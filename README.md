@@ -1,3 +1,3 @@
 Repo dscomputer.id
 Welcome to dscomputer.id
-Test auto deploy
+Test auto deployy
