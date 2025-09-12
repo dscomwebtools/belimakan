@@ -28,19 +28,40 @@
                                 <input type="text" id="name" name="name"
                                     class="my-input bg-primary/5 rounded w-fit border-transparent border-b border-b-primary 
             focus:ring-transparent focus:border-transparent focus:border-b-primary"
-                                    value="{{ old('name', isset($data) ? $data->user->name : '') }}" placeholder="example"
-                                    required autofocus disabled>
+                                    value="{{ old('name', isset($data) ? $data->user->name : '') }}"
+                                    placeholder="example" required autofocus>
                             </div>
 
                             <div class="flex flex-col mb-4">
-                                <label for="img" class="font-semibold mb-2">Photo</label>
-                                <img src="{{ $data->user->img !== null ? Storage::url($data->user->img) : asset('assets/images/image-not-found.webp') }}"
-                                    alt="Logo {{ $data->user->name }}" width="100" />
+                                @php
+                                    // Default values
+                                    $photo = null;
+                                    $name = '';
+
+                                    // Only set if $data exists
+                                    if (isset($data)) {
+                                        $photo = $data->user->img ?? ($data->img ?? null);
+                                        $name = $data->user->name ?? ($data->name ?? '');
+                                    }
+                                @endphp
+
+                                <div class="flex flex-col mb-4">
+                                    <label for="img" class="font-semibold mb-2">Photo</label>
+                                    <input type="file" name="img" id="img">
+
+                                    @if ($photo)
+                                        <p class="text-warning text-xs">
+                                            Upload a new photo if you want to change the current one
+                                        </p>
+                                        <div class="mt-2">Current Photo</div>
+                                        <img src="{{ Storage::url($photo) }}" alt="current img" width="150">
+                                    @endif
+                                </div>
                             </div>
 
                             <div class="flex flex-col mb-4">
                                 <label for="message" class="font-semibold mb-2">Pesan</label>
-                                <textarea name="message" id="message" rows="3" class="my-input bg-primary/5 rounded" readonly>{{ old('message', isset($data) ? $data->message : '') }}</textarea>
+                                <textarea name="message" id="message" rows="3" class="my-input bg-primary/5 rounded">{{ old('message', isset($data) ? $data->message : '') }}</textarea>
                             </div>
 
                             <div class="flex flex-col mb-4">
