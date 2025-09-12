@@ -1,10 +1,10 @@
 <x-app-layout>
     <div class="sm:mx-6 lg:mx-8 p-6 py-10 rounded overflow-x-auto">
         <div class="flex">
-            {{-- <a href="{{ route('testimonial.create') }}"
+            <a href="{{ route('testimonial.create') }}"
                 class="bg-primary text-primary-content rounded px-4 py-2 mb-4 inline-block">
                 <i class="fa fa-plus"></i>
-            </a> --}}
+            </a>
             <span class="ml-auto mb-3">
                 <form class="flex [&_option]:bg-secondary" id="form_search">
                     <div class="tooltip" data-tip="Data per halaman">
@@ -51,9 +51,12 @@
                     @foreach ($data as $item)
                         <tr class="odd:bg-primary/5">
                             <td class="text-center">{{ ++$indexNumber }}</td>
-                            <td>{{ $item->user->name }}</td>
-                            <td><img src="{{ $item->user->img !== null ? Storage::url($item->user->img) : asset('assets/images/image-not-found.webp') }}"
-                                    alt="Logo {{ $item->user->name }}" width="100" /></td>
+                            <td>{{ $item->user->name ?? ($item->name ?? '-') }}</td>
+                            <td>
+                                <img src="{{ $item->user?->img ? Storage::url($item->user->img) : ($item->img ? Storage::url($item->img) : asset('assets/images/image-not-found.webp')) }}"
+                                    alt="Logo {{ $item->user->name ?? ($item->name ?? 'No Name') }}" width="100" />
+                            </td>
+
                             <td>{{ $item->message }}</td>
                             <td>
                                 @if ($item->show)

@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('testimonials', function (Blueprint $table) {
-            $table->dropColumn(['name', 'img']);
+            $table->string('name')->nullable()->after('user_id');
+            $table->string('img')->nullable()->after('name');
         });
     }
 

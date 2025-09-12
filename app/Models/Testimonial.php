@@ -11,7 +11,7 @@ class Testimonial extends Model
 
     protected $hidden = ['user_id'];
 
-    protected $fillable = ['user_id', 'message', 'show'];
+    protected $fillable = ['user_id', 'name', 'img', 'message', 'show'];
 
     public function user()
     {
