@@ -206,14 +206,14 @@
                             <select name="bank_account_id" id="bank_account_id"
                                 class="my-input w-full border rounded p-2"
                                 @change="$store.cart.setBankSelected(
-            $event.target.value,
-            $event.target.options[$event.target.selectedIndex].dataset.bank_name,
-            $event.target.options[$event.target.selectedIndex].dataset.account_name,
-            $event.target.options[$event.target.selectedIndex].dataset.account_number
-        )">
+                                    $event.target.value,
+                                    $event.target.options[$event.target.selectedIndex].dataset.bank_name,
+                                    $event.target.options[$event.target.selectedIndex].dataset.account_name,
+                                    $event.target.options[$event.target.selectedIndex].dataset.account_number
+                                )">
                                 <option value="">Pilih Bank</option>
                                 @foreach ($bank_accounts as $bank_account)
-                                    <option value="{{ $bank_account->id }}"
+                                    <option value="{{ $bank_account->id }}""
                                         data-bank_name="{{ $bank_account->bank_name }}"
                                         data-account_name="{{ $bank_account->account_name }}"
                                         data-account_number="{{ $bank_account->account_number }}">
@@ -227,10 +227,6 @@
                                 class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white border rounded-lg p-4 shadow-sm gap-4">
 
                                 <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-                                    <!-- Bank Logo -->
-                                    <img :src="$store.cart.bankSelected.logo || '/assets/images/default-bank.png'"
-                                        alt="Bank Logo" class="w-12 h-12 object-contain">
-
                                     <!-- Text Info -->
                                     <div>
                                         <div class="font-bold text-gray-800"
@@ -251,11 +247,7 @@
                                     Salin
                                 </button>
                             </div>
-
-
                         </div>
-
-
                     </div>
                     {{-- END METODE PEMBAYARAN --}}
                 </div>
