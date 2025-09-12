@@ -75,18 +75,23 @@
                         Biodata
                     </button>
                     <button class="uppercase px-8 py-3 -mb-px text-sm rounded-t-2xl tracking-widest"
-                        :class="activeTab === 4 ? 'border-base-200 bg-base-200' : 'text-gray-600'"
-                        @click="activeTab = 4; localStorage.setItem('activeTab', 4)">
-                        Data Order
-                    </button>
-                    <button class="uppercase px-8 py-3 -mb-px text-sm rounded-t-2xl tracking-widest"
                         :class="activeTab === 2 ? 'border-base-200 bg-base-200' : 'text-gray-600'"
                         @click="activeTab = 2; localStorage.setItem('activeTab', 2)">
-                        Daftar Alamat
+                        Data Order
                     </button>
                     <button class="uppercase px-8 py-3 -mb-px text-sm rounded-t-2xl tracking-widest"
                         :class="activeTab === 3 ? 'border-base-200 bg-base-200' : 'text-gray-600'"
                         @click="activeTab = 3; localStorage.setItem('activeTab', 3)">
+                        Daftar Alamat
+                    </button>
+                    <button class="uppercase px-8 py-3 -mb-px text-sm rounded-t-2xl tracking-widest"
+                        :class="activeTab === 4 ? 'border-base-200 bg-base-200' : 'text-gray-600'"
+                        @click="activeTab = 4; localStorage.setItem('activeTab', 4)">
+                        Testimonial
+                    </button>
+                    <button class="uppercase px-8 py-3 -mb-px text-sm rounded-t-2xl tracking-widest"
+                        :class="activeTab === 5 ? 'border-base-200 bg-base-200' : 'text-gray-600'"
+                        @click="activeTab = 5; localStorage.setItem('activeTab', 5)">
                         Keamanan
                     </button>
                 </div>
@@ -315,14 +320,14 @@
 
                     </div>
 
-                    <div x-show="activeTab === 4">
+                    <div x-show="activeTab === 2">
                         @include('client.profile.data-order', [
                             'numb_per_page' => $numb_per_page,
                         ])
 
                     </div>
 
-                    <div x-show="activeTab === 2">
+                    <div x-show="activeTab === 3">
                         <button class="btn btn-primary mb-4 btn-sm"
                             @click.prevent="$dispatch('open-modal', {data: null, name: 'address-form-store'})"><i
                                 class="fas fa-plus"></i></button>
@@ -380,15 +385,54 @@
                         @endforeach
                     </div>
 
-                    <div x-show="activeTab === 3">
+                    <div x-show="activeTab === 4">
                         <section>
                             <header>
                                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                                    {{ __('Update Password') }}
+                                    {{ __('Testimonial') }}
                                 </h2>
 
                                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                                    {{ __('Ensure your account is using a long, random password to stay secure.') }}
+                                    {{ __('Bagikan pengalaman Anda menggunakan layanan kami.') }}
+                                </p>
+                            </header>
+
+                            <form method="post" action="{{ route('profile.testimonial.save') }}"
+                                class="mt-6 space-y-6">
+                                @csrf
+                                @method('post')
+
+                                <div>
+                                    <x-input-label for="testimonial_message_label" :value="__('Testimonial anda')" />
+                                    <textarea id="testimonial_message_label" name="message"
+                                        class="mt-1 block w-full h-32 resize-none border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">{{ old('message', $testimonial->message ?? '') }}</textarea>
+
+                                    <x-input-error :messages="$errors->testimonialMessage->get('testimonial_message')" class="mt-2" />
+                                </div>
+
+                                <div class="flex items-center gap-4">
+                                    <x-primary-button>{{ __('Simpan') }}</x-primary-button>
+
+                                    @if (session('status') === 'testimonial_message')
+                                        <p x-data="{ show: true }" x-show="show" x-transition
+                                            x-init="setTimeout(() => show = false, 2000)" class="text-sm text-gray-600 dark:text-gray-400">
+                                            {{ __('Simpan.') }}</p>
+                                    @endif
+                                </div>
+                            </form>
+                        </section>
+
+                    </div>
+
+                    <div x-show="activeTab === 5">
+                        <section>
+                            <header>
+                                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                                    {{ __('Perbarui Password') }}
+                                </h2>
+
+                                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                    {{ __('Pastikan akun Anda menggunakan password yang panjang dan acak untuk tetap aman.') }}
                                 </p>
                             </header>
 
@@ -397,9 +441,7 @@
                                 @method('put')
 
                                 <div>
-                                    <x-input-label for="update_password_current_password" :value="__('Current Password')" />
-                                    {{-- <x-text-input id="update_password_current_password" name="current_password"
-                                        type="password" class="mt-1 block w-full" autocomplete="current-password" /> --}}
+                                    <x-input-label for="update_password_current_password" :value="__('Password Saat Ini')" />
 
                                     <div x-data="{ show: false }" class="relative">
                                         <x-text-input id="update_password_current_password"
@@ -425,9 +467,7 @@
                                 </div>
 
                                 <div>
-                                    <x-input-label for="update_password_password" :value="__('New Password')" />
-                                    {{-- <x-text-input id="update_password_password" name="password" type="password"
-                                        class="mt-1 block w-full" autocomplete="new-password" /> --}}
+                                    <x-input-label for="update_password_password" :value="__('Password Baru')" />
 
                                     <div x-data="{ show: false }" class="relative">
                                         <x-text-input id="update_password_password" class="block mt-1 w-full pr-10"
@@ -453,10 +493,8 @@
                                 </div>
 
                                 <div>
-                                    <x-input-label for="update_password_password_confirmation" :value="__('Confirm Password')" />
-                                    {{-- <x-text-input id="update_password_password_confirmation"
-                                        name="password_confirmation" type="password" class="mt-1 block w-full"
-                                        autocomplete="new-password" /> --}}
+                                    <x-input-label for="update_password_password_confirmation" :value="__('Konfirmasi Password')" />
+
                                     <div x-data="{ show: false }" class="relative">
                                         <x-text-input id="update_password_password_confirmation"
                                             class="block mt-1 w-full pr-10" x-bind:type="show ? 'text' : 'password'"
@@ -481,17 +519,16 @@
                                 </div>
 
                                 <div class="flex items-center gap-4">
-                                    <x-primary-button>{{ __('Save') }}</x-primary-button>
+                                    <x-primary-button>{{ __('Simpan') }}</x-primary-button>
 
                                     @if (session('status') === 'password-updated')
                                         <p x-data="{ show: true }" x-show="show" x-transition
                                             x-init="setTimeout(() => show = false, 2000)" class="text-sm text-gray-600 dark:text-gray-400">
-                                            {{ __('Saved.') }}</p>
+                                            {{ __('Tersimpan.') }}</p>
                                     @endif
                                 </div>
                             </form>
                         </section>
-
                     </div>
                 </div>
             </div>

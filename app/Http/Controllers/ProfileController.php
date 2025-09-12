@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Models\Address;
 use App\Models\Order;
+use App\Models\Testimonial;
+use App\Http\Requests\UpdateTestimonialRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,6 +28,8 @@ class ProfileController extends Controller
 
         $data = Order::where('user_id', auth()->user()->id)->latest();
 
+        $testimonial = Testimonial::where('user_id', auth()->id())->first();
+
         if (isset($validated["name"])) {
             $data = $data->where('name', 'like', '%' . $validated["name"] . '%');
         }
@@ -35,7 +39,7 @@ class ProfileController extends Controller
         $data = $data->paginate($numb_per_page)->appends(array_merge($validated, ['numb_per_page' => $numb_per_page]));
         $indexNumber = (request()->input('page', 1) - 1) * $numb_per_page;
 
-        return view('client.profile.index', compact('data', 'indexNumber', 'validated', 'numb_per_page'));
+        return view('client.profile.index', compact('data', 'indexNumber', 'validated', 'numb_per_page', 'testimonial'));
         // return view('client.profile.index', compact('orders'));
     }
 
@@ -122,7 +126,7 @@ class ProfileController extends Controller
             'area_id' => ['required', 'string'],
             'hp' => ['required', 'string', 'regex:/^(?:\+62|62|0)8[1-9][0-9]{6,9}$/'],
             'isMain' => ['nullable', 'string'],
-        ],[
+        ], [
             'hp.regex' => 'Format nomor HP tidak valid',
         ]);
 
@@ -177,7 +181,7 @@ class ProfileController extends Controller
             'recipient' => ['required', 'string'],
             'hp' => ['required', 'string', 'regex:/^(?:\+62|62|0)8[1-9][0-9]{6,9}$/'],
             'isMain' => ['nullable', 'string'],
-        ],[
+        ], [
             'hp.regex' => 'Format nomor HP tidak valid',
         ]);
 
@@ -224,5 +228,22 @@ class ProfileController extends Controller
         $address->delete();
 
         return redirect()->route('client.profile')->with('success', 'Alamat berhasil dihapus.');
+    }
+
+    public function save_testimonial(UpdateTestimonialRequest $request)
+    {
+        $validated = $request->validated();
+
+        $user_id = auth()->id();
+
+        Testimonial::updateOrCreate(
+            ['user_id' => $user_id], // search condition
+            [
+                'message' => $validated['message'],
+                'show' => 0,
+            ]
+        );
+
+        return back()->with('success', 'Testimonial berhasil disimpan!');
     }
 }

@@ -11,13 +11,15 @@ use Illuminate\Support\Facades\Storage;
 
 class TestimonialController extends Controller
 {
-    public function index(Request $request):View
+    public function index(Request $request): View
     {
         $validated = $request->validate([
             'name' => ['string', 'nullable'],
         ]);
 
-        $data = Testimonial::latest();
+        /** @var \Illuminate\Pagination\LengthAwarePaginator $data */
+
+        $data = Testimonial::with(['user:id,name,img'])->latest();
 
         if (isset($validated["name"])) {
             $data = $data->where('name', 'like', '%' . $validated["name"] . '%');
@@ -26,6 +28,14 @@ class TestimonialController extends Controller
         $numb_per_page = $request['numb_per_page'] ?? 10;
 
         $data = $data->paginate($numb_per_page)->appends(array_merge($validated, ['numb_per_page' => $numb_per_page]));
+
+        $data->getCollection()->transform(function ($testimonial) {
+            if ($testimonial->user) {
+                $testimonial->name = $testimonial->user->name;
+                $testimonial->img  = $testimonial->user->img;
+            }
+            return $testimonial;
+        });
         $indexNumber = (request()->input('page', 1) - 1) * $numb_per_page;
 
         return view('admin.testimonial.index', compact('data', 'indexNumber', 'validated', 'numb_per_page'));
@@ -73,25 +83,11 @@ class TestimonialController extends Controller
     {
         $validated = $request->validated();
 
-        $testimonial->name = $validated["name"];
         $testimonial->message = $validated["message"];
         $testimonial->show = $validated["show"];
 
-        if (isset($validated["img"])) {
-            // remove old img
-            if(isset($testimonial->img)){
-                Storage::delete($testimonial->img);
-            }
-
-            $filename = 'testimonial-' . uniqid() . '.webp';
-            $path = 'testimonial/' . $filename;
-            Storage::put($path, file_get_contents($validated["img"]));
-
-            $testimonial->img = $path;
-        }
-        
         $testimonial->save();
-        
+
         return redirect()->route('testimonial.index')
             ->with('success', 'Berhasil diubah!');
     }
@@ -107,5 +103,4 @@ class TestimonialController extends Controller
         return redirect()->route('testimonial.index')
             ->with('success', 'Berhasil dihapus !!');
     }
-
 }

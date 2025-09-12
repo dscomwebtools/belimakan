@@ -238,11 +238,11 @@
                                     <div class="chat-image avatar">
                                         <div class="w-10 rounded-full">
                                             <img alt="profile photo"
-                                                src="{{ isset($testi->img) ? Storage::url($testi->img) : asset('assets/images/image-not-found.webp') }}" />
+                                                src="{{ isset($testi->user->img) ? Storage::url($testi->user->img) : asset('assets/images/image-not-found.webp') }}" />
                                         </div>
                                     </div>
                                     <div class="chat-header text-primary ml-2">
-                                        {{ $testi->name }}
+                                        {{ $testi->user->name }}
                                     </div>
                                     <div class="chat-bubble bg-secondary text-secondary-content">
                                         {{ $testi->message }}
