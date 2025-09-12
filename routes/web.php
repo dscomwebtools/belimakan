@@ -127,6 +127,9 @@ Route::post('/profile/address', [ProfileController::class, 'store_address'])->na
 Route::patch('/profile/address/{address}', [ProfileController::class, 'update_address'])->name('profile.update_address');
 Route::delete('/profile/address/{address}', [ProfileController::class, 'destroy_address'])->name('profile.destroy_address');
 
+Route::post('/profile/testimonial', [ProfileController::class, 'save_testimonial'])
+    ->name('profile.testimonial.save');
+
 Route::get('/how-to-order', [PageController::class, 'howToOrder'])->name('client.how-to-order');
 Route::get('/how-to-return', [PageController::class, 'howToReturn'])->name('client.how-to-return');
 Route::get('/payment-method', [PageController::class, 'paymentMethod'])->name('client.payment-method');

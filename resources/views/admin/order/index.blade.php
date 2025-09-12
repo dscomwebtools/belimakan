@@ -99,16 +99,18 @@
                             <div class="flex gap-3 justify-center">
 
                                 {{-- Tombol Batalkan --}}
-                                <div class="tooltip" data-tip="Batalkan">
-                                    <form action="{{ route('admin-order.cancel', $order->id) }}" method="POST"
-                                        onsubmit="return confirm('Yakin ingin membatalkan order ini?');">
-                                        @csrf
-                                        @method('PATCH') {{-- atau PATCH, sesuai definisi route cancel --}}
-                                        <button type="submit" class="text-red-600 hover:text-red-800">
-                                            <i class="fa fa-ban"></i>
-                                        </button>
-                                    </form>
-                                </div>
+                                @if ($order->delivery_state->name !== 'Dibatalkan')
+                                    <div class="tooltip" data-tip="Batalkan">
+                                        <form action="{{ route('admin-order.cancel', $order->id) }}" method="POST"
+                                            onsubmit="return confirm('Yakin ingin membatalkan order ini?');">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="text-red-600 hover:text-red-800">
+                                                <i class="fa fa-ban"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                @endif
 
                                 {{-- Tombol Lihat --}}
                                 <div class="tooltip" data-tip="Lihat">

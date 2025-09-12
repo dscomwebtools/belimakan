@@ -28,23 +28,19 @@
                                 <input type="text" id="name" name="name"
                                     class="my-input bg-primary/5 rounded w-fit border-transparent border-b border-b-primary 
             focus:ring-transparent focus:border-transparent focus:border-b-primary"
-                                    value="{{ old('name', isset($data) ? $data->name : '') }}" placeholder="example"
-                                    required autofocus>
+                                    value="{{ old('name', isset($data) ? $data->user->name : '') }}" placeholder="example"
+                                    required autofocus disabled>
                             </div>
 
                             <div class="flex flex-col mb-4">
                                 <label for="img" class="font-semibold mb-2">Photo</label>
-                                <input type="file" name="img" id="img">
-                                @isset($data->img)
-                                    <p class="text-warning text-xs">upload photo baru jika ingin mengubah photo saat ini</p>
-                                    <div class="mt-2">Photo saat ini</div>
-                                    <img src="{{ Storage::url($data->img) }}" alt="current img" width="150">
-                                @endisset
+                                <img src="{{ $data->user->img !== null ? Storage::url($data->user->img) : asset('assets/images/image-not-found.webp') }}"
+                                    alt="Logo {{ $data->user->name }}" width="100" />
                             </div>
 
                             <div class="flex flex-col mb-4">
                                 <label for="message" class="font-semibold mb-2">Pesan</label>
-                                <textarea name="message" id="message" rows="3" class="my-input bg-primary/5 rounded">{{ old('message', isset($data) ? $data->message : '') }}</textarea>
+                                <textarea name="message" id="message" rows="3" class="my-input bg-primary/5 rounded" readonly>{{ old('message', isset($data) ? $data->message : '') }}</textarea>
                             </div>
 
                             <div class="flex flex-col mb-4">
@@ -56,7 +52,7 @@
 
                                     Iya
                                 </div>
-                                
+
                                 <div class="flex items-center gap-2">
                                     <input type="radio" name="show" id="show" value="0"
                                         @isset($data) @if ($data->show === 0) checked @endif @endisset>

@@ -2,10 +2,10 @@
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-secondary text-secondary-content overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 [&>div]:mb-2">
-                <h2 class="text-2xl uppercase mb-4">Data <b>{{ $data->name }}</b></h2>
+                <h2 class="text-2xl uppercase mb-4">Data <b>{{ $data->user->name }}</b></h2>
 
-                <div>Nama : <strong>{{ $data->name }}</strong></div>
-                <div>Photo : <img src="{{ Storage::url($data->img) }}" alt="img {{ $data->img }}" width="150"></img>
+                <div>Nama : <strong>{{ $data->user->name }}</strong></div>
+                <div>Photo : <img src="{{ Storage::url($data->user->img) }}" alt="img {{ $data->user->img }}" width="150"></img>
                 </div>
                 <div>Pesan : {{ $data->message }}</div>
                 <div>Tampilkan : {{ $data->show ? 'Iya' : 'Tidak' }}</div>

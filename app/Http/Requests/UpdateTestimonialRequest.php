@@ -25,10 +25,17 @@ class UpdateTestimonialRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', Rule::unique(Testimonial::class)->ignore($this->testimonial)],
-            'img' => ['nullable','image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
+            'name' => ['nullable', Rule::unique(Testimonial::class)->ignore($this->testimonial)],
+            'img' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
             'message' => ['required', 'string'],
             'show' => ['nullable'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'message.required' => 'Pesan tidak boleh kosong',
         ];
     }
 }
