@@ -85,7 +85,7 @@
                     </div>
                 </template>
             </div>
-            <span class="font-bold text-lg text-right"
+            <span class="font-bold text-base md:text-lg text-right"
                 x-text="'Subtotal: ' + new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format($store.cart.subtotal)"></span>
             <div class="card-actions">
                 <a href="{{ route('client.cart') }}" class="btn btn-primary btn-block">Lihat Keranjang</a>

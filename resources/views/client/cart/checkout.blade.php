@@ -1,6 +1,6 @@
 <x-client-layout>
     <div class="cart-body p-2" x-data>
-        <h1 class="text-xl md:text-2xl lg:text-3xl mb-6 font-bold pl-6">Atur Pengiriman</h1>
+        <h1 class="text-xl md:text-2xl lg:text-3xl mb-6 font-bold">Atur Pengiriman</h1>
         <div class="flex flex-col sm:flex-row gap-4">
             <div class="flex-1">
 
@@ -79,7 +79,7 @@
                         )">
                         </div>
 
-                        <div class="flex flex-col gap-4">
+                        <div class="flex flex-col gap-4 text-sm md:text-base">
                             <div class="flex-1 capitalize">
                                 <div class="">
                                     <i class="fa fa-map-location-dot mr-2"></i>
@@ -139,7 +139,7 @@
                             @click.prevent="$dispatch('open-modal', 'courier-list'); $store.cart.setCourierList();">
                             <i class="fa fa-truck"></i> Pengiriman
                         </button>
-                        <div x-show="Object.keys($store.cart.courierSelected).length == 0" class="text-base-content">
+                        <div x-show="Object.keys($store.cart.courierSelected).length == 0" class="text-base-content text-sm md:text-base">
                             Anda belum memilih metode pengiriman !
                         </div>
                         <div x-show="typeof $store.cart.courierSelected == 'string'"
@@ -180,7 +180,7 @@
                             <button class="btn btn-primary lg:self-start" @click.prevent="$refs.transferBtn.focus()">
                                 <i class="fa fa-money-bill-wave"></i> Pembayaran
                             </button>
-                            <div x-show="!$store.cart.paymentMethod" class="text-base-content text-center">
+                            <div x-show="!$store.cart.paymentMethod" class="text-base-content text-center text-sm md:text-base">
                                 Pilih metode pembayaran !
                             </div>
                             <div class="flex gap-4 justify-center md:justify-end flex-1 flex-col sm:flex-row">
@@ -219,14 +219,13 @@
                                         data-bank_name="{{ $bank_account->bank_name }}"
                                         data-account_name="{{ $bank_account->account_name }}"
                                         data-account_number="{{ $bank_account->account_number }}">
-                                        {{ $bank_account->bank_name }} - {{ $bank_account->account_name }} -
-                                        {{ $bank_account->account_number }}
+                                        {{ $bank_account->bank_name }}
                                     </option>
                                 @endforeach
                             </select>
 
                             <div x-show="$store.cart.bankSelected.id"
-                                class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white border rounded-lg p-4 shadow-sm gap-4">
+                                class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white border rounded-lg p-4 shadow-sm gap-4 text-sm md:text-base">
 
                                 <div class="flex flex-col sm:flex-row sm:items-center gap-3">
                                     <!-- Text Info -->
@@ -310,7 +309,7 @@
                     <!-- Tombol ORDER -->
                     <div class="card-actions mb-2 mt-2">
                         <a href="#"
-                            :class="`btn btn-primary btn-block font-bold h-[20px] ${!$store.cart.paymentMethod || Object.keys($store.cart.courierSelected).length == 0 || $store.cart.isLoading || $store.cart.totalItem == 0 || ($store.cart.paymentMethod == 'Transfer' ? Object.keys($store.cart.bankSelected).length == 0 : false) || $store.cart.isThereItemWithNoStock ? 'btn-disabled' : ''}`"
+                            :class="`btn btn-primary btn-block font-bold h-4 ${!$store.cart.paymentMethod || Object.keys($store.cart.courierSelected).length == 0 || $store.cart.isLoading || $store.cart.totalItem == 0 || ($store.cart.paymentMethod == 'Transfer' ? Object.keys($store.cart.bankSelected).length == 0 : false) || $store.cart.isThereItemWithNoStock ? 'btn-disabled' : ''}`"
                             @click.prevent="$store.cart.submitOrder()">
                             <span x-show="!$store.cart.isLoading">
                                 <i class="fa fa-paper-plane"></i>

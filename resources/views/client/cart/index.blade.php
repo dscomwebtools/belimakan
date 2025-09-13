@@ -10,11 +10,13 @@
                         <div class="flex flex-row gap-2">
                             <img :src="item.product.product_pictures.length ? `/storage/${item.product.product_pictures[0].path}` :
                                 ''"
-                                alt="product-image" class="rounded mx-2 w-full max-h-[80px] md:max-h-[160px] max-w-[80px] md:max-w-[160px]">
+                                alt="product-image"
+                                class="rounded mx-2 w-full max-h-[80px] md:max-h-[160px] max-w-[80px] md:max-w-[160px]">
 
                             <div class="flex flex-col">
                                 <div class="name mb-4">
-                                    <div class="text-base md:text-lg lg:text-xl font-bold" x-text="item.product.name"></div>
+                                    <div class="text-base md:text-lg lg:text-xl font-bold" x-text="item.product.name">
+                                    </div>
                                     <template x-if="item.product_variant">
                                         <template x-for="detail in item.product_variant.product_detail">
                                             <div class="text-sm md:text-base mt-2"
@@ -23,7 +25,8 @@
                                         </template>
                                     </template>
                                     <div x-show="item.product_variant ? item.product_variant.stock <= 0 : item.product.product_variant[0].stock <= 0"
-                                        class="text-red-500 text-xs animate-pulse text-sm md:text-base mt-2">Stok Habis</div>
+                                        class="text-red-500 text-xs animate-pulse text-sm md:text-base mt-2">Stok Habis
+                                    </div>
                                 </div>
                                 <div class="price flex flex-col text-sm md:text-base">
                                     <div>
@@ -47,16 +50,18 @@
                                             </div>
                                         </template>
                                     </template>
-                                    <div class="mt-3" x-data>
+                                    <div class="mt-3 flex justify-between" x-data>
+                                        <div>
+                                            <button class="btn btn-sm btn-ghost"
+                                                @click="item.quantity--; $store.cart.updateQty(item, item.quantity)">-</button>
+                                            <input type="number" min="1" name="item.quantity"
+                                                x-model="item.quantity" class="my-input w-20 !px-1 mx-1"
+                                                @change="$store.cart.updateQty(item, item.quantity)">
+                                            <button class="btn btn-sm btn-ghost"
+                                                @click="item.quantity++; $store.cart.updateQty(item, item.quantity)">+</button>
+                                        </div>
                                         <button @click="$store.cart.removeItem(item)"><i
                                                 class="fa fa-trash"></i></button>
-                                        <button class="btn btn-sm btn-ghost"
-                                            @click="item.quantity--; $store.cart.updateQty(item, item.quantity)">-</button>
-                                        <input type="number" min="1" name="item.quantity"
-                                            x-model="item.quantity" class="my-input w-20 !px-1 mx-1"
-                                            @change="$store.cart.updateQty(item, item.quantity)">
-                                        <button class="btn btn-sm btn-ghost"
-                                            @click="item.quantity++; $store.cart.updateQty(item, item.quantity)">+</button>
                                     </div>
                                 </div>
                             </div>
