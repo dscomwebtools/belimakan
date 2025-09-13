@@ -27,7 +27,12 @@ class ViewServiceProvider extends ServiceProvider
         View::composer('layouts.client.menu', function ($view) {
             // $categories = Category::all();
             // $view->with('categories', $categories);
-            $category_labels = CategoryLabel::with('categories')->whereHas('categories')->get();
+            $category_labels = CategoryLabel::with('categories')
+                ->whereHas('categories')
+                ->orderByRaw('CASE WHEN id = 1 THEN 1 ELSE 0 END') // id=1 jadi paling akhir
+                ->orderBy('name') // opsional, biar sisanya tetap urut abjad
+                ->get();
+
             $view->with('category_labels', $category_labels);
         });
 

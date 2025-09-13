@@ -85,7 +85,7 @@
                         <!-- Slides -->
                         @foreach ($hero['product_pictures'] as $product)
                             @if ($product->product_pictures->isNotEmpty())
-                                <div class="swiper-slide rounded-box mask mask-squircle">
+                                <div class="swiper-slide">
                                     <img src="{{ Storage::url($product->product_pictures->first()->path) }}"
                                         class="w-full" alt="product images" />
                                 </div>

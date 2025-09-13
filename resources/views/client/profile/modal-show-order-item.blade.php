@@ -111,9 +111,9 @@
                                 <td
                                     x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(orderDetail.price)">
                                 </td>
-                                <td x-text="orderDetail.discount + ' %'"></td>
+                                <td x-text="'(' + orderDetail.discount + '%)' + '\n' + new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(orderDetail.price * (orderDetail.discount/100))"></td>
                                 <td
-                                    x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(orderDetail.price * orderDetail.quantity)">
+                                    x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(orderDetail.price - (orderDetail.price * (orderDetail.discount/100)) * orderDetail.quantity)">
                                 </td>
                             </tr>
                         </template>
