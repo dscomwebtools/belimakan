@@ -13,7 +13,7 @@
                                 alt="product-image"
                                 class="rounded mx-2 w-full max-h-[80px] md:max-h-[160px] max-w-[80px] md:max-w-[160px]">
 
-                            <div class="flex flex-col">
+                            <div class="flex flex-col w-full">
                                 <div class="name mb-4">
                                     <div class="text-base md:text-lg lg:text-xl font-bold" x-text="item.product.name">
                                     </div>
@@ -50,7 +50,7 @@
                                             </div>
                                         </template>
                                     </template>
-                                    <div class="mt-3 flex justify-between" x-data>
+                                    <div class="mt-3 flex justify-between w-full" x-data>
                                         <div>
                                             <button class="btn btn-sm btn-ghost"
                                                 @click="item.quantity--; $store.cart.updateQty(item, item.quantity)">-</button>
