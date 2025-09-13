@@ -101,7 +101,7 @@
 
     @endif
 
-    <div>Sisa stok : <span x-ref="stock">{{ $product->stock }}</span></div>
+    <div>Sisa stok : <span x-ref="stock">{{ $product->product_variant->first()->stock }}</span></div>
     {{-- <input type="text" class="input w-11/12 my-2" placeholder="Catatan"> --}}
     @auth
     <div class="mb-2" x-ref="subtotal"></div>

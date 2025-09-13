@@ -641,7 +641,9 @@ class ProductController extends Controller
         if ($keyword) {
             $products = Product::with(['product_pictures', 'promo', 'auction'])
                 ->where('name', 'like', '%' . $keyword . '%')
-                ->where('active', 1)
+                ->whereHas('product_variant', function ($query) {
+                    $query->where('active', 1);
+                })
                 ->latest()
                 ->paginate($perPage);
 
@@ -656,7 +658,9 @@ class ProductController extends Controller
 
         $product_data = Setting::where('section_name', 'product')->first();
         $products = Product::with(['product_pictures', 'promo', 'auction'])
-            ->where('active', 1)
+            ->whereHas('product_variant', function ($query) {
+                $query->where('active', 1);
+            })
             ->latest()
             ->paginate($perPage);
 
@@ -683,7 +687,9 @@ class ProductController extends Controller
             ->whereHas('category', function ($query) use ($category) {
                 $query->where('name', $category);
             })
-            ->where('active', 1)
+            ->whereHas('product_variant', function ($query) {
+                $query->where('active', 1);
+            })
             // ->limit() // nanti dilimit setelah sudah bisa load more
             ->latest()->paginate($perPage);
 
