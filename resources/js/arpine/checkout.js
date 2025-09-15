@@ -28,7 +28,6 @@ export default {
     },
 
     get totalItem() {
-        console.log("Total : ", this.selectedItems);
         return this.selectedItems.reduce((sum, item) => sum + item.quantity, 0);
     },
 
@@ -228,12 +227,9 @@ export default {
 
         if (this.notifTimeout) clearTimeout(this.notifTimeout);
 
-        console.log("What ?");
-
         this.notifTimeout = setTimeout(() => {
             this.showNotifSuccess = false;
             this.notifTimeout = null;
-            console.log("Anjay");
         }, 5000);
     },
 
