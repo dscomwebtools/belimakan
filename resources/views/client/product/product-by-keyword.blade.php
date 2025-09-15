@@ -2,7 +2,7 @@
     <h2 class="text-center text-3xl font-bold tracking-wider">{{ __('PRODUK ') . '"' . $keyword . '"' }}</h2>
     <p class="text-center mb-8 mt-2">
         {{ __('Hasil pencarian ')}} <strong>"{{ $keyword }}"</strong></p>
-    <div class="flex flex-wrap justify-around" id="products">
+    <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 justify-around" id="products">
         @foreach ($products as $product)
             <x-client.product-item :product="$product" />
         @endforeach

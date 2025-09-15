@@ -89,10 +89,12 @@ class OrderController extends Controller
             $new_order->delivery_state_id = 2; //Jika Cash set status langsung 'Menunggu Konfirmasi', jika tidak maka defaultnya 'menunggu pembayaran'
         }
 
-        DB::transaction(function () use ($new_order) {
+        DB::transaction(function () use ($new_order, $request) {
             $new_order->save();
 
-            $carts = Cart::where('user_id', auth()->user()->id)->get();
+            $carts = Cart::where('user_id', auth()->id())
+                ->whereIn('id', $request->selectedCartIds ?? [])
+                ->get();
 
             foreach ($carts as $cart) {
                 $order_detail = new OrderDetail();

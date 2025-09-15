@@ -7,7 +7,7 @@
             <input type="text" id="manual" class="my-input flex-1" x-ref="shippingManual"
                 placeholder="Contoh: COD/ Ambil di toko/ Baraka/ Kalog/ Mex Udara/ Gojek/ Cargo/ Lainnya">
             <button class="btn btn-primary"
-                @click.prevent="$store.cart.setCourierSelected($refs.shippingManual.value); $dispatch('close');">Pilih
+                @click.prevent="$store.checkout.setCourierSelected($refs.shippingManual.value); $dispatch('close');">Pilih
                 Manual</button>
         </div>
 
@@ -16,7 +16,7 @@
         <div class="h-96 overflow-auto relative">
 
             <!-- Loading State -->
-            <div x-show="!$store.cart.courierList.length"
+            <div x-show="!$store.checkout.courierList.length"
                 class="absolute inset-0 flex items-center justify-center bg-base-200 bg-opacity-75 z-10">
                 <div class="flex flex-col items-center gap-2">
                     <i class="fa fa-spinner fa-spin text-3xl text-primary"></i>
@@ -25,9 +25,9 @@
             </div>
 
             <!-- Courier List -->
-            <template x-for="courierRate in $store.cart.courierList" :key="courierRate">
-                <div @click.prevent="$store.cart.setCourierSelected(courierRate); $dispatch('close');"
-                    class="bg-base-200 text-base-content mb-4 p-4 rounded flex flex-col justify-between cursor-pointer gap-2">
+            <template x-for="courierRate in $store.checkout.courierList">
+                <div @click.prevent="$store.checkout.setCourierSelected(courierRate); $dispatch('close');"
+                    class="bg-base-200 text-base-content mb-4 p-4 rounded flex flex-col justify-between cursor-pointer gap-2" :key="courierRate">
 
                     <div class="flex justify-between flex-wrap">
                         <div class="capitalize"
@@ -51,7 +51,7 @@
         </div>
     </div>
 </x-modal>
-<div x-show="$store.cart.showNotifFailed" x-transition:leave.duration.500ms
+<div x-show="$store.checkout.showNotifFailed" x-transition:leave.duration.500ms
     class="toast toast-top toast-end mt-24 z-50">
     <div role="alert" class="alert alert-error mb-4">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none"
@@ -59,6 +59,6 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <span x-text="$store.cart.message"></span>
+        <span x-text="$store.checkout.message"></span>
     </div>
 </div>
