@@ -14,9 +14,9 @@
                 <template x-for="item in $store.cart.items" :key="item.product.id">
                     <div class="cart-item bg-base-200 p-4 rounded-t border-b border-primary flex gap-2">
                         <!-- ✅ Checkbox -->
-                        <div class="flex items-center gap-2">
+                        <div class="flex gap-2">
                             <input type="checkbox" :id="`check-${item.id}`" :checked="$store.checkout.isSelected(item)"
-                                @change="$store.checkout.toggleSelection(item)">
+                                @change="$store.checkout.toggleSelection(item)" class="w-[20px] h-[20px]">
                         </div>
 
                         <div class="flex flex-row gap-2 w-full">
@@ -68,19 +68,29 @@
                                         </template>
                                     </template>
 
-                                    <div class="mt-3 flex justify-between w-full">
-                                        <div>
-                                            <button class="btn btn-sm btn-ghost"
-                                                @click="item.quantity--; $store.cart.updateQty(item, item.quantity)">-</button>
-                                            <input type="number" min="1" name="item.quantity"
-                                                x-model="item.quantity" class="my-input w-20 !px-1 mx-1"
+                                    <div class="mt-3 flex flex-wrap justify-between w-full items-center gap-2">
+                                        <!-- Quantity controls -->
+                                        <div class="flex items-center gap-1 flex-grow sm:flex-grow-0">
+                                            <button class="btn btn-sm btn-ghost p-1"
+                                                @click="item.quantity--; $store.cart.updateQty(item, item.quantity)">
+                                                -
+                                            </button>
+                                            <input type="number" min="1" x-model="item.quantity"
+                                                class="my-input w-16 sm:w-20 text-center"
                                                 @change="$store.cart.updateQty(item, item.quantity)">
-                                            <button class="btn btn-sm btn-ghost"
-                                                @click="item.quantity++; $store.cart.updateQty(item, item.quantity)">+</button>
+                                            <button class="btn btn-sm btn-ghost p-1"
+                                                @click="item.quantity++; $store.cart.updateQty(item, item.quantity)">
+                                                +
+                                            </button>
                                         </div>
-                                        <button @click="$store.cart.removeItem(item)">
-                                            <i class="fa fa-trash"></i>
-                                        </button>
+
+                                        <!-- Remove button -->
+                                        <div class="flex-shrink-0">
+                                            <button class="btn btn-sm btn-ghost p-1"
+                                                @click="$store.cart.removeItem(item)">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
