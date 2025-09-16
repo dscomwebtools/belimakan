@@ -74,22 +74,22 @@
                         @click="activeTab = 1; localStorage.setItem('activeTab', 1)">
                         Biodata
                     </button>
-                    <button class="uppercase px-8 py-3 -mb-px text-sm rounded-t-2xl tracking-widest"
+                    <button class="uppercase px-2 sm:px-8 py-3 -mb-px text-sm rounded-t-2xl tracking-widest"
                         :class="activeTab === 2 ? 'border-base-200 bg-base-200' : 'text-gray-600'"
                         @click="activeTab = 2; localStorage.setItem('activeTab', 2)">
                         Data Order
                     </button>
-                    <button class="uppercase px-8 py-3 -mb-px text-sm rounded-t-2xl tracking-widest"
+                    <button class="uppercase px-2 sm:px-8 py-3 -mb-px text-sm rounded-t-2xl tracking-widest"
                         :class="activeTab === 3 ? 'border-base-200 bg-base-200' : 'text-gray-600'"
                         @click="activeTab = 3; localStorage.setItem('activeTab', 3)">
                         Daftar Alamat
                     </button>
-                    <button class="uppercase px-8 py-3 -mb-px text-sm rounded-t-2xl tracking-widest"
+                    <button class="uppercase px-2 sm:px-8 py-3 -mb-px text-sm rounded-t-2xl tracking-widest"
                         :class="activeTab === 4 ? 'border-base-200 bg-base-200' : 'text-gray-600'"
                         @click="activeTab = 4; localStorage.setItem('activeTab', 4)">
                         Testimonial
                     </button>
-                    <button class="uppercase px-8 py-3 -mb-px text-sm rounded-t-2xl tracking-widest"
+                    <button class="uppercase px-2 sm:px-8 py-3 -mb-px text-sm rounded-t-2xl tracking-widest"
                         :class="activeTab === 5 ? 'border-base-200 bg-base-200' : 'text-gray-600'"
                         @click="activeTab = 5; localStorage.setItem('activeTab', 5)">
                         Keamanan

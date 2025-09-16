@@ -17,7 +17,7 @@
     </figure>
     <div class="card-body items-center text-center">
         <a href="{{ route('client.product', $product['slug']) }}">
-            <h2 class="card-title text-lg">{{ $product->name }}</h2>
+            <h2 class="card-title text-base md:text-lg">{{ $product->name }}</h2>
         </a>
         @if (count($product->product_variant) > 1)
             <div class="variant w-full overflow-auto">

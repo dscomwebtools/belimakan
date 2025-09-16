@@ -33,13 +33,17 @@
                 <span x-text="$store.cart.orderDetail.payment_method"></span>
                 <span x-text="$store.cart.orderDetail.bank_account?.bank_name"></span>
                 <span x-text="$store.cart.orderDetail.bank_account?.account_number"></span>
-                <button @click="$store.cart.copyToClipboard($store.cart.orderDetail.bank_account?.account_number)"
-                    class="tooltip" data-tip="Copy nomor rekening">
-                    <span class="far fa-copy"></span>
-                </button>
-                <span x-show="$store.cart.showNotifSuccess" x-transition:leave.duration.100ms
-                    x-text="$store.cart.message">
-                </span>
+                <div class="relative inline-block">
+                    <button @click="$store.cart.copyToClipboard($store.cart.orderDetail.bank_account?.account_number)"
+                        class="tooltip" data-tip="Copy nomor rekening">
+                        <span class="far fa-copy"></span>
+                    </button>
+
+                    <span x-show="$store.cart.showNotifSuccess" x-text="$store.cart.message"
+                        class="absolute left-[100%] top-full -translate-x-1/2 mt-2
+               bg-white border border-gray-300 text-black 
+               text-sm px-3 py-1 rounded shadow-lg whitespace-nowrap"></span>
+                </div>
             </div>
 
             <div class="text-end">
