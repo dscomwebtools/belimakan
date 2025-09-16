@@ -11,7 +11,7 @@
                         @change="$store.checkout.toggleAll($store.cart.items)">
                     <label for="check-all" class="cursor-pointer">Pilih Semua</label>
                 </div>
-                <template x-for="item in $store.cart.items" :key="item.product.id">
+                <template x-for="item in $store.cart.items" :key="item.id">
                     <div class="cart-item bg-base-200 p-4 rounded-t border-b border-primary flex gap-2">
                         <!-- ✅ Checkbox -->
                         <div class="flex gap-2">
