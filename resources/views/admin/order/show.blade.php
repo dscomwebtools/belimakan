@@ -32,12 +32,50 @@
                     <!-- Tab Contents -->
                     <div class="p-6 bg-base-200 rounded text-sm">
                         <div x-show="activeTab === 1">
-                            <h2 class="font-bold uppercase mb-2 dark:text-base-content">No Invoice : <b
-                                    class="text-base-content">{{ $data->invoice }}</b></h2>
+                            <div class="flex items-center gap-4">
+                                <h2 class="font-bold uppercase mb-2 dark:text-base-content">No Invoice : <b
+                                        class="text-base-content">{{ $data->invoice }}</b></h2>
+                                <div class="tooltip" data-tip="Download Invoice">
+                                    <form action="{{ route('download-invoice', $data->id) }}" method="post"
+                                        target="_blank" class="inline-block">
+                                        @csrf
+                                        <button type="submit">
+                                            <i class="fa fa-download text-blue-600"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
 
-                            <div class="flex gap-2 leading-10">
-                                <span class="opacity-75 dark:text-base-content">Dikirim Ke
-                                    :</span><span class="dark:text-base-content">{{ $data->order_address->name }}</span>
+                            <div class="leading-10" x-data="{ open: false }">
+                                <div class="flex gap-2 items-center">
+                                    <span class="opacity-75 dark:text-base-content">Dikirim Ke :</span>
+                                    <span
+                                        class="dark:text-base-content font-semibold">{{ $data->order_address->name }}</span>
+
+                                    <!-- Toggle Button -->
+                                    <button type="button" class="btn btn-xs btn-outline ml-2 flex items-center gap-1"
+                                        @click="open = !open">
+                                        <span>Detail</span>
+                                    </button>
+                                </div>
+
+                                <!-- Collapsible Detail -->
+                                <div x-cloak x-show="open" x-transition
+                                    class="mt-2 ml-6 p-3 rounded bg-base-200 text-sm space-y-1">
+                                    <div><span class="font-semibold">Penerima:</span>
+                                        {{ $data->order_address->recipient }}</div>
+                                    <div><span class="font-semibold">HP:</span> {{ $data->order_address->hp }}</div>
+                                    <div><span class="font-semibold">Alamat:</span> {{ $data->order_address->address }}
+                                    </div>
+                                    @if ($data->order_address->noteForCurrier)
+                                        <div><span class="font-semibold">Catatan Kurir:</span>
+                                            {{ $data->order_address->noteForCurrier }}</div>
+                                    @endif
+                                    <div><span class="font-semibold">Area:</span> {{ $data->order_address->area_name }}
+                                    </div>
+                                    <div><span class="font-semibold">Kode Pos:</span>
+                                        {{ $data->order_address->postal_code }}</div>
+                                </div>
                             </div>
 
                             <div class="flex gap-2 leading-10">
@@ -109,7 +147,6 @@
                                     class="dark:text-base-content">{{ $data->created_at->isoFormat('LL') }}</span>
                             </div>
 
-                            {{-- DATA BARANG --}}
                             <div class="mb-4">
                                 <h2 class="font-bold text-lg text-center dark:text-primary-content">Data Barang</h2>
 
@@ -121,6 +158,7 @@
                                                 <th>Nama</th>
                                                 <th>qty</th>
                                                 <th>Harga</th>
+                                                <th>Diskon</th>
                                                 <th>Subtotal</th>
                                             </tr>
                                         </thead>
@@ -157,11 +195,32 @@
                                                     </td>
                                                     <td>{{ $order_detail->quantity }}</td>
                                                     <td>
-                                                        <x-client.format-rp value="{{ $order_detail->price }}" />
+                                                        {{-- Harga Satuan (tanpa diskon) --}}
+                                                        <x-client.format-rp :value="$order_detail->price" />
                                                     </td>
+
                                                     <td>
-                                                        <x-client.format-rp
-                                                            value="{{ $order_detail->price * $order_detail->quantity }}" />
+                                                        {{-- Diskon --}}
+                                                        @if ($order_detail->discount > 0)
+                                                            ({{ $order_detail->discount }}%)
+                                                            <x-client.format-rp :value="($order_detail->price *
+                                                                $order_detail->discount) /
+                                                                100" />
+                                                        @else
+                                                            -
+                                                        @endif
+                                                    </td>
+
+                                                    <td>
+                                                        {{-- Total setelah diskon * quantity --}}
+                                                        @php
+                                                            $priceAfterDiscount =
+                                                                $order_detail->price -
+                                                                ($order_detail->price * $order_detail->discount) / 100;
+                                                            $total = $priceAfterDiscount * $order_detail->quantity;
+                                                        @endphp
+
+                                                        <x-client.format-rp :value="$total" />
                                                     </td>
                                                 </tr>
                                             @endforeach

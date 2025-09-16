@@ -79,11 +79,11 @@ var brands = new Swiper(".brandsSwiper", {
   loop: true,
   breakpoints: {
     "@0.00": {
-      slidesPerView: 1,
+      slidesPerView: 2,
       spaceBetween: 10,
     },
     "@0.75": {
-      slidesPerView: 2,
+      slidesPerView: 3,
       spaceBetween: 20,
     },
     "@1.00": {
@@ -91,7 +91,7 @@ var brands = new Swiper(".brandsSwiper", {
       spaceBetween: 40,
     },
     "@1.50": {
-      slidesPerView: 6,
+      slidesPerView: 5,
       spaceBetween: 50,
     },
   },

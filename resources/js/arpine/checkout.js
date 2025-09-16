@@ -87,6 +87,11 @@ export default {
 
     init() {
         this.getDataCart();
+
+        // ✅ remove checkoutSelected if not on /checkout
+        if (!window.location.pathname.startsWith('/checkout')) {
+            localStorage.removeItem('checkoutSelected');
+        }
     },
 
     isSelected(item) {

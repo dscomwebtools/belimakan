@@ -32,7 +32,7 @@
     @endif
 
     <div class="divider">Deskripsi</div>
-    <p>{!! $product->description !!}</p>
+    <div class="text-sm md:text-base">{!! $product->description !!}</div>
 
     @if ($product->detail_value->isNotEmpty())
     <div class="divider">Spesifikasi</div>

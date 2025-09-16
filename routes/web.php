@@ -32,6 +32,7 @@ Route::middleware(['auth', 'check-banned', 'verified'])->group(function () {
     Route::get('/products', [ProductController::class, 'allProducts'])->name('client.products');
     Route::get('/products/category/{category}', [ProductController::class, 'productsByCategory'])->name('client.productsByCategory');
     Route::get('/product/{slug}', [ProductController::class, 'product'])->name('client.product');
+    Route::post('/download-invoice/{order}', [OrderController::class, 'download_invoice'])->name('download-invoice');
 });
 
 // MEMBER ROUTES
@@ -43,7 +44,6 @@ Route::middleware(['auth', 'check-banned', 'verified', 'can:is-member'])->group(
     Route::post('/order', OrderController::class);
     Route::get('/order/{order}', [OrderController::class, 'order_by_id']);
     Route::patch('/order/{order}', [OrderController::class, 'upload_bukti_bayar']);
-    Route::post('/download-invoice/{order}', [OrderController::class, 'download_invoice'])->name('download-invoice');
     Route::get('/profile', [ProfileController::class, 'index'])->name('client.profile')->middleware('auth', 'can:is-member');
 });
 

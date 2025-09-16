@@ -94,8 +94,8 @@
                     </div>
                 </div>
                 <div class="text-center sm:text-left w-fit">
-                    <h1 class="text-2xl sm:text-3xl font-bold">{{ $hero['data']->title }}</h1>
-                    <p class="py-6">
+                    <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold">{{ $hero['data']->title }}</h1>
+                    <p class="py-6 text-sm md:text-base">
                         {{ $hero['data']->description }}
                     </p>
                     <div class="relative">
@@ -109,10 +109,10 @@
     {{-- PROMO --}}
     @if ($promo['data']->is_show)
         <div class="promo mb-14">
-            <h2 class="text-center text-3xl uppercase font-bold tracking-wider">
+            <h2 class="text-center text-xl sm:text-2xl lg:text-3xl uppercase font-bold tracking-wider">
                 {{ $promo['data']->title }} <i class="fa fa-tags text-red-500 text-2xl pb-1"></i>
             </h2>
-            <p class="text-center pt-2">{{ $promo['data']->description }}</p>
+            <p class="text-center pt-2 text-sm md:text-base">{{ $promo['data']->description }}</p>
             <div class="swiper promoSwiper w-full pt-5">
                 <div class="w-full text-center mt-2 mb-6">
                     <a href="{{ route('client.promo') }}" class="btn btn-primary btn-sm tracking-wider">
@@ -191,10 +191,10 @@
                 </div>
 
                 <div class="text-center flex-1 lg:ml-32 lg:mr-8">
-                    <h2 class="text-center mb-2 text-3xl uppercase font-bold tracking-wider">
+                    <h2 class="text-center mb-2 text-xl sm:text-2xl lg:text-3xl uppercase font-bold tracking-wider">
                         {{ $auction['data']->title }} <i class="fa fa-hammer fa-flip-horizontal text-blue-500"></i>
                     </h2>
-                    <p class="py-4">
+                    <p class="py-4 text-sm md:text-base">
                         {{ $auction['data']->description }}
                     </p>
                     <a href="{{ route('client.lelang') }}" class="btn btn-primary tracking-wider">Lihat Semua</a>
@@ -206,8 +206,8 @@
     {{-- PRODUCTS --}}
     @if ($products['data']->is_show)
         <div class="products">
-            <h2 class="text-center text-3xl uppercase font-bold tracking-wider">{{ $products['data']->title }}</h2>
-            <p class="text-center mb-8 mt-2">{{ $products['data']->description }}</p>
+            <h2 class="text-center text-xl sm:text-2xl lg:text-3xl uppercase font-bold tracking-wider">{{ $products['data']->title }}</h2>
+            <p class="text-center mb-8 mt-2 text-sm md:text-base">{{ $products['data']->description }}</p>
             <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 justify-around">
                 @foreach ($products['items'] as $product)
                     <x-client.product-item :product="$product" />
@@ -227,8 +227,8 @@
     {{-- TESTIMONIAL --}}
     @if ($testimonial['data']->is_show)
         <div class="testimonial mb-14 pt-10">
-            <h2 class="text-center text-3xl uppercase font-bold tracking-wider">{{ $testimonial['data']->title }}</h2>
-            <p class="text-center mt-2">{{ $testimonial['data']->description }}</p>
+            <h2 class="text-center text-xl sm:text-2xl lg:text-3xl uppercase font-bold tracking-wider">{{ $testimonial['data']->title }}</h2>
+            <p class="text-center mt-2 text-sm md:text-base">{{ $testimonial['data']->description }}</p>
             <div class="flex flex-col lg:flex-row items-center">
                 <div class="swiper testimonialSwiper mb-10 lg:mb-0 !w-3/4 !my-2">
                     <div class="swiper-wrapper !my-10">
@@ -263,15 +263,15 @@
     {{-- FAQ --}}
     @if ($faq['data']->is_show)
         <div class="faq mb-10">
-            <h2 class="text-center text-3xl uppercase font-bold tracking-wider">{{ $faq['data']->title }}</h2>
-            <p class="text-center mt-2 mb-8">{{ $faq['data']->description }}</p>
+            <h2 class="text-center text-xl sm:text-2xl lg:text-3xl uppercase font-bold tracking-wider">{{ $faq['data']->title }}</h2>
+            <p class="text-center mt-2 mb-8 text-sm md:text-base">{{ $faq['data']->description }}</p>
             @foreach ($faq['items'] as $faq_item)
                 <div class="collapse collapse-arrow bg-base-200 w-fit mx-9 mb-1">
                     <input type="radio" name="faq" />
-                    <div class="collapse-title text-xl font-medium bg-base-300">
+                    <div class="collapse-title text-base md:text-xl font-medium bg-base-300">
                         {{ $faq_item->question }}
                     </div>
-                    <div class="collapse-content pt-2">
+                    <div class="collapse-content pt-2 text-sm md:text-base">
                         <p>{{ $faq_item->answer }}</p>
                     </div>
                 </div>
@@ -282,13 +282,13 @@
     {{-- BRANDS --}}
     @if ($brand['data']->is_show)
         <div class="brands my-20">
-            <h2 class="text-center text-3xl uppercase font-bold tracking-wider">{{ $brand['data']->title }}</h2>
-            <p class="text-center mt-2 mb-8">{{ $brand['data']->description }}</p>
+            <h2 class="text-center text-xl sm:text-2xl lg:text-3xl uppercase font-bold tracking-wider">{{ $brand['data']->title }}</h2>
+            <p class="text-center mt-2 mb-8 text-sm md:text-base">{{ $brand['data']->description }}</p>
             <div class="swiper brandsSwiper">
                 <div class="swiper-wrapper">
                     @foreach ($brand['items'] as $brand_item)
                         <div class="swiper-slide">
-                            <a href="{{ $brand_item->link }}">
+                            <a>
                                 <img src="{{ Storage::url($brand_item->logo) }}" alt="logo {{ $brand_item->name }}">
                             </a>
                         </div>
