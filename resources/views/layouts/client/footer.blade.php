@@ -1,7 +1,7 @@
 <footer class="footer p-10 bg-base-200 text-base-content">
     <nav class="md:mx-auto">
         <h6 class="footer-title tracking-widest">Panduan Belanja</h6>
-        <a class="link link-hover" href="{{ route('client.how-to-order') }}">Cara belanja</a>
+        <a class="link link-hover" href="{{ route('client.how-to-order') }}">Cara Belanja</a>
         <a class="link link-hover" href="{{ route('client.how-to-return') }}">Cara Pengembalian</a>
         <a class="link link-hover" href="{{ route('client.payment-method') }}">Metode Pembayaran</a>
     </nav>
@@ -16,14 +16,14 @@
         <a class="link link-hover" href="{{ route('client.contact') }}">Kontak kami</a>
     </nav>
 </footer>
-<footer class="footer px-10 py-3 border-t bg-primary text-primary-content border-base-300 mb-16 md:mb-0">
+<footer class="footer px-10 py-3 border-t bg-primary text-primary-content border-base-300 mb-16 lg:mb-0">
     <aside class="items-center grid-flow-col">
         <span class="bg-white rounded p-2 hidden sm:block">
             <img src="{{ asset('assets/images/logo.webp') }}" alt="logo" width="50px" class="hidden sm:block">
         </span>
         <div class="flex flex-col">
             <p>Toko Online</p>
-            <strong>DSComputer</strong>
+            <strong>DSCOMPUTER SOLUTION</strong>
         </div>
     </aside>
     <nav class="md:place-self-center md:justify-self-end">

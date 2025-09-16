@@ -206,7 +206,8 @@
     {{-- PRODUCTS --}}
     @if ($products['data']->is_show)
         <div class="products">
-            <h2 class="text-center text-xl sm:text-2xl lg:text-3xl uppercase font-bold tracking-wider">{{ $products['data']->title }}</h2>
+            <h2 class="text-center text-xl sm:text-2xl lg:text-3xl uppercase font-bold tracking-wider">
+                {{ $products['data']->title }}</h2>
             <p class="text-center mb-8 mt-2 text-sm md:text-base">{{ $products['data']->description }}</p>
             <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 justify-around">
                 @foreach ($products['items'] as $product)
@@ -227,7 +228,8 @@
     {{-- TESTIMONIAL --}}
     @if ($testimonial['data']->is_show)
         <div class="testimonial mb-14 pt-10">
-            <h2 class="text-center text-xl sm:text-2xl lg:text-3xl uppercase font-bold tracking-wider">{{ $testimonial['data']->title }}</h2>
+            <h2 class="text-center text-xl sm:text-2xl lg:text-3xl uppercase font-bold tracking-wider">
+                {{ $testimonial['data']->title }}</h2>
             <p class="text-center mt-2 text-sm md:text-base">{{ $testimonial['data']->description }}</p>
             <div class="flex flex-col lg:flex-row items-center">
                 <div class="swiper testimonialSwiper mb-10 lg:mb-0 !w-3/4 !my-2">
@@ -263,7 +265,8 @@
     {{-- FAQ --}}
     @if ($faq['data']->is_show)
         <div class="faq mb-10">
-            <h2 class="text-center text-xl sm:text-2xl lg:text-3xl uppercase font-bold tracking-wider">{{ $faq['data']->title }}</h2>
+            <h2 class="text-center text-xl sm:text-2xl lg:text-3xl uppercase font-bold tracking-wider">
+                {{ $faq['data']->title }}</h2>
             <p class="text-center mt-2 mb-8 text-sm md:text-base">{{ $faq['data']->description }}</p>
             @foreach ($faq['items'] as $faq_item)
                 <div class="collapse collapse-arrow bg-base-200 w-fit mx-9 mb-1">
@@ -282,7 +285,8 @@
     {{-- BRANDS --}}
     @if ($brand['data']->is_show)
         <div class="brands my-20">
-            <h2 class="text-center text-xl sm:text-2xl lg:text-3xl uppercase font-bold tracking-wider">{{ $brand['data']->title }}</h2>
+            <h2 class="text-center text-xl sm:text-2xl lg:text-3xl uppercase font-bold tracking-wider">
+                {{ $brand['data']->title }}</h2>
             <p class="text-center mt-2 mb-8 text-sm md:text-base">{{ $brand['data']->description }}</p>
             <div class="swiper brandsSwiper">
                 <div class="swiper-wrapper">
@@ -300,11 +304,22 @@
     @endif
 
     {{-- WA ICON --}}
-    <span
-        class="fixed bottom-20 sm:bottom-28 right-10 z-[9999] opacity-70 hover:opacity-100 duration-300 tooltip tooltip-left"
-        data-tip="Chat WhatsApp">
-        <a href="https://wa.me/{{ $wa_admin }}" target="_blank">
-            <i class="fa fa-whatsapp text-4xl sm:text-5xl text-green-500"></i>
-        </a>
-    </span>
+    <div x-data="{ open: false }" class="fixed bottom-20 lg:bottom-10 right-5 z-[9999]">
+        <!-- Main button -->
+        <button @click="open = !open"
+            class="bg-green-500 rounded-full p-3 h-[50px] w-[50px] flex items-center justify-center shadow-lg text-white hover:scale-110 transition">
+            <i class="fa fa-whatsapp text-3xl"></i>
+        </button>
+
+        <!-- Expanded options -->
+        <div x-show="open" x-transition @click.outside="open = false" class="flex flex-col gap-3 absolute bottom-16 right-0">
+            @foreach ($wa as $contact)
+                <a href="https://wa.me/{{ $contact['hp'] }}" target="_blank"
+                    class="bg-white shadow-md rounded-full p-2 flex items-center gap-2 hover:bg-gray-100">
+                    <i class="fa fa-whatsapp text-green-500 text-xl"></i>
+                    <span class="text-sm">{{ $contact['name'] }}</span>
+                </a>
+            @endforeach
+        </div>
+    </div>
 </x-client-layout>
