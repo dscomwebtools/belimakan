@@ -15,13 +15,13 @@
             <x-client.logo-promo />
         @endif
     </figure>
-    <div class="card-body items-center text-center">
+    <div class="p-4 md:p-8 flex flex-col gap-2 items-center text-center">
         <a href="{{ route('client.product', $product['slug']) }}">
-            <h2 class="card-title text-base md:text-lg">{{ $product->name }}</h2>
+            <h2 class="card-title text-left text-sm md:text-lg">{{ $product->name }}</h2>
         </a>
         @if (count($product->product_variant) > 1)
             <div class="variant w-full overflow-auto">
-                <select name="variant" class="my-input" x-ref="variant_id_selected">
+                <select name="variant" class="my-input w-full text-sm md:text-base" x-ref="variant_id_selected">
                     @foreach ($product->product_variant as $variant)
                         <option value="{{ $variant->id }}">
                             @foreach ($variant->product_detail as $i => $variant_detail)
@@ -80,11 +80,11 @@
                         {{-- & JIKA ADA PROMO --}}
                         @if (isset($product->promo) && $product->promo->active)
                             <span class="line-through">
-                                <span>{{ 'Rp. ' . number_format($product->product_variant->first()->price, 0, ',', '.') }}</span>
+                                <span class="text-sm md:text-base">{{ 'Rp. ' . number_format($product->product_variant->first()->price, 0, ',', '.') }}</span>
                             </span>
                             <span class="text-xs align-top ml-2">-{{ $product->promo->discount }}%</span>
                             <br />
-                            <span>{{ 'Rp. ' .
+                            <span class="text-sm md:text-base">{{ 'Rp. ' .
                                 number_format(
                                     $product->product_variant->first()->price -
                                         ($product->product_variant->first()->price * $product->promo->discount) / 100,
