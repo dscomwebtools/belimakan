@@ -54,7 +54,7 @@
                                                 x-text="item.product.product_variant ? 'x ' + new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.product.promo ? item.product.product_variant[0].price - (item.product.product_variant[0].price * (item.product.promo.discount / 100)) : item.product.product_variant[0].price) : ''"></span>
                                         </template>
                                     </div>
-                                    <template x-if="item.product.promo">
+                                    <template x-if="item.product.promo && item.product.promo.discount > 0">
                                         <template x-if="item.product_variant">
                                             <div class="line-through"
                                                 x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.product_variant.price)">
@@ -232,13 +232,13 @@
                                 @endforeach
                             </select>
 
-                            <div x-show="$store.checkout.bankSelected.id" class="flex flex-col bg-white border rounded-lg p-4 shadow-sm gap-4 text-sm md:text-base">
+                            <div x-show="$store.checkout.bankSelected.id"
+                                class="flex flex-col bg-white border rounded-lg p-4 shadow-sm gap-4 text-sm md:text-base">
                                 <template x-if="$store.checkout.bankSelected?.logo">
                                     <img :src="`/storage/${$store.checkout.bankSelected.logo}`"
                                         class="w-[140px] h-[40px] object-contain" />
                                 </template>
-                                <div
-                                    class="flex flex-col sm:flex-row items-start sm:items-end gap-4">
+                                <div class="flex flex-col sm:flex-row items-start sm:items-end gap-4">
                                     <div class="flex flex-col sm:flex-row sm:items-center gap-3">
                                         <div>
                                             <div class="font-bold text-gray-800"

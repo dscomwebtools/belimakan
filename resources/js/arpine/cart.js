@@ -2,6 +2,8 @@ import Alpine from 'alpinejs';
 
 export default {
     items: [],
+    selectedIds: [],
+    selectedItems: [],
     showNotifSuccess: false,
     showNotifFailed: false,
     message: '',
@@ -9,9 +11,14 @@ export default {
     isThereItemWithNoStock: false,
     _fetchPromise: null,
 
+    get selectedItems() {
+        return this.items.filter(item => this.selectedIds.includes(item.id));
+    },
+
     get totalItem() {
         return this.items.reduce((sum, item) => sum + item.quantity, 0)
     },
+
     get subtotal() {
         return this.items.reduce((sum, item) => {
             let price = item.product_variant ? item.product_variant.price : item.product.product_variant[0].price
@@ -23,13 +30,23 @@ export default {
             return sum + (item.quantity * price)
         }, 0)
     },
-    get totalWeight() {
-        return this.items.reduce((sum, item) => {
-            let weight = item.product_variant ? item.product_variant.weight : item.product.product_variant[0].weight
 
-            return sum + (item.quantity * weight)
+    get totalItemCart() {
+        return this.selectedItems.reduce((sum, item) => sum + item.quantity, 0)
+    },
+
+    get subtotalCart() {
+        return this.selectedItems.reduce((sum, item) => {
+            let price = item.product_variant ? item.product_variant.price : item.product.product_variant[0].price
+
+            if (item.product.promo) {
+                price = price - (price * item.product.promo.discount / 100)
+            }
+
+            return sum + (item.quantity * price)
         }, 0)
     },
+
     init() {
         if (localStorage.getItem('orderSuccess')) {
             this.showNotification("Terimakasih, data order berhasil kami terima !")
@@ -38,8 +55,46 @@ export default {
 
     },
 
+    isSelected(item) {
+        return this.selectedIds.includes(item.id);
+    },
+
+    toggleSelection(item) {
+        const id = item.id; // use cart row id now
+
+        if (this.selectedIds.includes(id)) {
+            this.selectedIds = this.selectedIds.filter(pid => pid !== id);
+        } else {
+            this.selectedIds = [...this.selectedIds, id]; // new array (keeps reactivity)
+        }
+
+        localStorage.setItem('checkoutSelected', JSON.stringify(this.selectedIds));
+    },
+
+    toggleAll(items) {
+        if (this.selectedIds.length === items.length) {
+            // ✅ unselect all
+            this.selectedIds = [];
+        } else {
+            // ✅ select all
+            this.selectedIds = items.map(i => i.id);
+        }
+
+        // save to localStorage
+        if (this.selectedIds.length > 0) {
+            localStorage.setItem('checkoutSelected', JSON.stringify(this.selectedIds));
+        } else {
+            localStorage.removeItem('checkoutSelected');
+        }
+    },
+
     async getDataCart() {
         this.items = await (await fetch('/data-cart')).json();
+
+        const saved = localStorage.getItem('checkoutSelected');
+        if (saved) {
+            this.selectedIds = JSON.parse(saved);
+        }
     },
 
     async fetchItems(force = false) {
@@ -141,7 +196,8 @@ export default {
             if (saved.length > 0) {
                 localStorage.setItem('checkoutSelected', JSON.stringify(saved));
             } else {
-                localStorage.removeItem('checkoutSelected'); // clean up if empty
+                this.selectedIds = [];
+                localStorage.removeItem('checkoutSelected');
             }
             await this.getDataCart();
             this.showNotification('Berhasil ditambah ke keranjang Anda !');
