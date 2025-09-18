@@ -15,7 +15,6 @@
             <x-client.logo-promo />
         @endif
     </figure>
-
     <div class="p-4 md:p-8 flex flex-col gap-2 items-center text-center">
         <a href="{{ route('client.product', $product['slug']) }}">
             <h2 class="card-title text-left text-sm md:text-lg">{{ $product->name }}</h2>
@@ -29,42 +28,44 @@
                 promo: {{ isset($product->promo) && $product->promo->active ? $product->promo->discount : 0 }}
             }">
 
-                {{-- Variant Selector --}}
-                @if ($product->product_variant->count() > 1)
-                    <select name="variant" class="my-input w-full text-sm md:text-base mb-2" x-model="selectedVariant">
-                        <template x-for="variant in variants" :key="variant.id">
-                            <option :value="variant.id"
-                                x-text="variant.product_detail.map(d => d.variant_value.variant.variant + ' - ' + d.variant_value.value).join(' & ')">
-                            </option>
-                        </template>
-                    </select>
-                @endif
+                @can('is-member')
+                    {{-- Variant Selector --}}
+                    @if ($product->product_variant->count() > 1)
+                        <select name="variant" class="my-input w-full text-sm md:text-base mb-2" x-model="selectedVariant">
+                            <template x-for="variant in variants" :key="variant.id">
+                                <option :value="variant.id"
+                                    x-text="variant.product_detail.map(d => d.variant_value.variant.variant + ' - ' + d.variant_value.value).join(' & ')">
+                                </option>
+                            </template>
+                        </select>
+                    @endif
 
-                {{-- Price Display --}}
-                <div>
-                    <template x-for="variant in variants" :key="variant.id">
-                        <div x-show="selectedVariant == variant.id">
-                            <template x-if="promo > 0">
-                                <div>
-                                    <span class="line-through text-sm md:text-base"
+                    {{-- Price Display --}}
+                    <div>
+                        <template x-for="variant in variants" :key="variant.id">
+                            <div x-show="selectedVariant == variant.id">
+                                <template x-if="promo > 0">
+                                    <div>
+                                        <span class="line-through text-sm md:text-base"
+                                            x-text="'Rp. ' + new Intl.NumberFormat('id-ID').format(variant.price)">
+                                        </span>
+                                        <span class="text-xs align-top ml-2" x-text="'-' + promo + '%'"></span>
+                                        <br>
+                                        <span class="text-sm md:text-base"
+                                            x-text="'Rp. ' + new Intl.NumberFormat('id-ID').format(variant.price - (variant.price * promo / 100))">
+                                        </span>
+                                    </div>
+                                </template>
+
+                                <template x-if="promo == 0">
+                                    <span class="text-sm md:text-base"
                                         x-text="'Rp. ' + new Intl.NumberFormat('id-ID').format(variant.price)">
                                     </span>
-                                    <span class="text-xs align-top ml-2" x-text="'-' + promo + '%'"></span>
-                                    <br>
-                                    <span class="text-sm md:text-base"
-                                        x-text="'Rp. ' + new Intl.NumberFormat('id-ID').format(variant.price - (variant.price * promo / 100))">
-                                    </span>
-                                </div>
-                            </template>
-
-                            <template x-if="promo == 0">
-                                <span class="text-sm md:text-base"
-                                    x-text="'Rp. ' + new Intl.NumberFormat('id-ID').format(variant.price)">
-                                </span>
-                            </template>
-                        </div>
-                    </template>
-                </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                @endcan
 
                 {{-- Add to Cart --}}
                 @can('is-member')
