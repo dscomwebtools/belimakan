@@ -74,7 +74,12 @@
         {{-- user section --}}
         <div class="hidden lg:block dropdown dropdown-end">
             @if (auth()->check())
-                {{-- Logged in (lg) → show logout --}}
+                <form action="{{ route('logout') }}" method="post">
+                    @csrf
+                    <button class="flex mx-3">
+                        <span class="fa fa-person-running mr-2"></span><span>Keluar</span>
+                    </button>
+                </form>
             @else
                 {{-- Not logged in (lg) → show Masuk + Buat Akun --}}
                 <div class="mx-3 flex gap-4">
