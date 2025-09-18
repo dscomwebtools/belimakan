@@ -639,11 +639,19 @@ class ProductController extends Controller
         $perPage = 10;
 
         if ($keyword) {
-            $products = Product::with(['product_pictures', 'promo', 'auction'])
-                ->where('name', 'like', '%' . $keyword . '%')
+            $products = Product::with([
+                'product_pictures',
+                'promo',
+                'auction',
+                'product_variant' => function ($query) {
+                    $query->where('active', 1)
+                        ->with(['product_detail.variant_value.variant']);
+                }
+            ])
                 ->whereHas('product_variant', function ($query) {
                     $query->where('active', 1);
                 })
+                ->where('name', 'like', '%' . $keyword . '%')
                 ->latest()
                 ->paginate($perPage);
 
@@ -657,7 +665,15 @@ class ProductController extends Controller
         }
 
         $product_data = Setting::where('section_name', 'product')->first();
-        $products = Product::with(['product_pictures', 'promo', 'auction'])
+        $products = Product::with([
+            'product_pictures',
+            'promo',
+            'auction',
+            'product_variant' => function ($query) {
+                $query->where('active', 1)
+                    ->with(['product_detail.variant_value.variant']);
+            }
+        ])
             ->whereHas('product_variant', function ($query) {
                 $query->where('active', 1);
             })
@@ -683,12 +699,20 @@ class ProductController extends Controller
     function productsByCategory(Request $request, $category)
     {
         $perPage = 10;
-        $products = Product::with(['product_pictures', 'promo', 'auction'])
-            ->whereHas('category', function ($query) use ($category) {
-                $query->where('name', $category);
-            })
+        $products = Product::with([
+            'product_pictures',
+            'promo',
+            'auction',
+            'product_variant' => function ($query) {
+                    $query->where('active', 1)
+                        ->with(['product_detail.variant_value.variant']);
+                }
+            ])
             ->whereHas('product_variant', function ($query) {
                 $query->where('active', 1);
+            })
+            ->whereHas('category', function ($query) use ($category) {
+                $query->where('name', $category);
             })
             // ->limit() // nanti dilimit setelah sudah bisa load more
             ->latest()->paginate($perPage);

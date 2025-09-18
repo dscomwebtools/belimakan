@@ -55,36 +55,6 @@ export default {
         }, 0);
     },
 
-    // ==== SELECTION HANDLERS ====
-    toggleSelection(item) {
-        const id = item.id; // use cart row id now
-
-        if (this.selectedIds.includes(id)) {
-            this.selectedIds = this.selectedIds.filter(pid => pid !== id);
-        } else {
-            this.selectedIds = [...this.selectedIds, id]; // new array (keeps reactivity)
-        }
-
-        localStorage.setItem('checkoutSelected', JSON.stringify(this.selectedIds));
-    },
-
-    toggleAll(items) {
-        if (this.selectedIds.length === items.length) {
-            // ✅ unselect all
-            this.selectedIds = [];
-        } else {
-            // ✅ select all
-            this.selectedIds = items.map(i => i.id);
-        }
-
-        // save to localStorage
-        if (this.selectedIds.length > 0) {
-            localStorage.setItem('checkoutSelected', JSON.stringify(this.selectedIds));
-        } else {
-            localStorage.removeItem('checkoutSelected');
-        }
-    },
-
     init() {
         this.getDataCart();
 
@@ -92,10 +62,6 @@ export default {
         if (!window.location.pathname.startsWith('/checkout')) {
             localStorage.removeItem('checkoutSelected');
         }
-    },
-
-    isSelected(item) {
-        return this.selectedIds.includes(item.id);
     },
 
     // ==== CHECKOUT PAGE STUFF ====

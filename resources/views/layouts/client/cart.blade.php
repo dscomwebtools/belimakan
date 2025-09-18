@@ -72,7 +72,7 @@
                                                 x-text="item.product.product_variant ? 'x ' + new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.product.promo ? item.product.product_variant[0].price - (item.product.product_variant[0].price * (item.product.promo.discount / 100)) : item.product.product_variant[0].price) : ''"></span>
                                         </template>
                                     </div>
-                                    <template x-if="item.product.promo">
+                                    <template x-if="item.product.promo && item.product.promo.discount > 0">
                                         <template x-if="item.product_variant">
                                             <div class="line-through ml-auto"
                                                 x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.product_variant.price)">

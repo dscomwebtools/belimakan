@@ -7,16 +7,16 @@
             <div class="flex flex-col gap-2 flex-1">
                 <div x-show="$store.cart.items.length" class="flex items-center gap-2 mb-2 bg-base-200 p-2 rounded">
                     <input type="checkbox" id="check-all"
-                        :checked="$store.checkout.selectedIds.length === $store.cart.items.length && $store.cart.items.length > 0"
-                        @change="$store.checkout.toggleAll($store.cart.items)">
+                        :checked="$store.cart.selectedIds.length === $store.cart.items.length && $store.cart.items.length > 0"
+                        @change="$store.cart.toggleAll($store.cart.items)">
                     <label for="check-all" class="cursor-pointer">Pilih Semua</label>
                 </div>
                 <template x-for="item in $store.cart.items" :key="item.id">
                     <div class="cart-item bg-base-200 p-4 rounded-t border-b border-primary flex gap-2">
                         <!-- ✅ Checkbox -->
                         <div class="flex gap-2">
-                            <input type="checkbox" :id="`check-${item.id}`" :checked="$store.checkout.isSelected(item)"
-                                @change="$store.checkout.toggleSelection(item)" class="w-[20px] h-[20px]">
+                            <input type="checkbox" :id="`check-${item.id}`" :checked="$store.cart.isSelected(item)"
+                                @change="$store.cart.toggleSelection(item)" class="w-[20px] h-[20px]">
                         </div>
 
                         <div class="flex flex-row gap-2 w-full">
@@ -60,7 +60,7 @@
                                         </template>
                                     </div>
 
-                                    <template x-if="item.product.promo">
+                                    <template x-if="item.product.promo && item.product.promo.discount > 0">
                                         <template x-if="item.product_variant">
                                             <div class="line-through"
                                                 x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.product_variant.price)">
@@ -108,21 +108,25 @@
                 <h2 class="text-lg md:text-xl font-bold mb-2">Ringkasan Belanja</h2>
                 <div class="flex justify-between text-sm md:text-base">
                     <div class="w-32">Total Dipilih</div>
-                    <div x-text="$store.checkout.totalItem"></div>
+                    <div x-text="$store.cart.totalItemCart"></div>
                 </div>
                 <div class="flex justify-between text-sm md:text-base">
                     <div class="w-32">Subtotal</div>
                     <div
-                        x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format($store.checkout.subtotal)">
+                        x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format($store.cart.subtotalCart)">
                     </div>
                 </div>
                 <div class="card-actions my-2">
                     <a href="{{ route('client.checkout') }}"
                         @click.prevent="
-                            localStorage.setItem('checkoutSelected', JSON.stringify($store.checkout.selectedIds));
-                            window.location.href='{{ route('client.checkout') }}';
+                            if ($store.cart.selectedIds.length > 0) {
+                                localStorage.setItem('checkoutSelected', JSON.stringify($store.cart.selectedIds));
+                                window.location.href='{{ route('client.checkout') }}';
+                            }
                         "
-                        class="btn btn-primary btn-block">
+                        class="btn btn-primary btn-block"
+                        :class="{ 'btn-disabled': $store.cart.selectedIds.length === 0 }"
+                        :disabled="$store.cart.selectedIds.length === 0">
                         Beli
                     </a>
                 </div>

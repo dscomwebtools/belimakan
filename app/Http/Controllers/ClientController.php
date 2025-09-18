@@ -50,7 +50,15 @@ class ClientController extends Controller
         $product_data = Setting::where('section_name', 'product')->first();
         $products = [
             'data' => $product_data,
-            'items' => Product::with(['product_pictures', 'promo', 'auction', 'product_variant.product_detail.variant_value.variant'])
+            'items' => Product::with([
+                'product_pictures',
+                'promo',
+                'auction',
+                'product_variant' => function ($query) {
+                    $query->where('active', 1)
+                        ->with(['product_detail.variant_value.variant']);
+                }
+            ])
                 ->whereHas('product_variant', function ($query) {
                     $query->where('active', 1);
                 })
@@ -98,11 +106,17 @@ class ClientController extends Controller
         $perPage = 10;
 
         $promo_data = Setting::where('section_name', 'promo')->first();
-        $promo = Product::whereHas('promo', function ($query) {
-            $query->where('active', true);
-        })->whereDoesntHave('auction', function ($query) {
-            $query->where('active', true);
-        })
+        $promo = Product::with([
+                'product_variant' => function ($query) {
+                    $query->where('active', 1)
+                        ->with(['product_detail.variant_value.variant']);
+                }
+            ])
+            ->whereHas('promo', function ($query) {
+                $query->where('active', true);
+            })->whereDoesntHave('auction', function ($query) {
+                $query->where('active', true);
+            })
             // ->limit( 0 // nanti buat disini load more nya dengan limit, sementara dikosongkan dulu agar ga limit)
             //LUPA KNP ADA KOMEN DIATAS NYURUH PAKE LIMIT
             ->latest()->paginate($perPage);

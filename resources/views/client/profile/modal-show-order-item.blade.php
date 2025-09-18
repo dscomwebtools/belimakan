@@ -90,9 +90,9 @@
                             <tr class="hover" :key="key">
                                 <td x-text="++key"></td>
                                 <td>
-                                    <template x-if="orderDetail.product_variant">
+                                    <span x-text="orderDetail.product.name"></span>
+                                    <template x-if="orderDetail.product_variant && orderDetail.product_variant.product_detail.length > 0">
                                         <span>
-                                            <span x-text="orderDetail.product.name"></span>
                                             <br />
                                             <span>
                                                 (<template
@@ -106,9 +106,6 @@
                                                 </template>)
                                             </span>
                                         </span>
-                                    </template>
-                                    <template x-if="!orderDetail.product_variant">
-                                        <span x-text="orderDetail.product.name"></span>
                                     </template>
                                 </td>
                                 <td x-text="orderDetail.quantity"></td>
