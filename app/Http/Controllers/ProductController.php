@@ -691,7 +691,10 @@ class ProductController extends Controller
 
     function product($slug): View
     {
-        $product = Product::where('slug', $slug)->firstOrFail();
+        $product = Product::with(['product_variant' => function ($query) {
+            $query->where('active', 1)
+                ->with(['product_detail.variant_value.variant']);
+        }])->where('slug', $slug)->firstOrFail();
 
         return view('client.product.detail', compact('product'));
     }
@@ -704,10 +707,10 @@ class ProductController extends Controller
             'promo',
             'auction',
             'product_variant' => function ($query) {
-                    $query->where('active', 1)
-                        ->with(['product_detail.variant_value.variant']);
-                }
-            ])
+                $query->where('active', 1)
+                    ->with(['product_detail.variant_value.variant']);
+            }
+        ])
             ->whereHas('product_variant', function ($query) {
                 $query->where('active', 1);
             })
