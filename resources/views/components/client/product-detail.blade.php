@@ -1,5 +1,27 @@
 @props(['product'])
 
+<x-slot name="title">
+    {{ $product->name }}
+</x-slot>
+
+<x-slot name="meta">
+    {{-- Open Graph (for WhatsApp, FB, LinkedIn, etc.) --}}
+    <meta property="og:title" content="{{ $product->name }}">
+    <meta property="og:description" content="{{ Str::limit(strip_tags($product->description), 150) }}">
+    <meta property="og:image"
+        content="{{ url(Storage::url($product->product_pictures->first()->path ?? 'default.jpg')) }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:type" content="product">
+
+    {{-- Twitter Card --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $product->name }}">
+    <meta name="twitter:description" content="{{ Str::limit(strip_tags($product->description), 150) }}">
+    <meta name="twitter:image"
+        content="{{ url(Storage::url($product->product_pictures->first()->path ?? 'default.jpg')) }}">
+    <meta name="twitter:url" content="{{ url()->current() }}">
+</x-slot>
+
 <div class="flex flex-wrap gap-2 mb-4" x-data>
     @if (isset($product->auction) && $product->auction->active)
         <x-client.product-detail.lelang :product="$product" />
@@ -41,7 +63,8 @@
                                 @csrf
                                 <input type="number" name="value"
                                     value="{{ $product->auction->bids->isNotEmpty() ? $product->auction->bids->first()->value + $product->auction->bid_increment : $product->auction->bid_start }}"
-                                    step="{{ $product->auction->bid_increment }}" min="{{ $product->auction->bids->isNotEmpty() ? $product->auction->bids->first()->value + $product->auction->bid_increment : $product->auction->bid_start }}"
+                                    step="{{ $product->auction->bid_increment }}"
+                                    min="{{ $product->auction->bids->isNotEmpty() ? $product->auction->bids->first()->value + $product->auction->bid_increment : $product->auction->bid_start }}"
                                     class="input">
                                 <input type="hidden" name="auction_id" value="{{ $product->auction->id }}">
                                 <div class="tooltip" data-tip="Bid">
@@ -164,7 +187,8 @@
                                 @csrf
                                 <input type="number" name="value"
                                     value="{{ $product->auction->bids->isNotEmpty() ? $product->auction->bids->first()->value + $product->auction->bid_increment : $product->auction->bid_start }}"
-                                    step="{{ $product->auction->bid_increment }}" min="{{ $product->auction->bids->isNotEmpty() ? $product->auction->bids->first()->value + $product->auction->bid_increment : $product->auction->bid_start }}"
+                                    step="{{ $product->auction->bid_increment }}"
+                                    min="{{ $product->auction->bids->isNotEmpty() ? $product->auction->bids->first()->value + $product->auction->bid_increment : $product->auction->bid_start }}"
                                     class="input">
                                 <input type="hidden" name="auction_id" value="{{ $product->auction->id }}">
                                 <div class="tooltip" data-tip="Bid">
