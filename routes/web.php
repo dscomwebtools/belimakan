@@ -24,6 +24,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [ClientController::class, 'home'])->name('client.home');
+Route::get('/product/{slug}', [ProductController::class, 'product'])->name('client.product');
 Route::middleware(['auth', 'check-banned', 'verified'])->group(function () {
     Route::get('/promo', [ClientController::class, 'promo'])->name('client.promo');
     Route::get('/lelang', [ClientController::class, 'lelang'])->name('client.lelang');
@@ -31,7 +32,6 @@ Route::middleware(['auth', 'check-banned', 'verified'])->group(function () {
     Route::post('/comment', [AuctionController::class, 'comment'])->name('comment.store');
     Route::get('/products', [ProductController::class, 'allProducts'])->name('client.products');
     Route::get('/products/category/{category}', [ProductController::class, 'productsByCategory'])->name('client.productsByCategory');
-    Route::get('/product/{slug}', [ProductController::class, 'product'])->name('client.product');
     Route::post('/download-invoice/{order}', [OrderController::class, 'download_invoice'])->name('download-invoice');
 });
 
