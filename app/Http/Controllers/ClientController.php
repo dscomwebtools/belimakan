@@ -116,6 +116,8 @@ class ClientController extends Controller
                 $query->where('active', true);
             })->whereDoesntHave('auction', function ($query) {
                 $query->where('active', true);
+            })->whereHas('product_variant', function ($query) {
+                $query->where('active', 1);
             })
             // ->limit( 0 // nanti buat disini load more nya dengan limit, sementara dikosongkan dulu agar ga limit)
             //LUPA KNP ADA KOMEN DIATAS NYURUH PAKE LIMIT
