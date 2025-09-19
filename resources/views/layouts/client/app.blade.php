@@ -23,14 +23,14 @@
         <meta property="og:image" content="{{ asset('assets/images/logo.webp') }}">
         <meta property="og:url" content="{{ url()->current() }}">
         <meta property="og:type" content="website">
-    @endif
 
-    {{-- Twitter Card mirrors OG --}}
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $title ?? 'DSCOMPUTER SOLUTION' }}">
-    <meta name="twitter:description"
-        content="{{ isset($meta) ? '' : 'Toko online DS Computer Solution. Temukan beragam produk pilihan dari merk ternama dan terpercaya. Kami hanya menghadirkan barang berkualitas dengan jaminan keaslian, kondisi terbaik, bergaransi resmi sesuai ketentuan produk, dan siap membantu bila ada masalah setelah barang diterima.' }}">
-    <meta name="twitter:image" content="{{ asset('assets/images/logo.webp') }}">
+        {{-- Twitter Card mirrors OG --}}
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ $title ?? 'DSCOMPUTER SOLUTION' }}">
+        <meta name="twitter:description"
+            content="{{ isset($meta) ? '' : 'Toko online DS Computer Solution. Temukan beragam produk pilihan dari merk ternama dan terpercaya. Kami hanya menghadirkan barang berkualitas dengan jaminan keaslian, kondisi terbaik, bergaransi resmi sesuai ketentuan produk, dan siap membantu bila ada masalah setelah barang diterima.' }}">
+        <meta name="twitter:image" content="{{ asset('assets/images/logo.webp') }}">
+    @endif
 
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
