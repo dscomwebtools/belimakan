@@ -68,7 +68,7 @@
 
     <div class="flex items-center gap-2 mb-2">
         <span class="">Bid Tertinggi</span>
-        <span class="bg-secondary text-secondary-content py-2 px-4 rounded">
+        <span class="bg-primary text-white py-2 px-4 rounded">
             @if ($product->auction->bids->isNotEmpty())
                 @auth
                     <x-client.format-rp :value="$product->auction->bids->first()->value" />
@@ -83,7 +83,7 @@
     </div>
     <div class="flex items-center gap-2">
         <span class="">Oleh</span>
-        <span class="bg-secondary text-secondary-content py-2 px-4 rounded">
+        <span class="bg-primary text-white py-2 px-4 rounded">
             @if (auth()->user() && $product->auction->bids->isNotEmpty())
                 {{ $product->auction->bids->first()->user_id === auth()->user()->id
                     ? 'Anda'
