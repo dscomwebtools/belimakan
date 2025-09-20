@@ -8,7 +8,7 @@
         @endforeach
     </div>
 
-    <div id="loading" style="display: none;">Loading...</div>
+    <div id="loading" style="display: none; text-center w-full">Sedang memuat data...</div>
         <div class="w-full text-center my-2">
             @if ($products->hasMorePages())
                 <button id="load-more" data-page="{{ $products->currentPage() }}" data-last-page="{{ $products->lastPage() }}">Load more</button>

@@ -11,7 +11,7 @@
         @endforeach
     </div>
 
-    <div id="loading" style="display: none;">Loading...</div>
+    <div id="loading" style="display: none; text-center w-full">Sedang memuat data...</div>
     <div class="w-full text-center my-2">
         <button id="load-more" class="btn btn-primary" data-page="{{ $auction->currentPage() }}"
             data-last-page="{{ $auction->lastPage() }}">

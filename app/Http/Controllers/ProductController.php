@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateProductRequest;
 use App\Imports\ProductImport;
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Cart;
 use App\Models\CategoryProduct;
 use App\Models\Detail;
 use App\Models\DetailValue;
@@ -99,12 +100,26 @@ class ProductController extends Controller
         return view('admin.product.index', compact('data', 'indexNumber', 'validated', 'numbRows', 'headers', 'rows', 'routeName', 'queryParams'));
     }
 
+    public function extractYoutubeId($url)
+    {
+        if (preg_match('/^[a-zA-Z0-9_-]{11}$/', $url)) {
+            return $url;
+        }
+
+        preg_match(
+            '/(?:youtube\.com\/(?:[^\/\n\s]+\/\S*?v=|.*v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/',
+            $url,
+            $matches
+        );
+
+        return $matches[1] ?? null;
+    }
 
     function create(): View
     {
         $variants = Variant::limit(2)->get();
-        $categories = Category::all();
-        $brands = Brand::all();
+        $categories = Category::orderBy('name', 'asc')->get();
+        $brands = Brand::orderBy('name', 'asc')->get();
 
         return view('admin.product.form', compact('variants', 'categories', 'brands'));
     }
@@ -118,7 +133,7 @@ class ProductController extends Controller
         $new_product->slug = Str::of($validated["name"])->slug('-')->value;
         $new_product->description = $validated["description"];
         $new_product->brand_id = $validated["brand_id"] ?? null;
-        $new_product->youtube = $validated["youtube"] ?? null;
+        $new_product->youtube = $this->extractYoutubeId($validated["youtube"]) ?? null;
 
         DB::transaction(function () use ($new_product, $validated) {
             $new_product->save();
@@ -292,8 +307,8 @@ class ProductController extends Controller
     {
         $data = $product->load('detail_value.detail');
         $variants = Variant::limit(2)->get();
-        $categories = Category::all();
-        $brands = Brand::all();
+        $categories = Category::orderBy('name', 'asc')->get();
+        $brands = Brand::orderBy('name', 'asc')->get();
 
         // $existingVariants = $product->product_variant;
         // dd($existingVariants);
@@ -350,7 +365,7 @@ class ProductController extends Controller
         return view('admin.product.form', compact('data', 'variants', 'categories', 'brands', 'existingVariants', 'productVariants'));
     }
 
-    function update(UpdateProductRequest $request, Product $product)
+    public function update(UpdateProductRequest $request, Product $product)
     {
         $validated = $request->validated();
 
@@ -358,32 +373,39 @@ class ProductController extends Controller
         $product->slug = Str::of($validated["name"])->slug('-')->value;
         $product->description = $validated["description"];
         $product->brand_id = $validated["brand_id"] ?? null;
-        $product->youtube = $validated["youtube"] ?? null;
+        $product->youtube = $this->extractYoutubeId($validated["youtube"]) ?? null;
 
         DB::transaction(function () use ($product, $validated) {
             $product->save();
 
             if (isset($validated["variantData"])) {
-                // JIKA ADA VARIANT 
+                // =========================
+                // 1. Build old variant map
+                // =========================
+                $oldVariantMap = [];
+                foreach ($product->product_variant as $variant) {
+                    $valuesKey = $variant->product_detail
+                        ->map(fn($detail) => $detail->variant_value->variant->variant . ':' . $detail->variant_value->value)
+                        ->sort()
+                        ->implode('|'); // e.g. "Warna:Merah|Ukuran:L"
 
-                //  HAPUS DULU DATA VARIANT LAMA
+                    $oldVariantMap[$valuesKey] = $variant->id;
+                }
+
+                // HAPUS DULU DATA VARIANT LAMA
                 $variants_id = [];
                 $variant_values_id = [];
                 foreach ($product->product_variant as $variant) {
                     foreach ($variant->product_detail as $detail) {
-                        // Simpan detail ke dalam array
                         $variant_values_id[] = $detail->variant_value->id;
                         $variants_id[] = $detail->variant_value->variant_id;
                     }
                 }
-                // Hapus semua product_variants, ini akan menghapus product_details juga
                 foreach ($product->product_variant as $variant) {
                     $variant->delete();
                 }
 
-                // singkirkan id variant value yang duplikat
                 $variant_values = array_unique($variant_values_id);
-                // hapus variant value yang tidak digunakan / tidak ada pada product detail
                 foreach ($variant_values as $value_id) {
                     $is_exists_in_product_detail = ProductDetail::where('variant_value_id', $value_id)->exists();
                     if (!$is_exists_in_product_detail) {
@@ -391,18 +413,17 @@ class ProductController extends Controller
                     }
                 }
 
-                // variant sama seperti variant_value diatas
                 foreach ($variants_id as $variant_id) {
                     $is_exists_in_variant_value = VariantValue::where('variant_id', $variant_id)->exists();
                     if (!$is_exists_in_variant_value) {
                         Variant::destroy($variant_id);
                     }
                 }
-                // HAPUS DATA VARIANT LAMA END
 
-                //  KEMUADIAN SIMPAN DATA VARIANT BARU
+                // SIMPAN DATA VARIANT BARU
                 $variants = json_decode($validated['variantData'], true);
                 $variantCombinations = json_decode($validated['variantCombinationsData'], true);
+
                 foreach ($variants as $variantName => $values) {
                     $variant = Variant::firstOrCreate(['variant' => $variantName]);
 
@@ -426,55 +447,58 @@ class ProductController extends Controller
                     ]);
                     $productVariant->save();
 
+                    $valuesForKey = [];
                     foreach ($combination as $value) {
-                        // Misal $value adalah 'Warna: Merah'
                         [$variantName, $variantValue] = explode(': ', $value);
-
-                        // Cari variant_id berdasarkan nama varian
                         $variant = Variant::where('variant', $variantName)->first();
 
-                        // Cari atau buat VariantValue berdasarkan variant_id dan nilai
                         $variantValueObj = VariantValue::firstOrCreate([
                             'variant_id' => $variant->id,
                             'value' => $variantValue,
                         ]);
 
-                        // Simpan ke tabel product_details
                         ProductDetail::create([
                             'product_variant_id' => $productVariant->id,
-                            'variant_value_id' => $variantValueObj->id, // Gunakan ID di sini
-                            'isMain' => false, // Atur logika isMain sesuai kebutuhan
+                            'variant_value_id' => $variantValueObj->id,
+                            'isMain' => false,
                         ]);
+
+                        $valuesForKey[] = $variantName . ':' . $variantValue;
+                    }
+
+                    // =========================
+                    // 2. Remap cart references
+                    // =========================
+                    $valuesKey = collect($valuesForKey)->sort()->implode('|');
+                    if (isset($oldVariantMap[$valuesKey])) {
+                        $oldId = $oldVariantMap[$valuesKey];
+                        $newId = $productVariant->id;
+
+                        Cart::where('product_variant_id', $oldId)
+                            ->update(['product_variant_id' => $newId]);
+
+                        // (Optional) also for orders
+                        // OrderItem::where('product_variant_id', $oldId)
+                        //     ->update(['product_variant_id' => $newId]);
                     }
                 }
             } else {
                 // JIKA TIDAK ADA VARIANT
 
-                //  HAPUS DULU DATA VARIANT LAMA
                 $variants_id = [];
                 $variant_values_id = [];
                 foreach ($product->product_variant as $variant) {
                     foreach ($variant->product_detail as $detail) {
-                        // Simpan detail ke dalam array
                         $variant_values_id[] = $detail->variant_value->id;
                         $variants_id[] = $detail->variant_value->variant_id;
                     }
                 }
-                // Hapus semua product_variants KECUALI INDEX YANG PERTAMA
-                //  AGAR ID NYA TIDAK DIPERBAHARUI ATAU DIUBAH 
-                // UNTUK ANTISIPASI JIKA SUDAH ADA DI KERANJANG ATAU SUDAH DIORDER,
-                //  ini akan menghapus product_details juga
                 foreach ($product->product_variant as $key => $variant) {
-                    // dd($key);
-                    if ($key === 0) {
-                        continue;
-                    }
+                    if ($key === 0) continue;
                     $variant->delete();
                 }
 
-                // singkirkan id variant value yang duplikat
                 $variant_values = array_unique($variant_values_id);
-                // hapus variant value yang tidak digunakan / tidak ada pada product detail
                 foreach ($variant_values as $value_id) {
                     $is_exists_in_product_detail = ProductDetail::where('variant_value_id', $value_id)->exists();
                     if (!$is_exists_in_product_detail) {
@@ -482,17 +506,14 @@ class ProductController extends Controller
                     }
                 }
 
-                // variant sama seperti variant_value diatas
                 foreach ($variants_id as $variant_id) {
                     $is_exists_in_variant_value = VariantValue::where('variant_id', $variant_id)->exists();
                     if (!$is_exists_in_variant_value) {
                         Variant::destroy($variant_id);
                     }
                 }
-                // HAPUS DATA VARIANT LAMA END
 
                 $newProductVariant = ProductVariant::firstWhere('product_id', $product->id);
-                // dd($newProductVariant);
                 $newProductVariant->product_id = $product->id;
                 $newProductVariant->stock = $validated["stock"];
                 $newProductVariant->price = $validated["price"];
@@ -502,28 +523,21 @@ class ProductController extends Controller
                 $newProductVariant->save();
             }
 
-            // CATEGORIES (many to many)
+            // CATEGORIES
             if (isset($validated["categories"])) {
                 $categoryIds = [];
-
                 foreach ($validated["categories"] as $categoryId) {
                     $category = Category::find($categoryId);
-
                     if (!$category) {
-                        // If the category does not exist, create it with the ID as the name
                         $category = Category::create(['name' => $categoryId]);
                     }
-
                     $categoryIds[] = $category->id;
                 }
-
                 $product->category()->sync($categoryIds);
             }
 
             // PICTURES
             if (isset($validated["product_pictures"])) {
-
-                // TAMBAH GAMBAR
                 foreach ($validated["product_pictures"] as $product_picture) {
                     $filename = $product->slug . '-' . uniqid() . '.webp';
                     $path = $this->picture_folder . $filename;
@@ -536,7 +550,6 @@ class ProductController extends Controller
                 }
             }
 
-            // HAPUS GAMBAR YANG DIHAPUS CLIENT BERDASARKAN ID JIKA ADA
             if (isset($validated["deleted_pictures"])) {
                 $deletedPictures = json_decode($validated['deleted_pictures'], true);
                 if (!empty($deletedPictures)) {
@@ -549,17 +562,9 @@ class ProductController extends Controller
             if ($discount) {
                 $promo = Promo::firstOrNew(['product_id' => $product->id]);
                 $promo->discount = $discount;
-
-                // toggle promo based discount
-                if ($discount > 0) {
-                    $promo->active = true;
-                } else {
-                    $promo->active = false;
-                }
-
+                $promo->active = $discount > 0;
                 $promo->save();
             } else {
-                // kosongkan diskon jika inputan kosong
                 $promo = Promo::firstWhere(['product_id' => $product->id]);
                 if ($promo) {
                     $promo->discount = 0;
@@ -577,38 +582,28 @@ class ProductController extends Controller
 
             // DETAILS
             if (isset($validated["detail"])) {
-                //AMBIL DETAIL_VALUE SAAT INI UNTUK MENDAPATKAN DATA DETAIL DARI DETAIL_ID
                 $currentDetailValue = DetailValue::where('product_id', $product->id)->get();
                 $currentDetailIds = $currentDetailValue->pluck('detail_id')->toArray();
 
-                // HAPUS SEMUA DETAIL VALUE
                 DetailValue::destroy($currentDetailValue);
-                // SIMPAN DETAIL VALUE YANG BARU
                 foreach ($validated["detail"] as $index => $detail_input) {
-                    if (isset($detail_input)) { //hanya simpan detail yang tidak null
+                    if (isset($detail_input)) {
                         $detail = Detail::firstOrCreate(['detail' => $detail_input]);
 
                         $detail_value = new DetailValue();
                         $detail_value->detail_id = $detail->id;
                         $detail_value->product_id = $product->id;
                         $detail_value->value = $validated["detail-value"][$index];
-
                         $detail_value->save();
                     }
                 }
 
-                // HAPUS DETAIL SAAT INI YANG TIDAK DIGUNAKAN PADA DETAIL VALUE PRODUK YG LAIN
                 Detail::whereIn('id', $currentDetailIds)
                     ->whereNotIn('id', function ($q) {
-                        $q->select('detail_id')
-                            ->from((new DetailValue())->getTable());
+                        $q->select('detail_id')->from((new DetailValue())->getTable());
                     })->delete();
             } else {
-                // JIKA TIDAK ADA DETAIL MAKA HAPUS SEMUA DETAIL YANG ADA
                 $currentDetailValue = DetailValue::where('product_id', $product->id)->get();
-                $currentDetailIds = $currentDetailValue->pluck('detail_id')->toArray();
-
-                // HAPUS SEMUA DETAIL VALUE
                 DetailValue::destroy($currentDetailValue);
             }
         });

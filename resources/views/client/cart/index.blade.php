@@ -45,6 +45,15 @@
                                 </div>
 
                                 <!-- Price & Qty -->
+
+                                <template x-if="item.product.promo && item.product.promo.discount > 0">
+                                    <template x-if="item.product_variant">
+                                        <div class="line-through"
+                                            x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.product_variant.price)">
+                                        </div>
+                                    </template>
+                                </template>
+
                                 <div class="price flex flex-col text-sm md:text-base">
                                     <div>
                                         <span x-text="item.quantity"></span>
@@ -59,14 +68,6 @@
                                             </span>
                                         </template>
                                     </div>
-
-                                    <template x-if="item.product.promo && item.product.promo.discount > 0">
-                                        <template x-if="item.product_variant">
-                                            <div class="line-through"
-                                                x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.product_variant.price)">
-                                            </div>
-                                        </template>
-                                    </template>
 
                                     <div class="mt-3 flex flex-wrap justify-between w-full items-center gap-2">
                                         <!-- Quantity controls -->

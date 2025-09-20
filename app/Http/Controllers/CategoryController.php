@@ -19,7 +19,9 @@ class CategoryController extends Controller
 
         $validated = $request->validate($queryParams);
 
-        $data = Category::with('category_label')->latest();
+        $data = Category::with('category_label')
+            ->orderBy('categories.name', 'asc')
+            ->latest();
 
         if (isset($validated["nama"])) {
             $data = $data->where('name', 'like', '%' . $validated["nama"] . '%');
@@ -53,7 +55,7 @@ class CategoryController extends Controller
 
     public function create()
     {
-        $category_labels = CategoryLabel::pluck('name', 'id')->toArray();
+        $category_labels = CategoryLabel::orderBy('name', 'asc')->pluck('name', 'id')->toArray();
         return view('admin.category.form', compact('category_labels'));
     }
 
@@ -70,7 +72,7 @@ class CategoryController extends Controller
     public function edit(Category $category)
     {
         $data = $category;
-        $category_labels = CategoryLabel::pluck('name', 'id')->toArray();
+        $category_labels = CategoryLabel::orderBy('name', 'asc')->pluck('name', 'id')->toArray();
         return view('admin.category.form', compact('data', 'category_labels'));
     }
 

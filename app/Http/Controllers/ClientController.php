@@ -34,17 +34,45 @@ class ClientController extends Controller
         $promo_data = Setting::where('section_name', 'promo')->first();
         $promo = [
             'data' => $promo_data,
-            'items' => Promo::with('product')
-                ->where('active', 1)
-                ->limit($promo_data->show_items)->latest()->get()
+            'items' => Promo::where('active', 1)
+                ->whereHas('product.product_variant', function ($q) {
+                    $q->where('active', 1);
+                })
+                ->with([
+                    'product' => function ($q) {
+                        $q->with([
+                            'product_variant' => function ($query) {
+                                $query->where('active', 1)
+                                    ->with(['product_detail.variant_value.variant']);
+                            }
+                        ]);
+                    }
+                ])
+                ->limit($promo_data->show_items)
+                ->latest()
+                ->get()
         ];
 
         $auction_data = Setting::where('section_name', 'auction')->first();
         $auction = [
             'data' => $auction_data,
-            'items' => Auction::with('product')
-                ->where('active', 1)
-                ->limit($auction_data->show_items)->latest()->get()
+            'items' => Auction::where('active', 1)
+                ->whereHas('product.product_variant', function ($q) {
+                    $q->where('active', 1);
+                })
+                ->with([
+                    'product' => function ($q) {
+                        $q->with([
+                            'product_variant' => function ($query) {
+                                $query->where('active', 1)
+                                    ->with(['product_detail.variant_value.variant']);
+                            }
+                        ]);
+                    }
+                ])
+                ->limit($auction_data->show_items)
+                ->latest()
+                ->get()
         ];
 
         $product_data = Setting::where('section_name', 'product')->first();
@@ -107,18 +135,17 @@ class ClientController extends Controller
 
         $promo_data = Setting::where('section_name', 'promo')->first();
         $promo = Product::with([
-                'product_variant' => function ($query) {
-                    $query->where('active', 1)
-                        ->with(['product_detail.variant_value.variant']);
-                }
-            ])
-            ->whereHas('promo', function ($query) {
-                $query->where('active', true);
-            })->whereDoesntHave('auction', function ($query) {
-                $query->where('active', true);
-            })->whereHas('product_variant', function ($query) {
-                $query->where('active', 1);
-            })
+            'product_variant' => function ($query) {
+                $query->where('active', 1)
+                    ->with(['product_detail.variant_value.variant']);
+            }
+        ])->whereHas('promo', function ($query) {
+            $query->where('active', true);
+        })->whereDoesntHave('auction', function ($query) {
+            $query->where('active', true);
+        })->whereHas('product_variant', function ($query) {
+            $query->where('active', 1);
+        })
             // ->limit( 0 // nanti buat disini load more nya dengan limit, sementara dikosongkan dulu agar ga limit)
             //LUPA KNP ADA KOMEN DIATAS NYURUH PAKE LIMIT
             ->latest()->paginate($perPage);
@@ -136,8 +163,15 @@ class ClientController extends Controller
     {
         $perPage = 10;
         $auction_data = Setting::where('section_name', 'auction')->first();
-        $auction = Product::whereHas('auction', function ($query) {
+        $auction = Product::with([
+            'product_variant' => function ($query) {
+                $query->where('active', 1)
+                    ->with(['product_detail.variant_value.variant']);
+            }
+        ])->whereHas('auction', function ($query) {
             $query->where('active', true);
+        })->whereHas('product_variant', function ($query) {
+            $query->where('active', 1);
         })
             // ->limit($auction_data->show_items) //sama seperti di promo
             ->latest()->paginate($perPage);
