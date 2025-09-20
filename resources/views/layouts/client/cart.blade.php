@@ -46,7 +46,8 @@
                                 <img :src="item.product.product_pictures.length ?
                                     `/storage/${item.product.product_pictures[0].path}` :
                                     ''"
-                                    alt="product-image" class="rounded max-h-[80px] md:max-h-[100px] max-w-[80px] md:max-w-[100px]">
+                                    alt="product-image"
+                                    class="rounded max-h-[80px] md:max-h-[100px] max-w-[80px] md:max-w-[100px]">
                             </div>
                             <div class="flex flex-col gap-2">
                                 <div class="name flex-1">
@@ -60,6 +61,13 @@
                                     </template>
                                 </div>
                                 <div class="price mr-2">
+                                    <template x-if="item.product.promo && item.product.promo.discount > 0">
+                                        <template x-if="item.product_variant">
+                                            <div class="line-through ml-auto"
+                                                x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.product_variant.price)">
+                                            </div>
+                                        </template>
+                                    </template>
                                     <div>
                                         <span x-text="item.quantity"></span>
                                         {{-- JIKA PRODUCT VARIANT ID TIDAK ADA BERARTI TIDAK ADA VARIAN MAKA AMBIL DARI RELASI PRODUCT->PRODUCT_VARAINT, JIKA ADA YA AMBIL DARI PRODUCT_VARIANT GA USAH DARI PRODUCT KARENA BERARTI PRODUCT NYA ADA VARIANT --}}
@@ -72,13 +80,6 @@
                                                 x-text="item.product.product_variant ? 'x ' + new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.product.promo ? item.product.product_variant[0].price - (item.product.product_variant[0].price * (item.product.promo.discount / 100)) : item.product.product_variant[0].price) : ''"></span>
                                         </template>
                                     </div>
-                                    <template x-if="item.product.promo && item.product.promo.discount > 0">
-                                        <template x-if="item.product_variant">
-                                            <div class="line-through ml-auto"
-                                                x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.product_variant.price)">
-                                            </div>
-                                        </template>
-                                    </template>
                                 </div>
                             </div>
                         </div>

@@ -7,7 +7,7 @@ import 'swiper/css/bundle';
 Swiper.use([Autoplay, EffectCards, Thumbs, Navigation, EffectCoverflow, EffectCube]);
 
 const heroSwiper = new Swiper('.heroSwiper', {
-  autoplay: {delay: 1500},
+  autoplay: { delay: 1500 },
   loop: true,
 });
 
@@ -56,16 +56,30 @@ var testimonialSwiper2 = new Swiper(".testimonialSwiper2", {
   },
 });
 
+// for Kategori section only
+document.addEventListener('DOMContentLoaded', function () {
+  const kategoriCollapses = document.querySelectorAll('.kategori-collapse');
+  kategoriCollapses.forEach((collapse) => {
+    const checkbox = collapse.querySelector('input[type="checkbox"]');
+    collapse.querySelector('.collapse-title').addEventListener('click', function (e) {
+      e.stopPropagation(); // biar gak bubble aneh
+      if (checkbox) {
+        checkbox.checked = !checkbox.checked;
+      }
+    });
+  });
+});
+
 // for FAQ section
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   // TOGGLE COLLAPSE FAQ
   const collapses = document.querySelectorAll('.collapse');
   collapses.forEach((collapse, index) => {
-      const title = collapse.querySelector('.collapse-title');
-      const radio = collapse.querySelector('input[type="radio"]');
-      collapse.addEventListener('click', function() {
-          radio.checked = radio.checked == true ? false : true;
-      });
+    const title = collapse.querySelector('.collapse-title');
+    const radio = collapse.querySelector('input[type="radio"]');
+    collapse.addEventListener('click', function () {
+      radio.checked = radio.checked == true ? false : true;
+    });
   });
 });
 
