@@ -1,57 +1,59 @@
 <x-client-layout>
-    <h2 class="text-center text-xl sm:text-3xl uppercase font-bold tracking-wider">{{ __('Produk ') . '"' . $category . '"' }}</h2>
+    <h2 class="text-center text-xl sm:text-3xl uppercase font-bold tracking-wider">
+        {{ __('Produk ') . '"' . $category . '"' }}</h2>
     <p class="text-center mb-8 mt-2">
-        {{ __('Halaman ini hanya menampilkan produk dengan kategori ')}} <strong>"{{ $category }}"</strong></p>
+        {{ __('Halaman ini hanya menampilkan produk dengan kategori ') }} <strong>"{{ $category }}"</strong></p>
     <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 justify-around" id="products_by_category">
         @foreach ($products as $product)
-        <x-client.product-item :product="$product" />
+            <x-client.product-item :product="$product" />
         @endforeach
     </div>
 
     <div id="loading" style="display: none; text-center w-full">Sedang memuat data...</div>
     <div class="w-full text-center my-2">
-        <button id="load-more" data-page="{{ $products->currentPage() }}"
-            data-last-page="{{ $products->lastPage() }}">Load
-            more</button>
+        <button id="load-more" class="btn btn-primary" data-page="{{ $products->currentPage() }}"
+            data-last-page="{{ $products->lastPage() }}">
+            Muat lebih banyak
+        </button>
     </div>
 
     <x-client.features />
     @push('scripts')
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
-        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 
-    <script>
-        $(document).ready(function () {
-            
-            $('#load-more').click(function () {
-                var page = $(this).data('page');
-                var lastPage = $(this).data('last-page');
+        <script>
+            $(document).ready(function() {
 
-                if (page < lastPage) {
-                    $(this).data('page', page + 1);
-                    $('#loading').show();
+                $('#load-more').click(function() {
+                    var page = $(this).data('page');
+                    var lastPage = $(this).data('last-page');
 
-                    $.ajax({
-                        url: `${window.location.href}?page=${page + 1}`,
-                        method: 'GET',
-                        success: function (data) {
-                            $('#products_by_category').append(data.html);
-                            $('#loading').hide();
+                    if (page < lastPage) {
+                        $(this).data('page', page + 1);
+                        $('#loading').show();
 
-                            if (page + 1 >= lastPage) {
-                                $('#load-more').hide();
+                        $.ajax({
+                            url: `${window.location.href}?page=${page + 1}`,
+                            method: 'GET',
+                            success: function(data) {
+                                $('#products_by_category').append(data.html);
+                                $('#loading').hide();
+
+                                if (page + 1 >= lastPage) {
+                                    $('#load-more').hide();
+                                }
+                            },
+                            error: function() {
+                                $('#loading').hide();
+                                alert('An error occurred while loading more auction.');
                             }
-                        },
-                        error: function () {
-                            $('#loading').hide();
-                            alert('An error occurred while loading more auction.');
-                        }
-                    });
-                } else {
-                    $('#load-more').hide();
-                }
+                        });
+                    } else {
+                        $('#load-more').hide();
+                    }
+                });
             });
-        });
-    </script>
+        </script>
     @endpush
 </x-client-layout>

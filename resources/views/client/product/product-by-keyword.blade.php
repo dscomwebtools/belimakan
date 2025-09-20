@@ -1,7 +1,7 @@
 <x-client-layout>
     <h2 class="text-center text-3xl font-bold tracking-wider">{{ __('PRODUK ') . '"' . $keyword . '"' }}</h2>
     <p class="text-center mb-8 mt-2">
-        {{ __('Hasil pencarian ')}} <strong>"{{ $keyword }}"</strong></p>
+        {{ __('Hasil pencarian ') }} <strong>"{{ $keyword }}"</strong></p>
     <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 justify-around" id="products">
         @foreach ($products as $product)
             <x-client.product-item :product="$product" />
@@ -9,48 +9,53 @@
     </div>
 
     <div id="loading" style="display: none; text-center w-full">Sedang memuat data...</div>
-        <div class="w-full text-center my-2">
-            @if ($products->hasMorePages())
-                <button id="load-more" data-page="{{ $products->currentPage() }}" data-last-page="{{ $products->lastPage() }}">Load more</button>
-            @endif
-        </div>
+    <div class="w-full text-center my-2">
+        @if ($products->hasMorePages())
+            <div class="w-full text-center my-2">
+                <button id="load-more" class="btn btn-primary" data-page="{{ $products->currentPage() }}"
+                    data-last-page="{{ $products->lastPage() }}">
+                    Muat lebih banyak
+                </button>
+            </div>
+        @endif
+    </div>
     <x-client.features />
 
     @push('scripts')
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
-    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 
-    <script>
-        $(document).ready(function () {
-            $('#load-more').click(function () {
-                var page = $(this).data('page');
-                var lastPage = $(this).data('last-page');
+        <script>
+            $(document).ready(function() {
+                $('#load-more').click(function() {
+                    var page = $(this).data('page');
+                    var lastPage = $(this).data('last-page');
 
-                if (page < lastPage) {
-                    $(this).data('page', page + 1);
-                    $('#loading').show();
+                    if (page < lastPage) {
+                        $(this).data('page', page + 1);
+                        $('#loading').show();
 
-                    $.ajax({
-                        url: `{{ url('products') }}?page=${page + 1}&q={{ $keyword }}`,
-                        method: 'GET',
-                        success: function (data) {
-                            $('#products').append(data.html);
-                            $('#loading').hide();
+                        $.ajax({
+                            url: `{{ url('products') }}?page=${page + 1}&q={{ $keyword }}`,
+                            method: 'GET',
+                            success: function(data) {
+                                $('#products').append(data.html);
+                                $('#loading').hide();
 
-                            if (page + 1 >= lastPage) {
-                                $('#load-more').hide();
+                                if (page + 1 >= lastPage) {
+                                    $('#load-more').hide();
+                                }
+                            },
+                            error: function() {
+                                $('#loading').hide();
+                                alert('An error occurred while loading more products.');
                             }
-                        },
-                        error: function () {
-                            $('#loading').hide();
-                            alert('An error occurred while loading more products.');
-                        }
-                    });
-                } else {
-                    $('#load-more').hide();
-                }
+                        });
+                    } else {
+                        $('#load-more').hide();
+                    }
+                });
             });
-        });
-    </script>
+        </script>
     @endpush
 </x-client-layout>
