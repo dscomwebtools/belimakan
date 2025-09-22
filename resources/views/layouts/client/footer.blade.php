@@ -29,9 +29,8 @@
     <nav class="md:place-self-center md:justify-self-end">
         <div class="grid grid-flow-col gap-1">
             @foreach ($sosmed as $item)
-                <a href="{{ $item->url }}" class="btn btn-circle bg-base-100 btn-sm">
-                    <img src="{{ Storage::url($item->logo) }}" alt="{{ $item->name . 's logo' }}" width="20"
-                        height="20">
+                <a href="{{ $item->url }}" target="_blank" class="bg-white rounded-full p-2 flex items-center justify-center">
+                    <img src="{{ Storage::url($item->logo) }}" alt="{{ $item->name . 's logo' }}" class="w-[30px] h-[30px] object-contain">
                 </a>
             @endforeach
         </div>

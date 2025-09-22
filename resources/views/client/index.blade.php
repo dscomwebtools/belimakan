@@ -304,7 +304,7 @@
     @endif
 
     {{-- WA ICON --}}
-    <div x-data="{ open: false }" x-cloak class="fixed bottom-20 lg:bottom-10 right-5 z-[9999]">
+    <div x-data="{ open: false }" x-cloak class="fixed bottom-[100px] sm:bottom-[150px] lg:bottom-20 right-5 z-[9999]">
         <!-- Main button -->
         <button @click="open = !open"
             class="bg-green-500 rounded-full p-3 h-[50px] w-[50px] flex items-center justify-center shadow-lg text-white hover:scale-110 transition">
