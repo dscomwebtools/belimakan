@@ -267,16 +267,16 @@
                     {{-- Voucher Coupon --}}
                     <div class="bg-base-200 p-6 rounded mb-4 flex flex-col gap-4">
                         <label for="voucher" class="font-semibold">Voucher / Kupon</label>
-                        <div class="flex gap-2">
+                        <div class="flex flex-col sm:flex-row gap-2">
                             <input type="text" id="voucher" x-model="$store.checkout.voucherCode"
                                 @keyup.enter.prevent="$store.checkout.applyVoucher()"
                                 placeholder="Masukkan kode voucher" class="my-input flex-1" />
 
-                            <button type="button" class="btn btn-primary" @click="$store.checkout.applyVoucher()">
+                            <button type="button" class="btn btn-primary w-full sm:w-auto"
+                                @click="$store.checkout.applyVoucher()">
                                 Terapkan
                             </button>
                         </div>
-
                         <template x-if="$store.checkout.voucherError">
                             <p class="text-red-500 text-sm"
                                 x-text="
@@ -295,8 +295,7 @@
                                 Voucher <span class="font-bold" x-text="$store.checkout.voucherCode"></span> berhasil
                                 digunakan!
                                 <div>
-                                    <span
-                                        x-text="$store.checkout.voucherDescription">
+                                    <span x-text="$store.checkout.voucherDescription">
                                     </span>
                                     <span
                                         x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format($store.checkout.voucherDiscount)">
