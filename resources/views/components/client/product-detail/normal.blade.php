@@ -44,16 +44,16 @@
         </div>
     @endif
 
-    {{-- @if ($product->youtube)
+    @if ($product->youtube)
         <div class="divider">Video</div>
         <div class="mt-8">
             <iframe src="https://www.youtube.com/embed/{{ $product->youtube }}" title="YouTube video player"
-                class="w-full h-[300px] rounded" frameborder="0"
+                class="w-full h-[400px] rounded" frameborder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
             </iframe>
         </div>
-    @endif --}}
+    @endif
 </div>
 
 <div

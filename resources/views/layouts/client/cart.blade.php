@@ -55,7 +55,7 @@
                                     <template x-if="item.product_variant">
                                         <template x-for="detail in item.product_variant.product_detail">
                                             <div class="text-xs"
-                                                x-text="`${detail.variant_value.variant.variant} ${detail.variant_value.value}`">
+                                                x-text="`${detail.variant_value.value}`">
                                             </div>
                                         </template>
                                     </template>

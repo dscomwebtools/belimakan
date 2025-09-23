@@ -28,6 +28,13 @@
          ])>
              Categories
          </a>
+         <a href="{{ route('coupon.index') }}" @class([
+             'block px-4 py-3 mt-0 text-sm',
+             'bg-primary text-primary-content' =>
+                 Request::RouteIs('coupon.index') || Request::is('admin/coupon/*'),
+         ])>
+             Coupons
+         </a>
          <a href="{{ route('notice.index') }}" @class([
              'block px-4 py-3 mt-0 text-sm',
              'bg-primary text-primary-content' => Request::RouteIs('notice.index'),
