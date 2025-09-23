@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Address;
 use App\Models\Cart;
+use App\Models\Coupon;
 use App\Models\DeliveryState;
 use App\Models\Order;
 use App\Models\OrderAddress;
@@ -84,6 +85,14 @@ class OrderController extends Controller
         $new_order->shipping_method_id = $shipping_method_id;
         $new_order->shipping_method_manual = $shipping_method_manual;
         $new_order->bank_account_id = $request->bankAccountId;
+        $new_order->coupon_id = $request->voucherId ?? null;
+        $new_order->coupon_code = $request->voucherCode ?? null;
+        $new_order->coupon_discount = $request->voucherDiscount ?? 0;
+
+        if ($new_order->coupon_id) {
+            Coupon::where('id', $new_order->coupon_id)->increment('used_count');
+        }
+
 
         if ($request->paymentMethod == 'Cash') {
             $new_order->delivery_state_id = 2; //Jika Cash set status langsung 'Menunggu Konfirmasi', jika tidak maka defaultnya 'menunggu pembayaran'

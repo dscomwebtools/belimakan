@@ -31,7 +31,7 @@
                                     <template x-if="item.product_variant">
                                         <template x-for="detail in item.product_variant.product_detail">
                                             <div class="text-sm md:text-base mt-2"
-                                                x-text="`${detail.variant_value.variant.variant} ${detail.variant_value.value}`">
+                                                x-text="`${detail.variant_value.value}`">
                                             </div>
                                         </template>
                                     </template>
@@ -263,6 +263,48 @@
                         </div>
                     </div>
                     {{-- END METODE PEMBAYARAN --}}
+
+                    {{-- Voucher Coupon --}}
+                    <div class="bg-base-200 p-6 rounded mb-4 flex flex-col gap-4">
+                        <label for="voucher" class="font-semibold">Voucher / Kupon</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="voucher" x-model="$store.checkout.voucherCode"
+                                @keyup.enter.prevent="$store.checkout.applyVoucher()"
+                                placeholder="Masukkan kode voucher" class="my-input flex-1" />
+
+                            <button type="button" class="btn btn-primary" @click="$store.checkout.applyVoucher()">
+                                Terapkan
+                            </button>
+                        </div>
+
+                        <template x-if="$store.checkout.voucherError">
+                            <p class="text-red-500 text-sm"
+                                x-text="
+                                    $store.checkout.voucherError
+                                        ? $store.checkout.voucherError.replace(
+                                                /Rp(\d+)/g, 
+                                                (_, n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n)
+                                            )
+                                        : ''
+                                ">
+                            </p>
+                        </template>
+
+                        <template x-if="$store.checkout.voucherSuccess">
+                            <div class="text-green-600 text-sm">
+                                Voucher <span class="font-bold" x-text="$store.checkout.voucherCode"></span> berhasil
+                                digunakan!
+                                <div>
+                                    <span
+                                        x-text="$store.checkout.voucherDescription">
+                                    </span>
+                                    <span
+                                        x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format($store.checkout.voucherDiscount)">
+                                    </span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
                 </div>
 
             </div>
@@ -299,6 +341,16 @@
                         </div>
                     </div>
                     <div class="flex justify-between text-sm md:text-base">
+                        <div class="w-32">Voucher</div>
+                        <div class="flex gap-2">
+                            <div
+                                x-text="$store.checkout.voucherDiscount
+                                ? `- ${new Intl.NumberFormat('id-ID', {style: 'currency', currency: 'IDR', minimumFractionDigits: 0}).format($store.checkout.voucherDiscount)}`
+                                : '-'">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-sm md:text-base">
                         <div class="w-32">Ongkir</div>
                         <div
                             x-text="JSON.stringify($store.checkout.courierSelected) !== '{}' 
@@ -314,7 +366,7 @@
                     <div class="flex justify-between text-sm md:text-base">
                         <div class="w-32">Total bayar</div>
                         <div
-                            x-text="new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format($store.checkout.subtotal + ($store.checkout.courierSelected.price || 0))">
+                            x-text="new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format($store.checkout.subtotal + ($store.checkout.courierSelected.price || 0) - ($store.checkout.voucherDiscount || 0))">
                         </div>
                     </div>
 

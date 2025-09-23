@@ -44,7 +44,7 @@
                                 x-model="selectedVariant">
                                 <template x-for="variant in variants" :key="variant.id">
                                     <option :value="variant.id"
-                                        x-text="variant.product_detail.map(d => d.variant_value.variant.variant + ' - ' + d.variant_value.value).join(' & ')">
+                                        x-text="variant.product_detail.map(d => d.variant_value.value).join(', ')">
                                     </option>
                                 </template>
                             </select>

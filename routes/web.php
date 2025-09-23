@@ -11,6 +11,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\CouponController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\FeatureController;
@@ -45,6 +46,7 @@ Route::middleware(['auth', 'check-banned', 'verified', 'can:is-member'])->group(
     Route::get('/order/{order}', [OrderController::class, 'order_by_id']);
     Route::patch('/order/{order}', [OrderController::class, 'upload_bukti_bayar']);
     Route::get('/profile', [ProfileController::class, 'index'])->name('client.profile')->middleware('auth', 'can:is-member');
+    Route::post('/coupon', [CouponController::class, 'check_coupon']);
 });
 
 // ADMIN ROUTES
@@ -54,6 +56,7 @@ Route::prefix('admin')
         Route::get('/', DashboardController::class)->name('admin.dashboard');
 
         Route::resource('notice', NoticeController::class)->only('index', 'update');
+        Route::resource('coupon', CouponController::class);
         Route::resource('faq', FaqController::class)->except('show');
         Route::resource('brand', BrandController::class);
         Route::resource('feature', FeatureController::class);

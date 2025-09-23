@@ -33,7 +33,7 @@
                                     <template x-if="item.product_variant">
                                         <template x-for="detail in item.product_variant.product_detail">
                                             <div class="text-sm md:text-base mt-2"
-                                                x-text="`${detail.variant_value.variant.variant} ${detail.variant_value.value}`">
+                                                x-text="`${detail.variant_value.value}`">
                                             </div>
                                         </template>
                                     </template>
@@ -118,13 +118,8 @@
                     </div>
                 </div>
                 <div class="card-actions my-2">
-                    <a href="{{ route('client.checkout') }}"
-                        @click.prevent="
-                            if ($store.cart.selectedIds.length > 0) {
-                                localStorage.setItem('checkoutSelected', JSON.stringify($store.cart.selectedIds));
-                                window.location.href='{{ route('client.checkout') }}';
-                            }
-                        "
+                    <a
+                        @click.prevent="$store.cart.proceedToCheckout"
                         class="btn btn-primary btn-block"
                         :class="{ 'btn-disabled': $store.cart.selectedIds.length === 0 }"
                         :disabled="$store.cart.selectedIds.length === 0">

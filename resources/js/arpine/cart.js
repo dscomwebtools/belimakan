@@ -3,7 +3,6 @@ import Alpine from 'alpinejs';
 export default {
     items: [],
     selectedIds: [],
-    selectedItems: [],
     showNotifSuccess: false,
     showNotifFailed: false,
     message: '',
@@ -16,43 +15,66 @@ export default {
     },
 
     get totalItem() {
-        return this.items.reduce((sum, item) => sum + item.quantity, 0)
+        return this.items.reduce((sum, item) => sum + item.quantity, 0);
     },
 
     get subtotal() {
         return this.items.reduce((sum, item) => {
-            let price = item.product_variant ? item.product_variant.price : item.product.product_variant[0].price
+            let price = item.product_variant ? item.product_variant.price : item.product.product_variant[0].price;
 
             if (item.product.promo) {
-                price = price - (price * item.product.promo.discount / 100)
+                price = price - (price * item.product.promo.discount / 100);
             }
 
-            return sum + (item.quantity * price)
-        }, 0)
+            return sum + (item.quantity * price);
+        }, 0);
     },
 
     get totalItemCart() {
-        return this.selectedItems.reduce((sum, item) => sum + item.quantity, 0)
+        return this.selectedItems.reduce((sum, item) => sum + item.quantity, 0);
     },
 
     get subtotalCart() {
         return this.selectedItems.reduce((sum, item) => {
-            let price = item.product_variant ? item.product_variant.price : item.product.product_variant[0].price
+            let price = item.product_variant ? item.product_variant.price : item.product.product_variant[0].price;
 
             if (item.product.promo) {
-                price = price - (price * item.product.promo.discount / 100)
+                price = price - (price * item.product.promo.discount / 100);
             }
 
-            return sum + (item.quantity * price)
-        }, 0)
+            return sum + (item.quantity * price);
+        }, 0);
     },
 
     init() {
         if (localStorage.getItem('orderSuccess')) {
-            this.showNotification("Terimakasih, data order berhasil kami terima !")
+            this.showNotification("Terimakasih, data order berhasil kami terima !");
             localStorage.removeItem('orderSuccess');
         }
 
+        // Restore checkout selection
+        let checkoutId = sessionStorage.getItem('checkoutId');
+        if (checkoutId) {
+            let stored = localStorage.getItem(`checkoutSelected_${checkoutId}`);
+            try {
+                this.selectedIds = stored ? JSON.parse(stored) : [];
+                if (!Array.isArray(this.selectedIds)) {
+                    this.selectedIds = [];
+                }
+            } catch {
+                this.selectedIds = [];
+            }
+        }
+    },
+
+    // --- utility for saving ---
+    saveSelection() {
+        let checkoutId = sessionStorage.getItem('checkoutId');
+        if (!checkoutId) {
+            checkoutId = Date.now();
+            sessionStorage.setItem('checkoutId', checkoutId);
+        }
+        localStorage.setItem(`checkoutSelected_${checkoutId}`, JSON.stringify(this.selectedIds));
     },
 
     isSelected(item) {
@@ -60,51 +82,31 @@ export default {
     },
 
     toggleSelection(item) {
-        const id = item.id; // use cart row id now
-
+        const id = item.id;
         if (this.selectedIds.includes(id)) {
             this.selectedIds = this.selectedIds.filter(pid => pid !== id);
         } else {
-            this.selectedIds = [...this.selectedIds, id]; // new array (keeps reactivity)
+            this.selectedIds = [...this.selectedIds, id];
         }
-
-        localStorage.setItem('checkoutSelected', JSON.stringify(this.selectedIds));
+        this.saveSelection();
     },
 
     toggleAll(items) {
         if (this.selectedIds.length === items.length) {
-            // ✅ unselect all
             this.selectedIds = [];
         } else {
-            // ✅ select all
             this.selectedIds = items.map(i => i.id);
         }
-
-        // save to localStorage
-        if (this.selectedIds.length > 0) {
-            localStorage.setItem('checkoutSelected', JSON.stringify(this.selectedIds));
-        } else {
-            localStorage.removeItem('checkoutSelected');
-        }
+        this.saveSelection();
     },
 
     async getDataCart() {
         this.items = await (await fetch('/data-cart')).json();
-
-        const saved = localStorage.getItem('checkoutSelected');
-        if (saved) {
-            this.selectedIds = JSON.parse(saved);
-        }
     },
 
     async fetchItems(force = false) {
-        if (this.items.length > 0 && !force) {
-            return this.items;
-        }
-
-        if (this._fetchPromise && !force) {
-            return this._fetchPromise;
-        }
+        if (this.items.length > 0 && !force) return this.items;
+        if (this._fetchPromise && !force) return this._fetchPromise;
 
         this._fetchPromise = fetch("/data-cart")
             .then(res => res.json())
@@ -129,25 +131,19 @@ export default {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
-            body: JSON.stringify({
-                product_id: productId,
-                product_variant_id: variantId,
-                quantity: qty
-            })
+            body: JSON.stringify({ product_id: productId, product_variant_id: variantId, quantity: qty })
         });
 
         const result = await response.json();
 
         if (result.status === 1) {
-            // Successfully added to cart, now refresh the cart data
             await this.getDataCart();
             this.showNotification('Berhasil ditambah ke keranjang Anda !');
         } else {
-            // Handle the error case
-            console.error(result.message);
             this.showNotificationFailed(result.message);
         }
     },
+
     async updateQty(item, qty) {
         if (qty < 1) {
             this.showNotificationFailed('Kuantitas tidak boleh kurang dari 1');
@@ -161,80 +157,55 @@ export default {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
-            body: JSON.stringify({
-                qty
-            })
+            body: JSON.stringify({ qty })
         });
 
         const result = await response.json();
 
         if (result.status === 1) {
-            // Successfully added to cart, now refresh the cart data
             await this.getDataCart();
-            this.showNotification('Berhasil ditambah ke keranjang Anda !');
+            this.showNotification('Berhasil diupdate !');
         } else {
-            // Handle the error case
             await this.getDataCart();
             this.showNotificationFailed(result.message);
-            console.error('Gagal udpate data');
         }
     },
+
     async removeItem(item) {
         const response = await fetch(`/remove-item/${item.id}`, {
             method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
+            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') }
         });
 
         const result = await response.json();
 
         if (result.status === 1) {
-            let saved = JSON.parse(localStorage.getItem('checkoutSelected') || "[]");
-            saved = saved.filter(id => id !== item.id);
-
-            if (saved.length > 0) {
-                localStorage.setItem('checkoutSelected', JSON.stringify(saved));
-            } else {
-                this.selectedIds = [];
-                localStorage.removeItem('checkoutSelected');
-            }
+            this.selectedIds = this.selectedIds.filter(id => id !== item.id);
+            this.saveSelection();
             await this.getDataCart();
-            this.showNotification('Berhasil ditambah ke keranjang Anda !');
+            this.showNotification('Berhasil dihapus !');
         } else {
-            // Handle the error case
             this.showNotificationFailed('Gagal dihapus !');
-            console.error('Gagal dihapus');
         }
     },
+
     showNotification(message) {
         this.message = message;
         this.showNotifSuccess = true;
-
-        // Clear existing timeout if any
-        if (this.notifTimeout) {
-            clearTimeout(this.notifTimeout);
-        }
-
-        // Set a new timeout
+        if (this.notifTimeout) clearTimeout(this.notifTimeout);
         this.notifTimeout = setTimeout(() => {
             this.showNotifSuccess = false;
-            this.notifTimeout = null; // Clear the timeout ID
+            this.notifTimeout = null;
         }, 5000);
     },
+
     showNotificationFailed(message) {
         this.message = message;
         this.showNotifFailed = true;
-
-        // Clear existing timeout if any
-        if (this.notifTimeout) {
-            clearTimeout(this.notifTimeout);
-        }
-
-        // Set a new timeout
+        if (this.notifTimeout) clearTimeout(this.notifTimeout);
         this.notifTimeout = setTimeout(() => {
             this.showNotifFailed = false;
-            this.notifTimeout = null; // Clear the timeout ID
+            this.notifTimeout = null;
         }, 5000);
     },
 
@@ -249,12 +220,7 @@ export default {
 
     copyToClipboard(text) {
         navigator.clipboard.writeText(text)
-            .then(() => {
-                this.showNotification('Nomor rekening berhasil disalin !');
-            })
-            .catch(err => {
-                this.showNotificationFailed('Nomor rekening gagal disalin !');
-                console.error(err);
-            })
+            .then(() => this.showNotification('Nomor rekening berhasil disalin !'))
+            .catch(() => this.showNotificationFailed('Nomor rekening gagal disalin !'));
     },
-}
+};

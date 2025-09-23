@@ -52,10 +52,8 @@
                 data-stock="{{ $variant->stock }}">
                 @foreach ($variant->product_detail as $i => $variant_detail)
                     @if ($i !== 0)
-                        {{ '& ' . $variant_detail->variant_value->variant->variant }} -
                         {{ $variant_detail->variant_value->value }}
                     @else
-                        {{ $variant_detail->variant_value->variant->variant }} -
                         {{ $variant_detail->variant_value->value }}
                     @endif
                 @endforeach

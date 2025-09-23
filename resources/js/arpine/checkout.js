@@ -5,19 +5,17 @@ export default {
     selectedItems: [],
     showNotifSuccess: false,
     showNotifFailed: false,
+    voucherCode: '',
+    voucherDescription: '',
+    voucherError: '',
+    voucherSuccess: false,
+    voucherDiscount: 0,
     message: '',
     notifTimeout: null,
     isLoading: false,
 
     async getDataCart() {
-        // fetch cart items into Alpine store
         await Alpine.store("cart").fetchItems();
-
-        // restore selected ids from localStorage
-        const saved = localStorage.getItem('checkoutSelected');
-        if (saved) {
-            this.selectedIds = JSON.parse(saved);
-        }
     },
 
     get selectedItems() {
@@ -55,13 +53,17 @@ export default {
         }, 0);
     },
 
+    getCheckoutSelected() {
+        const data = localStorage.getItem(`checkoutSelected_${this.checkoutId}`);
+        return data ? JSON.parse(data) : [];
+    },
+
     init() {
         this.getDataCart();
 
-        // ✅ remove checkoutSelected if not on /checkout
-        if (!window.location.pathname.startsWith('/checkout')) {
-            localStorage.removeItem('checkoutSelected');
-        }
+        let checkoutId = sessionStorage.getItem('checkoutId');
+        this.checkoutId = checkoutId;
+        this.selectedIds = this.getCheckoutSelected();
     },
 
     // ==== CHECKOUT PAGE STUFF ====
@@ -141,6 +143,45 @@ export default {
         this.paymentMethod = method;
     },
 
+    async applyVoucher() {
+        this.voucherError = '';
+        this.voucherSuccess = false;
+        this.voucherDiscount = 0;
+
+        if (!this.voucherCode) {
+            this.voucherError = 'Silakan masukkan kode voucher';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/coupon`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    code: this.voucherCode,
+                    subtotal: this.subtotal,
+                    selectedIds: this.selectedIds
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.valid) {
+                this.voucherSuccess = true;
+                this.voucherDiscount = data.discount_amount ?? 0;
+                this.voucherId = data.id;
+                this.voucherDescription = data.description;
+            } else {
+                this.voucherError = data.message ?? 'Kode voucher tidak valid';
+            }
+        } catch (e) {
+            this.voucherError = 'Terjadi kesalahan, coba lagi';
+        }
+    },
+
     async submitOrder() {
         this.isLoading = true;
 
@@ -152,11 +193,14 @@ export default {
             },
             body: JSON.stringify({
                 paymentMethod: this.paymentMethod,
-                total: this.subtotal + (this.courierSelected.price || 0),
+                total: this.subtotal + (this.courierSelected.price || 0) - (this.voucherDiscount || 0),
                 orderAddressId: this.addressSelected.id,
                 shippingMethod: this.courierSelected,
                 bankAccountId: this.paymentMethod === 'Transfer' ? this.bankSelected.id : null,
-                selectedCartIds: this.selectedIds
+                selectedCartIds: this.selectedIds,
+                voucherId: this.voucherId || null,
+                voucherCode: this.voucherCode || null,
+                voucherDiscount: this.voucherDiscount || 0,
             })
         });
 
