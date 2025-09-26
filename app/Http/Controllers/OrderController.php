@@ -9,6 +9,7 @@ use App\Models\DeliveryState;
 use App\Models\Order;
 use App\Models\OrderAddress;
 use App\Models\OrderDetail;
+use App\Models\OrderReceipt;
 use App\Models\ProductVariant;
 use App\Models\ShippingMethod;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -129,7 +130,7 @@ class OrderController extends Controller
 
     function order_by_id(Order $order)
     {
-        $order->load(['delivery_state', 'order_address', 'shipping_method', 'order_detail.product', 'order_detail.product_variant.product_detail.variant_value.variant', 'bank_account']);
+        $order->load(['delivery_state', 'order_address', 'shipping_method', 'order_detail.product', 'order_detail.product_variant.product_detail.variant_value.variant', 'bank_account', 'receipt']);
 
         return response()->json($order);
     }
@@ -233,7 +234,7 @@ class OrderController extends Controller
 
     function show(Order $order)
     {
-        $data = $order->load(['delivery_state', 'order_address', 'shipping_method', 'order_detail.product', 'order_detail.product_variant.product_detail.variant_value.variant']);
+        $data = $order->load(['delivery_state', 'order_address', 'shipping_method', 'order_detail.product', 'order_detail.product_variant.product_detail.variant_value.variant', 'receipt']);
 
         // dd($data);
         return view('admin.order.show', compact('data'));
@@ -273,5 +274,39 @@ class OrderController extends Controller
         }
 
         return redirect()->back()->with('success', 'Berhasil membatalkan order dan mengembalikan stok produk');
+    }
+
+    function save_receipt(Request $request, Order $order)
+    {
+        $validated = $request->validate([
+            'receipt_number' => 'required|string|unique:order_receipts,receipt_number,' . $order->order_receipt_id,
+            'receipt_img'    => 'nullable|image|max:2048',
+        ]);
+
+        $oldPath = $order->receipt?->receipt_img;
+
+        $attributes = [
+            'receipt_number' => $validated['receipt_number'],
+        ];
+
+        if ($request->hasFile('receipt_img')) {
+            if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+                Storage::disk('public')->delete($oldPath);
+            }
+
+            $attributes['receipt_img'] = $request->file('receipt_img')->store('receipts', 'public');
+        }
+
+        $receipt = OrderReceipt::updateOrCreate(
+            ['id' => $order->order_receipt_id],
+            $attributes
+        );
+
+        if (!$order->order_receipt_id) {
+            $order->order_receipt_id = $receipt->id;
+            $order->save();
+        }
+
+        return back()->with('success', 'Resi berhasil disimpan!');
     }
 }
