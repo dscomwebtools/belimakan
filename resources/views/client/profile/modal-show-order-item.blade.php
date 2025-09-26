@@ -76,6 +76,33 @@
             </div>
         </div>
 
+        <!-- Delivery Receipt -->
+        <div x-if="$store.cart.orderDetail.receipt">
+            <div class="mb-4">
+                <h2 class="font-bold text-lg">Resi Pengiriman</h2>
+                <div class="flex flex-col gap-2">
+                    <div>
+                        <span class="font-semibold">Nomor Resi:</span>
+                        <span x-text="$store.cart.orderDetail.receipt?.receipt_number || '-'"></span>
+                    </div>
+                    <div>
+                        <span class="font-semibold">Bukti Resi:</span>
+                        <template x-if="$store.cart.orderDetail.receipt?.receipt_img">
+                            <div class="tooltip" data-tip="Download Resi">
+                                <a :href="$store.cart.orderDetail.receipt.receipt_img_url"
+                                    :download="'resi-' + $store.cart.orderDetail.id + '.jpg'" class="inline-block">
+                                    <i class="fa fa-download text-blue-600"></i>
+                                </a>
+                            </div>
+                        </template>
+                        <template x-if="!$store.cart.orderDetail.receipt?.receipt_img">
+                            <span class="text-gray-500">Resi belum dibuat</span>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Data Barang -->
         <div class="mb-4">
             <h2 class="font-bold text-lg text-center">Data Barang</h2>

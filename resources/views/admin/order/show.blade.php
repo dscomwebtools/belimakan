@@ -147,6 +147,90 @@
                                     class="dark:text-base-content">{{ $data->created_at->isoFormat('LL') }}</span>
                             </div>
 
+                            <dialog id="receiptModal" name="modal-upload-receipt" class="modal">
+                                <div class="modal-box w-11/12 max-w-2xl">
+                                    <h1 class="text-xl font-bold text-center mb-4">
+                                        @if ($data->delivery_state_id >= 5)
+                                            Lihat Resi Pengiriman
+                                        @else
+                                            {{ $data->receipt ? 'Update Resi Pengiriman' : 'Upload Resi Pengiriman' }}
+                                        @endif
+                                    </h1>
+
+                                    @if ($data->delivery_state_id >= 5)
+                                        {{-- SHOW-ONLY MODE --}}
+                                        <div class="space-y-4">
+                                            <div class="form-control">
+                                                <label class="label font-semibold">Nomor Resi</label>
+                                                <input type="text"
+                                                    value="{{ $data->receipt->receipt_number ?? '-' }}"
+                                                    class="input input-bordered w-full bg-gray-100"
+                                                    readonly>
+                                            </div>
+
+                                            <div class="form-control">
+                                                <label class="label font-semibold">Gambar Resi</label>
+                                                @if ($data->receipt?->receipt_img)
+                                                    <a href="{{ Storage::url($data->receipt->receipt_img) }}"
+                                                        target="_blank" class="w-fit">
+                                                        <img src="{{ Storage::url($data->receipt->receipt_img) }}"
+                                                            alt="resi pengiriman"
+                                                            class="w-40 h-[200px] object-contain rounded shadow">
+                                                    </a>
+                                                @else
+                                                    <p class="text-gray-500">Belum ada gambar resi</p>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @else
+                                        {{-- CREATE/UPDATE MODE --}}
+                                        <form action="{{ route('admin-order.save-receipt', $data->id) }}"
+                                            method="POST" enctype="multipart/form-data" class="space-y-4">
+                                            @csrf
+
+                                            <div class="form-control">
+                                                <label for="receipt_number" class="label font-semibold">Nomor
+                                                    Resi</label>
+                                                <input type="text" name="receipt_number" id="receipt_number"
+                                                    value="{{ $data->receipt->receipt_number ?? '' }}"
+                                                    class="input input-bordered w-full" required>
+                                            </div>
+
+                                            <div class="form-control">
+                                                <label for="receipt_img" class="label font-semibold">Upload Foto
+                                                    Resi</label>
+                                                <input type="file" name="receipt_img" id="receipt_img"
+                                                    class="file-input file-input-bordered w-full">
+
+                                                @if ($data->receipt?->receipt_img)
+                                                    <div class="mt-3">
+                                                        <p class="text-xs text-warning">Pilih file baru jika ingin
+                                                            mengganti resi saat ini</p>
+                                                        <div class="mt-2 mb-1">Resi Saat Ini:</div>
+                                                        <a href="{{ Storage::url($data->receipt->receipt_img) }}"
+                                                            target="_blank" class="w-fit">
+                                                            <img src="{{ Storage::url($data->receipt->receipt_img) }}"
+                                                                alt="resi pengiriman"
+                                                                class="w-40 h-[200px] object-contain rounded shadow">
+                                                        </a>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <div class="flex justify-end gap-2 pt-2">
+                                                <x-primary-button type="submit">
+                                                    Simpan <i class="fa fa-paper-plane ml-1"></i>
+                                                </x-primary-button>
+                                            </div>
+                                        </form>
+                                    @endif
+                                </div>
+
+                                <form method="dialog" class="modal-backdrop">
+                                    <button>Batal</button>
+                                </form>
+                            </dialog>
+
                             <div class="mb-4">
                                 <h2 class="font-bold text-lg text-center dark:text-primary-content">Data Barang</h2>
 
@@ -171,23 +255,15 @@
                                                             <span>
                                                                 <span>{{ $order_detail->product->name }}</span>
                                                                 <br />
-                                                                <span>
-                                                                    (
-                                                                    @foreach ($order_detail->product_variant->product_detail as $index => $detail)
-                                                                        <span>
-                                                                            <span>
-                                                                                {{ $detail->variant_value->variant->variant }}
-                                                                            </span> -
-                                                                            <span>
-                                                                                {{ $detail->variant_value->value }}
-                                                                            </span>
-                                                                            <span>
-                                                                                {{ $index < count($order_detail->product_variant->product_detail) - 1 ? ', ' : '' }}
-                                                                            </span>
-                                                                        </span>
-                                                                    @endforeach
-                                                                    )
-                                                                </span>
+                                                                @if ($order_detail->product_variant && $order_detail->product_variant->product_detail->isNotEmpty())
+                                                                    <span>(
+                                                                        @foreach ($order_detail->product_variant->product_detail as $index => $detail)
+                                                                            {{ $detail->variant_value->value }}
+                                                                            {{ $index < $order_detail->product_variant->product_detail->count() - 1 ? ', ' : '' }}
+                                                                        @endforeach
+                                                                        )
+                                                                    </span>
+                                                                @endif
                                                             </span>
                                                         @else
                                                             <span>{{ $order_detail->product->name }}</span>
@@ -230,24 +306,90 @@
                             </div>
                             {{-- END DATA BARANG --}}
 
+                            {{-- RINGKASAN PEMBAYARAN --}}
+                            <div class="mb-4">
+                                <h2 class="font-bold text-lg text-center dark:text-primary-content">Ringkasan
+                                    Pembayaran</h2>
+
+                                <!-- Subtotal Barang -->
+                                <div class="flex justify-between leading-8">
+                                    <span>Subtotal Barang</span>
+                                    <span>
+                                        <x-client.format-rp :value="$data->order_detail->sum(function ($d) {
+                                            $priceAfterDiscount = $d->price - ($d->price * $d->discount) / 100;
+                                            return $priceAfterDiscount * $d->quantity;
+                                        })" />
+                                    </span>
+                                </div>
+
+                                <!-- Ongkos Kirim -->
+                                <div class="flex justify-between leading-8">
+                                    <span>Ongkos Kirim</span>
+                                    <span>
+                                        <x-client.format-rp :value="$data->shipping_method?->price ?? 0" />
+                                    </span>
+                                </div>
+
+                                <!-- Voucher -->
+                                @if ($data->coupon_code)
+                                    <div class="flex justify-between leading-8 text-red-600">
+                                        <span>Voucher ({{ $data->coupon_code }})</span>
+                                        <span>
+                                            -<x-client.format-rp :value="$data->coupon_discount" />
+                                        </span>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Total Bayar -->
+                            <div class="flex justify-between mb-4 font-bold text-lg">
+                                <span>Total Bayar</span>
+                                <span>
+                                    <x-client.format-rp :value="$data->total" />
+                                </span>
+                            </div>
+
                             <div class="flex gap-2 mt-6">
                                 <a href="{{ route('admin-order.index') }}" class="btn btn-secondary btn-sm">
                                     {{ __('Kembali') }}
                                 </a>
 
                                 @if ($data->delivery_state_id < 5)
+                                    @php
+                                        $needsReceipt =
+                                            $data->delivery_state_id == 3 &&
+                                            (!$data->receipt ||
+                                                !$data->receipt->receipt_number ||
+                                                !$data->receipt->receipt_img);
+                                    @endphp
+
                                     <form action="{{ route('admin-order.next-state', $data->id) }}" method="post"
                                         class="inline-block">
                                         @csrf
                                         @method('patch')
-                                        <button type="submit" class="btn btn-primary btn-sm">
+
+                                        <button type="submit"
+                                            class="btn btn-primary btn-sm {{ $needsReceipt ? 'btn-disabled cursor-not-allowed opacity-50' : '' }}"
+                                            {{ $needsReceipt ? 'disabled' : '' }}>
                                             Next Status <i class="fa fa-arrow-right"></i>
                                         </button>
                                     </form>
                                 @endif
+
+                                @if (
+                                    ($data->delivery_state_id >= 3 && $data->delivery_state_id != 6) ||
+                                        ($data->delivery_state_id == 6 && $data->receipt))
+                                    <button class="btn btn-primary btn-sm" onclick="receiptModal.showModal()">
+                                        <i class="fas fa-receipt"></i>
+                                        @if ($data->delivery_state_id >= 5)
+                                            Lihat Resi
+                                        @else
+                                            {{ $data->receipt ? 'Edit Resi' : 'Upload Resi' }}
+                                        @endif
+                                    </button>
+                                @endif
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>

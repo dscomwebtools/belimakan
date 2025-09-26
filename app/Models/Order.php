@@ -10,12 +10,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Order extends Model
 {
     use HasFactory;
-    
+
     public function order_address(): BelongsTo
     {
         return $this->belongsTo(OrderAddress::class);
     }
-    
+
     public function shipping_method(): BelongsTo
     {
         return $this->belongsTo(ShippingMethod::class);
@@ -36,9 +36,14 @@ class Order extends Model
     {
         return $this->belongsTo(User::class);
     }
-    
+
     public function bank_account(): BelongsTo
     {
         return $this->belongsTo(BankAccount::class);
+    }
+
+    public function receipt()
+    {
+        return $this->belongsTo(OrderReceipt::class, 'order_receipt_id');
     }
 }
