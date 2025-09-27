@@ -65,7 +65,7 @@
                     <td>
                         <div class="flex gap-4 justify-center">
                             @if ($item->payment_method == 'Transfer')
-                                <div class="tooltip" data-tip="Upload Bukti Bayar">
+                                <div class="tooltip" data-tip="{{ $item->delivery_state_id < 3 ? 'Upload Bukti Bayar' : 'Lihat Bukti Transfer' }}">
                                     <a href="#"
                                         @click.prevent="$dispatch('open-modal', 'modal-upload-bukti-bayar'); $store.cart.getOrderDetail('{{ $item->id }}')">
                                         <i class="fa fa-money-bills text-red-600"></i>
