@@ -163,9 +163,8 @@
                                             <div class="form-control">
                                                 <label class="label font-semibold">Nomor Resi</label>
                                                 <input type="text"
-                                                    value="{{ $data->receipt->receipt_number ?? '-' }}"
-                                                    class="input input-bordered w-full bg-gray-100"
-                                                    readonly>
+                                                    value="{{ $data->receipt->receipt_number ?? $data->biteship_waybill }}"
+                                                    class="input input-bordered w-full bg-gray-100" readonly>
                                             </div>
 
                                             <div class="form-control">
@@ -191,9 +190,20 @@
                                             <div class="form-control">
                                                 <label for="receipt_number" class="label font-semibold">Nomor
                                                     Resi</label>
-                                                <input type="text" name="receipt_number" id="receipt_number"
-                                                    value="{{ $data->receipt->receipt_number ?? '' }}"
-                                                    class="input input-bordered w-full" required>
+
+                                                @if ($data->biteship_waybill)
+                                                    {{-- Dari Biteship, readonly --}}
+                                                    <input type="text" name="receipt_number" id="receipt_number"
+                                                        value="{{ $data->biteship_waybill }}"
+                                                        class="input input-bordered w-full bg-gray-100" readonly>
+                                                    <input type="hidden" name="receipt_number"
+                                                        value="{{ $data->biteship_waybill }}">
+                                                @else
+                                                    {{-- Manual, bisa diketik --}}
+                                                    <input type="text" name="receipt_number" id="receipt_number"
+                                                        value="{{ $data->receipt->receipt_number ?? '' }}"
+                                                        class="input input-bordered w-full" required>
+                                                @endif
                                             </div>
 
                                             <div class="form-control">
@@ -201,7 +211,6 @@
                                                     Resi</label>
                                                 <input type="file" name="receipt_img" id="receipt_img"
                                                     class="file-input file-input-bordered w-full">
-
                                                 @if ($data->receipt?->receipt_img)
                                                     <div class="mt-3">
                                                         <p class="text-xs text-warning">Pilih file baru jika ingin
@@ -349,6 +358,19 @@
                                 </span>
                             </div>
 
+                            @if ($data->delivery_state_id >= 3)
+                                <div class="mt-4 pt-3 border-t text-sm">
+                                    <a href="#"
+                                        @click.prevent="
+                                                $dispatch('open-modal', 'modal-show-order-tracking'); 
+                                                $store.cart.getAdminTrackingDetail({{ $data->id }})
+                                            "
+                                        class="text-teal-600 hover:underline flex items-center gap-1">
+                                        <i class="fa fa-eye"></i> Lihat Pengiriman
+                                    </a>
+                                </div>
+                            @endif
+
                             <div class="flex gap-2 mt-6">
                                 <a href="{{ route('admin-order.index') }}" class="btn btn-secondary btn-sm">
                                     {{ __('Kembali') }}
@@ -363,17 +385,26 @@
                                                 !$data->receipt->receipt_img);
                                     @endphp
 
-                                    <form action="{{ route('admin-order.next-state', $data->id) }}" method="post"
-                                        class="inline-block">
-                                        @csrf
-                                        @method('patch')
-
-                                        <button type="submit"
-                                            class="btn btn-primary btn-sm {{ $needsReceipt ? 'btn-disabled cursor-not-allowed opacity-50' : '' }}"
-                                            {{ $needsReceipt ? 'disabled' : '' }}>
-                                            Next Status <i class="fa fa-arrow-right"></i>
-                                        </button>
-                                    </form>
+                                    @if ($data->delivery_state_id == 2)
+                                        <form action="{{ route('admin-order.confirm_order', $data->id) }}"
+                                            method="post" class="inline-block">
+                                            @csrf
+                                            <button type="submit" class="btn btn-success btn-sm">
+                                                Konfirm Order <i class="fa fa-check"></i>
+                                            </button>
+                                        </form>
+                                    @else
+                                        <form action="{{ route('admin-order.next-state', $data->id) }}"
+                                            method="post" class="inline-block">
+                                            @csrf
+                                            @method('patch')
+                                            <button type="submit"
+                                                class="btn btn-primary btn-sm {{ $needsReceipt ? 'btn-disabled cursor-not-allowed opacity-50' : '' }}"
+                                                {{ $needsReceipt ? 'disabled' : '' }}>
+                                                Next Status <i class="fa fa-arrow-right"></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                 @endif
 
                                 @if (
@@ -395,4 +426,6 @@
             </div>
         </div>
     </div>
+
+    @include('client.profile.modal-show-order-tracking')
 </x-app-layout>

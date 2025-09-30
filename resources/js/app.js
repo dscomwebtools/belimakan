@@ -1,6 +1,8 @@
 import './bootstrap';
 import './client/home';
 import './client/countdown';
+// import Swal from 'sweetalert2';
+// window.Swal = Swal;
 
 import Alpine from 'alpinejs';
 import productForm from './arpine/productForm.js'

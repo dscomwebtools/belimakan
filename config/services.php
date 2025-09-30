@@ -31,4 +31,9 @@ return [
         ],
     ],
 
+    'biteship_api' => [
+        'base' => env('BITESHIP_API_BASE'),
+        'key'  => env('BITESHIP_API_KEY'),
+    ],
+
 ];

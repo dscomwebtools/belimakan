@@ -11,15 +11,26 @@ use App\Models\OrderAddress;
 use App\Models\OrderDetail;
 use App\Models\OrderReceipt;
 use App\Models\ProductVariant;
+use App\Models\SettingAddress;
 use App\Models\ShippingMethod;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 
 class OrderController extends Controller
 {
+    protected string $base;
+    protected string $key;
+
+    public function __construct()
+    {
+        $this->base = config('services.biteship_api.base');
+        $this->key  = config('services.biteship_api.key');
+    }
+
     function __invoke(Request $request)
     {
         $user_id = auth()->user()->id;
@@ -55,6 +66,7 @@ class OrderController extends Controller
         $addressData = collect($address->toArray())->except('id')->toArray();
         // MENGGUNAKAN FIRST OR CREATE BIAR GA TERLALU BANYAK DUPLIKAT, MISAL ADA DATA YANG SAMA MAKA GA BUAT DATA BARU LAGI
         $order_address_id = OrderAddress::firstOrCreate($addressData)->id;
+        $shippingMethodData = [];
 
         if (gettype($request->shippingMethod) == 'string') {
             // kalo string berarti shipping method nya manual set shipping_method_id = null then isi shipping_method_manual
@@ -89,6 +101,7 @@ class OrderController extends Controller
         $new_order->coupon_id = $request->voucherId ?? null;
         $new_order->coupon_code = $request->voucherCode ?? null;
         $new_order->coupon_discount = $request->voucherDiscount ?? 0;
+        $new_order->delivery_note = $request->deliveryNote;
 
         if ($new_order->coupon_id) {
             Coupon::where('id', $new_order->coupon_id)->increment('used_count');
@@ -99,9 +112,11 @@ class OrderController extends Controller
             $new_order->delivery_state_id = 2; //Jika Cash set status langsung 'Menunggu Konfirmasi', jika tidak maka defaultnya 'menunggu pembayaran'
         }
 
-        DB::transaction(function () use ($new_order, $request) {
+        DB::transaction(function () use ($new_order, $request, $addressData, $shippingMethodData, $shipping_method_manual) {
+            // 1. Save order first so it has an ID
             $new_order->save();
 
+            // 2. Process carts
             $carts = Cart::where('user_id', auth()->id())
                 ->whereIn('id', $request->selectedCartIds ?? [])
                 ->get();
@@ -112,20 +127,138 @@ class OrderController extends Controller
                 $order_detail->product_id = $cart->product_id;
                 $order_detail->product_variant_id = $cart->product_variant_id;
                 $order_detail->quantity = $cart->quantity;
-                $order_detail->price = $cart->product_variant ? $cart->product_variant->price : $cart->product->product_variant->first()->price; // jika tidak ada variant maka ambil harga dari relasi product kemudian ambil dari product variant index pertama 
+                $order_detail->price = $cart->product_variant
+                    ? $cart->product_variant->price
+                    : $cart->product->product_variant->first()->price;
                 $order_detail->discount = $cart->product->promo ? $cart->product->promo->discount : 0;
                 $order_detail->save();
 
-                // KURANGI STOK SETELAH ORDER / CO
-                $product_variant = ProductVariant::find($cart->product_variant ? $cart->product_variant->id : $cart->product->product_variant->first()->id);
+                $product_variant = ProductVariant::find(
+                    $cart->product_variant
+                        ? $cart->product_variant->id
+                        : $cart->product->product_variant->first()->id
+                );
                 $product_variant->stock -= $cart->quantity;
                 $product_variant->save();
 
-                $cart->delete(); // delete cart item
+                $cart->delete();
             }
+
+            if (!$shipping_method_manual) {
+                // 3. Build items
+                $items = $this->buildItemsFromCarts($carts);
+
+                // 4. Call Biteship
+                $response = $this->sendToBiteship($new_order, $addressData, $shippingMethodData, $items);
+                if (!($response['status'] ?? false)) {
+                    throw new \Exception("Gagal membuat draft order di Biteship");
+                }
+
+                $biteship = $response['response'];
+
+                // 5. Update order with biteship fields
+                $new_order->biteship_draft_order_id = $biteship['id'] ?? null;
+                $new_order->biteship_order_id       = $biteship['order_id'] ?? null;
+                $new_order->biteship_waybill        = $biteship['courier']['waybill_id'] ?? null;
+            }
+
+            $new_order->save();
         });
 
         return response()->json(["status" => 1, "message" => "Order berhasil dibuat", $new_order]);
+    }
+
+    public function sendToBiteship($new_order, $address, $shipping, $items)
+    {
+        $origin = SettingAddress::first();
+
+        $payload = [
+            "shipper_contact_name"  => $origin->name,
+            "shipper_contact_phone" => $origin->hp,
+            "shipper_contact_email" => $origin->email,
+            "origin_contact_name"   => $origin->name,
+            "origin_contact_phone"  => $origin->hp,
+            "origin_address"        => $origin->address,
+            "origin_postal_code"    => $origin->postal_code,
+            "destination_contact_name"  => $address['recipient'],
+            "destination_contact_phone" => $address['hp'],
+            "destination_address"       => $address['address'],
+            "destination_postal_code"   => strval($address['postal_code']),
+            "destination_note"      => $address['noteForCurrier'],
+            "courier_company"       => $shipping['company'],
+            "courier_type"          => $shipping['type'],
+            "order_note"              => $new_order->delivery_note,
+            "delivery_type"         => "now",
+            "items"                 => $items,
+        ];
+
+        // 👇 call API Biteship
+        $response = Http::withHeaders([
+            "authorization" => "{$this->key}",
+            "content-type" => "application/json",
+        ])
+            ->post($this->base . "/v1/draft_orders", $payload);
+
+        return [
+            "status"   => $response->successful(),
+            "response" => $response->json(),
+        ];
+    }
+
+    private function buildItemsFromCarts($carts)
+    {
+        $items = [];
+
+        foreach ($carts as $cart) {
+            $product = $cart->product;
+            $variant = $cart->product_variant ?? $product->product_variant->first();
+
+            $items[] = [
+                "name"        => $product->name,
+                "description" => "description",
+                "category"    => "others",
+                "value"       => $variant->price,
+                "quantity"    => $cart->quantity,
+                "height"      => (int) ($product->dimention->height ?? 0),
+                "length"      => (int) ($product->dimention->length ?? 0),
+                "weight"      => (int) ($variant->weight ?? 0),
+                "width"       => (int) ($product->dimention->width ?? 0),
+            ];
+        }
+
+        return $items;
+    }
+
+    function order_tracking(Order $order)
+    {
+        $order->load(['shipping_method', 'delivery_state']);
+
+        if ($order->delivery_state_id <= 2) {
+            return response()->json([
+                "status"   => false,
+                "message"  => "Data tracking tidak lengkap",
+            ], 400);
+        }
+
+        $waybill   = $order->biteship_waybill ?? null;
+        $courierCode = $order->shipping_method?->courier_code ?? null;
+
+        if (!$waybill || !$courierCode) {
+            return response()->json([
+                "status"   => false,
+                "message"  => "Data tracking tidak lengkap",
+            ], 400);
+        }
+
+        $response = Http::withHeaders([
+            "authorization" => $this->key,
+            "content-type"  => "application/json",
+        ])->get("{$this->base}/v1/trackings/{$waybill}/couriers/{$courierCode}");
+
+        return [
+            "status"   => $response->successful(),
+            "response" => $response->json(),
+        ];
     }
 
     function order_by_id(Order $order)
@@ -154,7 +287,7 @@ class OrderController extends Controller
             $order->bukti_pembayaran = $path;
         }
 
-        $order->delivery_state_id += 1;
+        $order->delivery_state_id = 2;
         $order->save();
 
         return redirect()->route('client.profile')
@@ -252,6 +385,31 @@ class OrderController extends Controller
         return redirect()->back()->with('success', 'Berhasil update status menjadi ' . $order->delivery_state->name);
     }
 
+    function confirm_order(Order $order)
+    {
+        $order->delivery_state_id = 3;
+
+        $response = Http::withHeaders([
+            "authorization" => "{$this->key}",
+            "content-type" => "application/json",
+        ])
+            ->post($this->base . "/v1/draft_orders/" . $order->biteship_draft_order_id . "/confirm");
+
+        $data = $response->json();
+
+        if (isset($data['success']) && $data['success'] === true) {
+            $order->biteship_order_id  = $data['id'] ?? null;
+            $order->biteship_waybill   = $data['courier']['waybill_id'] ?? null;
+        }
+
+        if ($order->delivery_state_id == 3) {
+            $order->is_paid = true;
+        }
+        $order->save();
+
+        return redirect()->back()->with('success', 'Berhasil update status menjadi ' . $order->delivery_state->name);
+    }
+
     function cancel(Order $order)
     {
         if ($order->delivery_state_id == DeliveryState::where('name', 'Dibatalkan')->first()->id) {
@@ -278,15 +436,22 @@ class OrderController extends Controller
 
     function save_receipt(Request $request, Order $order)
     {
-        $validated = $request->validate([
-            'receipt_number' => 'required|string|unique:order_receipts,receipt_number,' . $order->order_receipt_id,
-            'receipt_img'    => 'nullable|image|max:2048',
-        ]);
+        $rules = [
+            'receipt_img' => 'nullable|image|max:2048',
+        ];
+
+        // Kalau manual, wajib isi nomor resi
+        if (!$order->biteship_waybill) {
+            $rules['receipt_number'] = 'required|string|unique:order_receipts,receipt_number,' . $order->order_receipt_id;
+        }
+
+        $validated = $request->validate($rules);
 
         $oldPath = $order->receipt?->receipt_img;
 
         $attributes = [
-            'receipt_number' => $validated['receipt_number'],
+            // kalau biteship, pakai langsung dari order
+            'receipt_number' => $order->biteship_waybill ?: $validated['receipt_number'],
         ];
 
         if ($request->hasFile('receipt_img')) {

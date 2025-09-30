@@ -11,6 +11,7 @@ export default {
     voucherSuccess: false,
     voucherDiscount: 0,
     message: '',
+    note: '',
     notifTimeout: null,
     isLoading: false,
 
@@ -201,6 +202,7 @@ export default {
                 voucherId: this.voucherId || null,
                 voucherCode: this.voucherCode || null,
                 voucherDiscount: this.voucherDiscount || 0,
+                deliveryNote: this.note || '',
             })
         });
 
@@ -221,7 +223,11 @@ export default {
 
     clearCheckout() {
         this.selectedIds = [];
-        localStorage.removeItem('checkoutSelected'); // ✅ clear LS
+        localStorage.removeItem('checkoutSelected');
+        let checkoutId = sessionStorage.getItem('checkoutId');
+        if (checkoutId) {
+            localStorage.removeItem(`checkoutSelected_${checkoutId}`);
+        }
     },
 
 

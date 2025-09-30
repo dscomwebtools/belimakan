@@ -99,6 +99,7 @@
     </div>
 
     @include('client.profile.modal-show-order-item')
+    @include('client.profile.modal-show-order-tracking')
     @include('client.profile.modal-upload-bukti-bayar')
 </div>
 @push('scripts')

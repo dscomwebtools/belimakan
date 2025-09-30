@@ -214,6 +214,41 @@ export default {
         this.orderDetail = await (await fetch(`/order/${order_id}`)).json();
     },
 
+    trackingDetail: {},
+    async getTrackingDetail(order_id) {
+        let response = await fetch(`/order/${order_id}/tracking`);
+        let data = await response.json();
+
+        if (data.status && data.response.success) {
+            this.trackingDetail = data.response;
+        } else {
+            console.warn("Tracking not available:", data.response?.message || data.message);
+            // Swal.fire({
+            //     icon: "error",
+            //     title: "Tracking Gagal",
+            //     text: data.message || "Tidak dapat mengambil data tracking",
+            // });
+            this.trackingDetail = {};
+        }
+    },
+
+    async getAdminTrackingDetail(order_id) {
+        let response = await fetch(`/admin/order/${order_id}/tracking`);
+        let data = await response.json();
+
+        if (data.status && data.response.success) {
+            this.trackingDetail = data.response;
+        } else {
+            console.warn("Tracking not available:", data.response?.message || data.message);
+            // Swal.fire({
+            //     icon: "error",
+            //     title: "Tracking Gagal",
+            //     text: data.message || "Tidak dapat mengambil data tracking",
+            // });
+            this.trackingDetail = {};
+        }
+    },
+
     proceedToCheckout() {
         window.location.href = "/checkout";
     },
