@@ -358,7 +358,7 @@
                                 </span>
                             </div>
 
-                            @if ($data->delivery_state_id >= 3)
+                            @if ($data->delivery_state_id >= 3 && $data->biteship_waybill)
                                 <div class="mt-4 pt-3 border-t text-sm">
                                     <a href="#"
                                         @click.prevent="

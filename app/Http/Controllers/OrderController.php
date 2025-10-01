@@ -389,17 +389,19 @@ class OrderController extends Controller
     {
         $order->delivery_state_id = 3;
 
-        $response = Http::withHeaders([
-            "authorization" => "{$this->key}",
-            "content-type" => "application/json",
-        ])
-            ->post($this->base . "/v1/draft_orders/" . $order->biteship_draft_order_id . "/confirm");
+        if (!$order->shipping_method_manual) {
+            $response = Http::withHeaders([
+                "authorization" => "{$this->key}",
+                "content-type" => "application/json",
+            ])
+                ->post($this->base . "/v1/draft_orders/" . $order->biteship_draft_order_id . "/confirm");
 
-        $data = $response->json();
+            $data = $response->json();
 
-        if (isset($data['success']) && $data['success'] === true) {
-            $order->biteship_order_id  = $data['id'] ?? null;
-            $order->biteship_waybill   = $data['courier']['waybill_id'] ?? null;
+            if (isset($data['success']) && $data['success'] === true) {
+                $order->biteship_order_id  = $data['id'] ?? null;
+                $order->biteship_waybill   = $data['courier']['waybill_id'] ?? null;
+            }
         }
 
         if ($order->delivery_state_id == 3) {
