@@ -214,8 +214,9 @@ export default {
         this.orderDetail = await (await fetch(`/order/${order_id}`)).json();
     },
 
-    trackingDetail: {},
+    trackingDetail: null,
     async getTrackingDetail(order_id) {
+        this.trackingDetail = null;
         let response = await fetch(`/order/${order_id}/tracking`);
         let data = await response.json();
 
@@ -223,12 +224,7 @@ export default {
             this.trackingDetail = data.response;
         } else {
             console.warn("Tracking not available:", data.response?.message || data.message);
-            // Swal.fire({
-            //     icon: "error",
-            //     title: "Tracking Gagal",
-            //     text: data.message || "Tidak dapat mengambil data tracking",
-            // });
-            this.trackingDetail = {};
+            this.trackingDetail = null;
         }
     },
 
@@ -240,11 +236,6 @@ export default {
             this.trackingDetail = data.response;
         } else {
             console.warn("Tracking not available:", data.response?.message || data.message);
-            // Swal.fire({
-            //     icon: "error",
-            //     title: "Tracking Gagal",
-            //     text: data.message || "Tidak dapat mengambil data tracking",
-            // });
             this.trackingDetail = {};
         }
     },

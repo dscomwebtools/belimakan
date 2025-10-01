@@ -1,99 +1,73 @@
-<div class="sm:mx-6 lg:mx-8 p-6 py-10 bg-base-300 text-base-content rounded overflow-x-auto">
-    <div class="flex">
-        <span class="mb-3">
-            <form class="flex [&_option]:bg-secondary" id="form_search">
-                <div class="tooltip" data-tip="Data per halaman">
-                    <select id="numb_per_page" name="numb_per_page" class="my-input mr-2">
-                        <option value="5" @if ($numb_per_page == '5') selected @endif>5
-                        </option>
-                        <option value="10" @if ($numb_per_page == '10') selected @endif>10
-                        </option>
-                        <option value="25" @if ($numb_per_page == '25') selected @endif>25
-                        </option>
-                        <option value="50" @if ($numb_per_page == '50') selected @endif>50
-                        </option>
-                        <option value="100" @if ($numb_per_page == '100') selected @endif>100
-                        </option>
-                    </select>
-                </div>
-                {{-- <div class="inline-block my-input whitespace-nowrap">
-                    <input type="text" id="search" name="name"
-                        class="border-transparent focus:outline-none focus:ring-0 focus:border-transparent bg-transparent"
-                        placeholder="Cari berdasarkan nama" @isset($validated['name'])value="{{ $validated['name'] }}"
-                        @endisset>
-                    <button type="submit"
-                        class="bg-primary/70 hover:bg-primary border border-primary py-1 px-2 rounded-full cursor-pointer hover:scale-105 text-primary-content">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div> --}}
-            </form>
-        </span>
+<div class="mx-2 md:mx-4 text-base-content rounded">
+    <!-- Filter -->
+    <div class="flex mb-6">
+        <form class="flex [&_option]:bg-secondary" id="form_search">
+            <div class="tooltip" data-tip="Data per halaman">
+                <select id="numb_per_page" name="numb_per_page" class="my-input mr-2">
+                    <option value="5" @if ($numb_per_page == '5') selected @endif>5</option>
+                    <option value="10" @if ($numb_per_page == '10') selected @endif>10</option>
+                    <option value="25" @if ($numb_per_page == '25') selected @endif>25</option>
+                    <option value="50" @if ($numb_per_page == '50') selected @endif>50</option>
+                    <option value="100" @if ($numb_per_page == '100') selected @endif>100</option>
+                </select>
+            </div>
+        </form>
     </div>
 
-    <table class="table">
-        <thead>
-            {{-- <tr
-                class="text-left border-b leading-9 bg-primary text-primary-content border-b-yellow-100 [&>th]:p-2">
-                --}}
-            <tr>
-                <th>No</th>
-                <th>Alamat Pengiriman</th>
-                <th>Pembayaran</th>
-                <th>Bank Transfer</th>
-                <th>Tanggal Order</th>
-                <th>Total Bayar</th>
-                <th>Status</th>
-                <th class="text-center">Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($data as $item)
-                {{-- <tr
-                class="border-b odd:bg-white/5 odd:text-accent-content [&>td]:p-2 hover:bg-primary hover:text-primary-content">
-                --}}
-                <tr class="hover">
-                    <td>{{ ++$indexNumber }}</td>
+    <!-- LIST ORDER -->
+    <div class="grid gap-6">
+        @foreach ($data as $item)
+            <div class="bg-base-200 rounded-xl shadow-md overflow-hidden border border-base-300">
+                <!-- Header -->
+                <div class="flex justify-between items-center bg-base-300 px-4 py-2">
+                    <div>
+                        <p class="font-semibold text-sm">Order
+                            #{{ $loop->iteration + ($data->currentPage() - 1) * $data->perPage() }}</p>
+                        <p class="text-xs opacity-70">{{ $item->created_at->isoFormat('LL') }}</p>
+                    </div>
+                    <span class="badge badge-primary badge-outline">{{ $item->delivery_state->name }}</span>
+                </div>
 
-                    <td>{{ $item->order_address->name }}</td>
-                    <td>{{ $item->payment_method }}</td>
-                    <td>{{ $item->bank_account->bank_name ?? '-' }}</td>
-                    <td>{{ $item->created_at->isoFormat('LL') }}</td>
-                    <td>
-                        <x-client.format-rp value="{{ $item->total }}" />
-                    </td>
-                    <td>{{ $item->delivery_state->name }}</td>
-                    <td>
-                        <div class="flex gap-4 justify-center">
-                            @if ($item->payment_method == 'Transfer')
-                                <div class="tooltip" data-tip="{{ $item->delivery_state_id < 3 ? 'Upload Bukti Bayar' : 'Lihat Bukti Transfer' }}">
-                                    <a href="#"
-                                        @click.prevent="$dispatch('open-modal', 'modal-upload-bukti-bayar'); $store.cart.getOrderDetail('{{ $item->id }}')">
-                                        <i class="fa fa-money-bills text-red-600"></i>
-                                    </a>
-                                </div>
-                            @endif
-                            <div class="tooltip" data-tip="Download Invoice">
-                                <form action="{{ route('download-invoice', $item->id) }}" method="post" target="_blank"
-                                    class="inline-block">
-                                    @csrf
-                                    <button type="submit">
-                                        <i class="fa fa-download text-blue-600"></i>
-                                    </button>
-                                </form>
-                            </div>
-                            <div class="tooltip" data-tip="Lihat">
-                                <a href="#"
-                                    @click.prevent="$dispatch('open-modal', 'modal-show-order-item'); $store.cart.getOrderDetail('{{ $item->id }}')">
-                                    <i class="fa fa-eye text-teal-600"></i>
-                                </a>
-                            </div>
+                <!-- Body -->
+                <div class="p-4 grid sm:grid-cols-2 gap-2 text-sm">
+                    <p><span class="font-semibold">Alamat:</span> {{ $item->order_address->name }}</p>
+                    <p><span class="font-semibold">Pembayaran:</span> {{ $item->payment_method }}</p>
+                    <p><span class="font-semibold">Bank:</span> {{ $item->bank_account->bank_name ?? '-' }}</p>
+                    <p><span class="font-semibold">Total:</span> <x-client.format-rp value="{{ $item->total }}" /></p>
+                </div>
+
+                <!-- Footer (Actions) -->
+                <div class="flex justify-end gap-4 px-4 py-3 bg-base-100 border-t">
+                    @if ($item->payment_method == 'Transfer')
+                        <div class="tooltip"
+                            data-tip="{{ $item->delivery_state_id < 3 ? 'Upload Bukti Bayar' : 'Lihat Bukti Transfer' }}">
+                            <a href="#"
+                                @click.prevent="$dispatch('open-modal', 'modal-upload-bukti-bayar'); $store.cart.getOrderDetail('{{ $item->id }}')">
+                                <i class="fa fa-money-bills text-red-600 hover:scale-110 transition"></i>
+                            </a>
                         </div>
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
+                    @endif
+                    <div class="tooltip" data-tip="Download Invoice">
+                        <form action="{{ route('download-invoice', $item->id) }}" method="post" target="_blank"
+                            class="inline-block">
+                            @csrf
+                            <button type="submit">
+                                <i class="fa fa-download text-blue-600 hover:scale-110 transition"></i>
+                            </button>
+                        </form>
+                    </div>
+                    <div class="tooltip" data-tip="Lihat">
+                        <a href="#"
+                            @click.prevent="$dispatch('open-modal', 'modal-show-order-item'); $store.cart.getOrderDetail('{{ $item->id }}')">
+                            <i class="fa fa-eye text-teal-600 hover:scale-110 transition"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
 
+    <!-- Pagination -->
     <div class="[&_p]:!text-secondary-content [&_.bg-white]:bg-primary [&_.bg-white]:text-primary-content mt-10">
         {!! $data->links() !!}
     </div>

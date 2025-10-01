@@ -2,6 +2,15 @@
     <div class="max-w-4xl mx-auto p-6" x-data>
         <h1 class="text-2xl font-bold mb-6">Pelacakan Pesanan</h1>
 
+        <!-- Loading Skeleton -->
+        <template x-if="!$store.cart.trackingDetail || !$store.cart.orderDetail">
+            <div class="space-y-6">
+                <div class="h-20 bg-gray-200 animate-pulse rounded-lg"></div>
+                <div class="h-32 bg-gray-200 animate-pulse rounded-lg"></div>
+                <div class="h-40 bg-gray-200 animate-pulse rounded-lg"></div>
+            </div>
+        </template>
+
         <!-- Order Info -->
         <template x-if="$store.cart.trackingDetail && $store.cart.orderDetail">
             <div class="bg-white shadow rounded-lg p-4 mb-6">
@@ -20,26 +29,22 @@
                 <h2 class="text-lg font-semibold mb-2">Info Kurir</h2>
                 <div class="flex flex-col md:flex-row items-start md:items-center md:justify-between gap-4">
                     <div class="flex-1">
-                        <!-- Company selalu tampil -->
                         <p><strong>Perusahaan:</strong>
                             <span x-text="$store.cart.trackingDetail.courier.company?.toUpperCase()"></span>
                         </p>
 
-                        <!-- Nama hanya tampil kalau ada -->
                         <template x-if="$store.cart.trackingDetail.courier.driver_name">
                             <p><strong>Nama Pengemudi:</strong>
                                 <span x-text="$store.cart.trackingDetail.courier.driver_name"></span>
                             </p>
                         </template>
 
-                        <!-- Telepon hanya tampil kalau ada -->
                         <template x-if="$store.cart.trackingDetail.courier.driver_phone">
                             <p><strong>No. Telepon:</strong>
                                 <span x-text="$store.cart.trackingDetail.courier.driver_phone"></span>
                             </p>
                         </template>
 
-                        <!-- Plat hanya tampil kalau ada -->
                         <template x-if="$store.cart.trackingDetail.courier.driver_plate_number">
                             <p><strong>No. Plat:</strong>
                                 <span x-text="$store.cart.trackingDetail.courier.driver_plate_number"></span>
@@ -47,7 +52,6 @@
                         </template>
                     </div>
 
-                    <!-- Foto hanya tampil kalau ada -->
                     <template x-if="$store.cart.trackingDetail.courier.driver_photo_url">
                         <div class="w-24 h-24 flex-shrink-0">
                             <img :src="$store.cart.trackingDetail.courier.driver_photo_url" alt="Foto Kurir"

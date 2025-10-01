@@ -65,471 +65,472 @@
         </div>
 
         {{-- RIGHT SIDE --}}
-        <div class="flex-1 bg-base-200 shadow-xl card overflow-auto w-full">
-            <div x-data="{ activeTab: parseInt(localStorage.getItem('activeTab')) || 1 }" @load.window="activeTab = parseInt(localStorage.getItem('activeTab')) || 1"
-                class="w-fit">
-                <div class="flex bg-base-300 rounded-t-2xl">
-                    <button class="uppercase px-2 sm:px-8 py-3 -mb-px text-sm rounded-t-2xl tracking-widest"
-                        :class="activeTab === 1 ? 'border-base-200 bg-base-200' : 'text-gray-600'"
-                        @click="activeTab = 1; localStorage.setItem('activeTab', 1)">
-                        Biodata
-                    </button>
-                    <button class="uppercase px-2 sm:px-8 py-3 -mb-px text-sm rounded-t-2xl tracking-widest"
-                        :class="activeTab === 2 ? 'border-base-200 bg-base-200' : 'text-gray-600'"
-                        @click="activeTab = 2; localStorage.setItem('activeTab', 2)">
-                        Data Order
-                    </button>
-                    <button class="uppercase px-2 sm:px-8 py-3 -mb-px text-sm rounded-t-2xl tracking-widest"
-                        :class="activeTab === 3 ? 'border-base-200 bg-base-200' : 'text-gray-600'"
-                        @click="activeTab = 3; localStorage.setItem('activeTab', 3)">
-                        Daftar Alamat
-                    </button>
-                    <button class="uppercase px-2 sm:px-8 py-3 -mb-px text-sm rounded-t-2xl tracking-widest"
-                        :class="activeTab === 4 ? 'border-base-200 bg-base-200' : 'text-gray-600'"
-                        @click="activeTab = 4; localStorage.setItem('activeTab', 4)">
-                        Testimonial
-                    </button>
-                    <button class="uppercase px-2 sm:px-8 py-3 -mb-px text-sm rounded-t-2xl tracking-widest"
-                        :class="activeTab === 5 ? 'border-base-200 bg-base-200' : 'text-gray-600'"
-                        @click="activeTab = 5; localStorage.setItem('activeTab', 5)">
-                        Keamanan
-                    </button>
+        <div x-data="{ activeTab: parseInt(localStorage.getItem('activeTab')) || 1 }" @load.window="activeTab = parseInt(localStorage.getItem('activeTab')) || 1"
+            class="flex-1 bg-base-200 shadow-xl card w-full">
+            <div>
+                <!-- TAB TITLES -->
+                <div class="relative w-full">
+                    <!-- Scrollable Tabs -->
+                    <div class="overflow-x-auto no-scrollbar">
+                        <div class="flex gap-2 p-1 min-w-max">
+                            <template
+                                x-for="(tab, i) in ['Biodata','Data Order','Daftar Alamat','Testimonial','Keamanan']"
+                                :key="i">
+                                <button
+                                    class="px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-300 transform hover:scale-105"
+                                    :class="activeTab === (i + 1) ? 'bg-primary text-white shadow-md' :
+                                        'bg-base-300 text-gray-600 hover:bg-base-200'"
+                                    @click="activeTab = i+1; localStorage.setItem('activeTab', i+1)">
+                                    <span x-text="tab"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Gradient indicators kiri/kanan -->
+                    {{-- <div class="absolute left-0 top-0 bottom-0 w-6 pointer-events-none bg-gradient-to-r from-base-200">
+                    </div>
+                    <div class="absolute right-0 top-0 bottom-0 w-6 pointer-events-none bg-gradient-to-l from-base-200">
+                    </div> --}}
+                </div>
+            </div>
+
+            <!-- Tab Contents -->
+            <div class="flex-1 p-6 bg-base-200 rounded text-sm mt-4 sm:mt-0">
+                <div x-show="activeTab === 1">
+                    <h2 class="font-bold uppercase mb-2">Data Diri</h2>
+
+                    <div class="flex gap-2 leading-10">
+                        <span class="opacity-75">Nama Lengkap :</span>
+                        <span x-show="!isEditingFullname" x-text='user.fullname'>
+                        </span>
+                        <div @click.outside="cancelEditingFullname">
+                            <input x-show="isEditingFullname" type="text" x-model="tempFullname" class="my-input"
+                                autocomplete="off" x-ref="fullnameInput"
+                                @keydown.enter="isEditingFullname = !isEditingFullname; saveFullname()"
+                                x-init="$watch('isEditingFullname', value => {
+                                    if (value) {
+                                        tempFullname = user.fullname
+                                    }
+                                })">
+                            <span class="cursor-pointer opacity-50 hover:opacity-100"
+                                @click="isEditingFullname = !isEditingFullname; if (!isEditingFullname) saveFullname(); else $nextTick(() => $refs.fullnameInput.focus());">
+                                <i x-show="!isEditingFullname" class="fas fa-pencil"></i>
+                                <i x-show="isEditingFullname" class="fas fa-circle-check"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 leading-10">
+                        <span class="opacity-75">Nama Panggilan :</span>
+                        <span x-show="!isEditingName" x-text='user.name'>
+                        </span>
+                        <div @click.outside="cancelEditingName">
+                            <input x-show="isEditingName" type="text" x-model="tempName" class="my-input"
+                                autocomplete="off" x-ref="nameInput"
+                                @keydown.enter="isEditingName = !isEditingName; saveName()" x-init="$watch('isEditingName', value => {
+                                    if (value) {
+                                        tempName = user.name
+                                    }
+                                })">
+                            <span class="cursor-pointer opacity-50 hover:opacity-100"
+                                @click="isEditingName = !isEditingName; if (!isEditingName) saveName(); else $nextTick(() => $refs.nameInput.focus());">
+                                <i x-show="!isEditingName" class="fas fa-pencil"></i>
+                                <i x-show="isEditingName" class="fas fa-circle-check"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 leading-10">
+                        <span class="opacity-75">Tanggal Lahir
+                            :</span>
+                        <span x-show="!isEditingBirthday" x-text='formattedBirthday'>
+                        </span>
+                        <div @click.outside="cancelEditingBirthday">
+                            <input x-show="isEditingBirthday" type="date" x-model="tempBirthday" class="my-input"
+                                autocomplete="off" x-ref="birthdayInput"
+                                @keydown.enter="isEditingBirthday = !isEditingBirthday; updateUserData()"
+                                x-init="$watch('isEditingBirthday', value => {
+                                    if (value) {
+                                        tempBirthday = formatBirthdayForInput(user.birthday);
+                                    }
+                                })">
+                            <span class="cursor-pointer opacity-50 hover:opacity-100"
+                                @click="isEditingBirthday = !isEditingBirthday; if (!isEditingBirthday) saveBirthday(); else $nextTick(() => $refs.birthdayInput.focus());">
+                                <i x-show="!isEditingBirthday" class="fas fa-pencil"></i>
+                                <i x-show="isEditingBirthday" class="fas fa-circle-check"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 leading-10">
+                        <span class="opacity-75">Jenis Kelamin :</span>
+                        <span x-show='!isEditingGender'
+                            x-text="user.gender === 'm' ? 'Laki' : (user.gender === 'f' ? 'Perempuan' : '-')">
+                        </span>
+                        <div @click.outside="cancelEditingGender">
+                            <select x-show="isEditingGender" x-model="tempGender" class="my-input"
+                                x-ref="genderInput" @keydown.enter="isEditingGender = !isEditingGender; saveGender()"
+                                x-init="$watch('isEditingGender', value => {
+                                    if (value) {
+                                        tempGender = $refs.genderInput.value;
+                                    }
+                                })">
+                                <option class="bg-primary text-primary-content" value="m">Laki</option>
+                                <option class="bg-primary text-primary-content" value="f">Perempuan</option>
+                            </select>
+                            <span class="cursor-pointer opacity-50 hover:opacity-100"
+                                @click="isEditingGender = !isEditingGender; if (!isEditingGender) saveGender(); else $nextTick(() => $refs.genderInput.focus());">
+                                <i x-show="!isEditingGender" class="fas fa-pencil"></i>
+                                <i x-show="isEditingGender" class="fas fa-circle-check"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 leading-10">
+                        <span class="opacity-75">Status Pernikahan
+                            :</span>
+                        <span x-show='!isEditingStatusPernikahan' class="capitalize"
+                            x-text='user["status-pernikahan"]'></span>
+
+                        <div @click.outside="cancelEditingStatusPernikahan">
+                            <select x-show="isEditingStatusPernikahan" x-model="tempStatusPernikahan"
+                                x-ref='pernikahanInput' class="my-input"
+                                @keydown.enter="isEditingStatusPernikahan = !isEditingStatusPernikahan; saveStatusPernikahan()"
+                                x-init="$watch('isEditingStatusPernikahan', value => {
+                                    if (value) {
+                                        tempStatusPernikahan = $refs.pernikahanInput.value;
+                                    }
+                                })">
+                                <option class="bg-primary text-primary-content" value="Lajang">Lajang</option>
+                                <option class="bg-primary text-primary-content" value="Menikah">Menikah</option>
+                                <option class="bg-primary text-primary-content" value="Bercerai">Bercerai</option>
+                            </select>
+                            <span class="cursor-pointer opacity-50 hover:opacity-100"
+                                @click="isEditingStatusPernikahan = !isEditingStatusPernikahan; if (!isEditingStatusPernikahan) saveStatusPernikahan(); else $nextTick(() => $refs.pernikahanInput.focus());">
+                                <i x-show="!isEditingStatusPernikahan" class="fas fa-pencil"></i>
+                                <i x-show="isEditingStatusPernikahan" class="fas fa-circle-check"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 leading-10">
+                        <span class="opacity-75">Pekerjaan :</span>
+                        <span x-show="!isEditingOccupation" x-text='user.occupation'></span>
+
+                        <div @click.outside="cancelEditingOccupation">
+                            <input x-show="isEditingOccupation" type="text" x-model="tempOccupation"
+                                class="my-input" autocomplete="off" x-ref="occupationInput"
+                                @keydown.enter="isEditingOccupation = !isEditingOccupation; saveOccupation()"
+                                x-init="$watch('isEditingOccupation', value => {
+                                    if (value) {
+                                        tempOccupation = user.occupation
+                                    }
+                                })">
+                            <span class="cursor-pointer opacity-50 hover:opacity-100"
+                                @click="isEditingOccupation = !isEditingOccupation; if (!isEditingOccupation) saveOccupation(); else $nextTick(() => $refs.occupationInput.focus());">
+                                <i x-show="!isEditingOccupation" class="fas fa-pencil"></i>
+                                <i x-show="isEditingOccupation" class="fas fa-circle-check"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 leading-10">
+                        <span class="opacity-75">Pendidikan :</span>
+                        <span x-show='!isEditingEducation' x-text='user.education'></span>
+                        <div @click.outside="cancelEditingEducation">
+                            <select x-show="isEditingEducation" x-model="tempEducation" x-ref='educationInput'
+                                class="my-input"
+                                @keydown.enter="isEditingEducation = !isEditingEducation; saveEducation()"
+                                x-init="$watch('isEditingEducation', value => {
+                                    if (value) {
+                                        tempEducation = $refs.educationInput.value;
+                                    }
+                                })">
+                                <option class="bg-primary text-primary-content" value="Tidak Sekolah">Tidak
+                                    Sekolah</option>
+                                <option class="bg-primary text-primary-content" value="SD">SD</option>
+                                <option class="bg-primary text-primary-content" value="SMP">SMP</option>
+                                <option class="bg-primary text-primary-content" value="SMA">SMA</option>
+                                <option class="bg-primary text-primary-content" value="D3">D3</option>
+                                <option class="bg-primary text-primary-content" value="S1">S1</option>
+                                <option class="bg-primary text-primary-content" value="S1 Profesi">S1 Profesi
+                                </option>
+                                <option class="bg-primary text-primary-content" value="S2">S2</option>
+                                <option class="bg-primary text-primary-content" value="S3">S3</option>
+                            </select>
+                            <span class="cursor-pointer opacity-50 hover:opacity-100"
+                                @click="isEditingEducation = !isEditingEducation; if (!isEditingEducation) saveEducation(); else $nextTick(() => $refs.educationInput.focus());">
+                                <i x-show="!isEditingEducation" class="fas fa-pencil"></i>
+                                <i x-show="isEditingEducation" class="fas fa-circle-check"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <h2 class="font-bold uppercase mb-2 mt-4">Kontak</h2>
+
+                    <div class="flex gap-2 leading-10">
+                        <span class="opacity-75">Nomor HP :</span>
+                        <span x-show='!isEditingHp' x-text='user.hp'></span>
+                        <div @click.outside="cancelEditingHp">
+                            <input x-show="isEditingHp" type="text" x-model="tempHp" class="my-input"
+                                autocomplete="off" x-ref="hpInput"
+                                @keydown.enter="isEditingHp = !isEditingHp; saveHp()" x-init="$watch('isEditingHp', value => {
+                                    if (value) {
+                                        tempHp = user.hp
+                                    }
+                                })">
+                            <span class="cursor-pointer opacity-50 hover:opacity-100"
+                                @click="isEditingHp = !isEditingHp; if (!isEditingHp) saveHp(); else $nextTick(() => $refs.hpInput.focus());">
+                                <i x-show="!isEditingHp" class="fas fa-pencil"></i>
+                                <i x-show="isEditingHp" class="fas fa-circle-check"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 leading-10">
+                        <span class="opacity-75">Email :</span>
+                        <span x-show='!isEditingEmail' x-text='user.email'></span>
+                        <div @click.outside="cancelEditingEmail">
+                            <input x-show="isEditingEmail" type="text" x-model="tempEmail" class="my-input"
+                                autocomplete="off" x-ref="emailInput"
+                                @keydown.enter="isEditingEmail = !isEditingEmail; saveEmail()"
+                                x-init="$watch('isEditingEmail', value => {
+                                    if (value) {
+                                        tempEmail = user.email
+                                    }
+                                })">
+                            <span class="cursor-pointer opacity-50 hover:opacity-100"
+                                @click="isEditingEmail = !isEditingEmail; if (!isEditingEmail) saveEmail(); else $nextTick(() => $refs.emailInput.focus());">
+                                <i x-show="!isEditingEmail" class="fas fa-pencil"></i>
+                                <i x-show="isEditingEmail" class="fas fa-circle-check"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="others mt-4"></div>
+
+                    <div class="flex gap-2 leading-10 font-bold">
+                        <span>Tanggal bergabung
+                            :</span><span x-text='formattedJoinedDate'></span>
+                    </div>
+
                 </div>
 
-                <!-- Tab Contents -->
-                <div class="p-6 bg-base-200 rounded text-sm">
-                    <div x-show="activeTab === 1">
-                        <h2 class="font-bold uppercase mb-2">Data Diri</h2>
+                <div x-show="activeTab === 2">
+                    @include('client.profile.data-order', [
+                        'numb_per_page' => $numb_per_page,
+                    ])
 
-                        <div class="flex gap-2 leading-10">
-                            <span class="opacity-75">Nama Lengkap :</span>
-                            <span x-show="!isEditingFullname" x-text='user.fullname'>
-                            </span>
-                            <div @click.outside="cancelEditingFullname">
-                                <input x-show="isEditingFullname" type="text" x-model="tempFullname" class="my-input"
-                                    autocomplete="off" x-ref="fullnameInput"
-                                    @keydown.enter="isEditingFullname = !isEditingFullname; saveFullname()"
-                                    x-init="$watch('isEditingFullname', value => {
-                                        if (value) {
-                                            tempFullname = user.fullname
-                                        }
-                                    })">
-                                <span class="cursor-pointer opacity-50 hover:opacity-100"
-                                    @click="isEditingFullname = !isEditingFullname; if (!isEditingFullname) saveFullname(); else $nextTick(() => $refs.fullnameInput.focus());">
-                                    <i x-show="!isEditingFullname" class="fas fa-pencil"></i>
-                                    <i x-show="isEditingFullname" class="fas fa-circle-check"></i>
-                                </span>
-                            </div>
-                        </div>
+                </div>
 
-                        <div class="flex gap-2 leading-10">
-                            <span class="opacity-75">Nama Panggilan :</span>
-                            <span x-show="!isEditingName" x-text='user.name'>
-                            </span>
-                            <div @click.outside="cancelEditingName">
-                                <input x-show="isEditingName" type="text" x-model="tempName" class="my-input"
-                                    autocomplete="off" x-ref="nameInput"
-                                    @keydown.enter="isEditingName = !isEditingName; saveName()"
-                                    x-init="$watch('isEditingName', value => {
-                                        if (value) {
-                                            tempName = user.name
-                                        }
-                                    })">
-                                <span class="cursor-pointer opacity-50 hover:opacity-100"
-                                    @click="isEditingName = !isEditingName; if (!isEditingName) saveName(); else $nextTick(() => $refs.nameInput.focus());">
-                                    <i x-show="!isEditingName" class="fas fa-pencil"></i>
-                                    <i x-show="isEditingName" class="fas fa-circle-check"></i>
-                                </span>
-                            </div>
-                        </div>
+                <div x-show="activeTab === 3">
+                    <!-- Tambah alamat baru -->
+                    <button class="btn btn-primary btn-sm mb-6 flex items-center gap-2"
+                        @click.prevent="$dispatch('open-modal', {data: null, name: 'address-form-store'})">
+                        <i class="fas fa-plus"></i>
+                        Tambah Alamat
+                    </button>
 
-                        <div class="flex gap-2 leading-10">
-                            <span class="opacity-75">Tanggal Lahir
-                                :</span>
-                            <span x-show="!isEditingBirthday" x-text='formattedBirthday'>
-                            </span>
-                            <div @click.outside="cancelEditingBirthday">
-                                <input x-show="isEditingBirthday" type="date" x-model="tempBirthday"
-                                    class="my-input" autocomplete="off" x-ref="birthdayInput"
-                                    @keydown.enter="isEditingBirthday = !isEditingBirthday; updateUserData()"
-                                    x-init="$watch('isEditingBirthday', value => {
-                                        if (value) {
-                                            tempBirthday = formatBirthdayForInput(user.birthday);
-                                        }
-                                    })">
-                                <span class="cursor-pointer opacity-50 hover:opacity-100"
-                                    @click="isEditingBirthday = !isEditingBirthday; if (!isEditingBirthday) saveBirthday(); else $nextTick(() => $refs.birthdayInput.focus());">
-                                    <i x-show="!isEditingBirthday" class="fas fa-pencil"></i>
-                                    <i x-show="isEditingBirthday" class="fas fa-circle-check"></i>
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-2 leading-10">
-                            <span class="opacity-75">Jenis Kelamin :</span>
-                            <span x-show='!isEditingGender'
-                                x-text="user.gender === 'm' ? 'Laki' : (user.gender === 'f' ? 'Perempuan' : '-')">
-                            </span>
-                            <div @click.outside="cancelEditingGender">
-                                <select x-show="isEditingGender" x-model="tempGender" class="my-input"
-                                    x-ref="genderInput"
-                                    @keydown.enter="isEditingGender = !isEditingGender; saveGender()"
-                                    x-init="$watch('isEditingGender', value => {
-                                        if (value) {
-                                            tempGender = $refs.genderInput.value;
-                                        }
-                                    })">
-                                    <option class="bg-primary text-primary-content" value="m">Laki</option>
-                                    <option class="bg-primary text-primary-content" value="f">Perempuan</option>
-                                </select>
-                                <span class="cursor-pointer opacity-50 hover:opacity-100"
-                                    @click="isEditingGender = !isEditingGender; if (!isEditingGender) saveGender(); else $nextTick(() => $refs.genderInput.focus());">
-                                    <i x-show="!isEditingGender" class="fas fa-pencil"></i>
-                                    <i x-show="isEditingGender" class="fas fa-circle-check"></i>
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-2 leading-10">
-                            <span class="opacity-75">Status Pernikahan
-                                :</span>
-                            <span x-show='!isEditingStatusPernikahan' class="capitalize"
-                                x-text='user["status-pernikahan"]'></span>
-
-                            <div @click.outside="cancelEditingStatusPernikahan">
-                                <select x-show="isEditingStatusPernikahan" x-model="tempStatusPernikahan"
-                                    x-ref='pernikahanInput' class="my-input"
-                                    @keydown.enter="isEditingStatusPernikahan = !isEditingStatusPernikahan; saveStatusPernikahan()"
-                                    x-init="$watch('isEditingStatusPernikahan', value => {
-                                        if (value) {
-                                            tempStatusPernikahan = $refs.pernikahanInput.value;
-                                        }
-                                    })">
-                                    <option class="bg-primary text-primary-content" value="Lajang">Lajang</option>
-                                    <option class="bg-primary text-primary-content" value="Menikah">Menikah</option>
-                                    <option class="bg-primary text-primary-content" value="Bercerai">Bercerai</option>
-                                </select>
-                                <span class="cursor-pointer opacity-50 hover:opacity-100"
-                                    @click="isEditingStatusPernikahan = !isEditingStatusPernikahan; if (!isEditingStatusPernikahan) saveStatusPernikahan(); else $nextTick(() => $refs.pernikahanInput.focus());">
-                                    <i x-show="!isEditingStatusPernikahan" class="fas fa-pencil"></i>
-                                    <i x-show="isEditingStatusPernikahan" class="fas fa-circle-check"></i>
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-2 leading-10">
-                            <span class="opacity-75">Pekerjaan :</span>
-                            <span x-show="!isEditingOccupation" x-text='user.occupation'></span>
-
-                            <div @click.outside="cancelEditingOccupation">
-                                <input x-show="isEditingOccupation" type="text" x-model="tempOccupation"
-                                    class="my-input" autocomplete="off" x-ref="occupationInput"
-                                    @keydown.enter="isEditingOccupation = !isEditingOccupation; saveOccupation()"
-                                    x-init="$watch('isEditingOccupation', value => {
-                                        if (value) {
-                                            tempOccupation = user.occupation
-                                        }
-                                    })">
-                                <span class="cursor-pointer opacity-50 hover:opacity-100"
-                                    @click="isEditingOccupation = !isEditingOccupation; if (!isEditingOccupation) saveOccupation(); else $nextTick(() => $refs.occupationInput.focus());">
-                                    <i x-show="!isEditingOccupation" class="fas fa-pencil"></i>
-                                    <i x-show="isEditingOccupation" class="fas fa-circle-check"></i>
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-2 leading-10">
-                            <span class="opacity-75">Pendidikan :</span>
-                            <span x-show='!isEditingEducation' x-text='user.education'></span>
-                            <div @click.outside="cancelEditingEducation">
-                                <select x-show="isEditingEducation" x-model="tempEducation" x-ref='educationInput'
-                                    class="my-input"
-                                    @keydown.enter="isEditingEducation = !isEditingEducation; saveEducation()"
-                                    x-init="$watch('isEditingEducation', value => {
-                                        if (value) {
-                                            tempEducation = $refs.educationInput.value;
-                                        }
-                                    })">
-                                    <option class="bg-primary text-primary-content" value="Tidak Sekolah">Tidak
-                                        Sekolah</option>
-                                    <option class="bg-primary text-primary-content" value="SD">SD</option>
-                                    <option class="bg-primary text-primary-content" value="SMP">SMP</option>
-                                    <option class="bg-primary text-primary-content" value="SMA">SMA</option>
-                                    <option class="bg-primary text-primary-content" value="D3">D3</option>
-                                    <option class="bg-primary text-primary-content" value="S1">S1</option>
-                                    <option class="bg-primary text-primary-content" value="S1 Profesi">S1 Profesi
-                                    </option>
-                                    <option class="bg-primary text-primary-content" value="S2">S2</option>
-                                    <option class="bg-primary text-primary-content" value="S3">S3</option>
-                                </select>
-                                <span class="cursor-pointer opacity-50 hover:opacity-100"
-                                    @click="isEditingEducation = !isEditingEducation; if (!isEditingEducation) saveEducation(); else $nextTick(() => $refs.educationInput.focus());">
-                                    <i x-show="!isEditingEducation" class="fas fa-pencil"></i>
-                                    <i x-show="isEditingEducation" class="fas fa-circle-check"></i>
-                                </span>
-                            </div>
-                        </div>
-
-                        <h2 class="font-bold uppercase mb-2 mt-4">Kontak</h2>
-
-                        <div class="flex gap-2 leading-10">
-                            <span class="opacity-75">Nomor HP :</span>
-                            <span x-show='!isEditingHp' x-text='user.hp'></span>
-                            <div @click.outside="cancelEditingHp">
-                                <input x-show="isEditingHp" type="text" x-model="tempHp" class="my-input"
-                                    autocomplete="off" x-ref="hpInput"
-                                    @keydown.enter="isEditingHp = !isEditingHp; saveHp()" x-init="$watch('isEditingHp', value => {
-                                        if (value) {
-                                            tempHp = user.hp
-                                        }
-                                    })">
-                                <span class="cursor-pointer opacity-50 hover:opacity-100"
-                                    @click="isEditingHp = !isEditingHp; if (!isEditingHp) saveHp(); else $nextTick(() => $refs.hpInput.focus());">
-                                    <i x-show="!isEditingHp" class="fas fa-pencil"></i>
-                                    <i x-show="isEditingHp" class="fas fa-circle-check"></i>
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-2 leading-10">
-                            <span class="opacity-75">Email :</span>
-                            <span x-show='!isEditingEmail' x-text='user.email'></span>
-                            <div @click.outside="cancelEditingEmail">
-                                <input x-show="isEditingEmail" type="text" x-model="tempEmail" class="my-input"
-                                    autocomplete="off" x-ref="emailInput"
-                                    @keydown.enter="isEditingEmail = !isEditingEmail; saveEmail()"
-                                    x-init="$watch('isEditingEmail', value => {
-                                        if (value) {
-                                            tempEmail = user.email
-                                        }
-                                    })">
-                                <span class="cursor-pointer opacity-50 hover:opacity-100"
-                                    @click="isEditingEmail = !isEditingEmail; if (!isEditingEmail) saveEmail(); else $nextTick(() => $refs.emailInput.focus());">
-                                    <i x-show="!isEditingEmail" class="fas fa-pencil"></i>
-                                    <i x-show="isEditingEmail" class="fas fa-circle-check"></i>
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="others mt-4"></div>
-
-                        <div class="flex gap-2 leading-10 font-bold">
-                            <span>Tanggal bergabung
-                                :</span><span x-text='formattedJoinedDate'></span>
-                        </div>
-
-                    </div>
-
-                    <div x-show="activeTab === 2">
-                        @include('client.profile.data-order', [
-                            'numb_per_page' => $numb_per_page,
-                        ])
-
-                    </div>
-
-                    <div x-show="activeTab === 3">
-                        <button class="btn btn-primary mb-4 btn-sm"
-                            @click.prevent="$dispatch('open-modal', {data: null, name: 'address-form-store'})"><i
-                                class="fas fa-plus"></i></button>
-
-                        @foreach (auth()->user()->address as $item)
-                            <div class="alamat bg-base-300 p-4 rounded mb-3 shadow-lg">
-                                <h2 class="font-bold text-base mb-2">
+                    @foreach (auth()->user()->address as $item)
+                        <div
+                            class="bg-base-100 border border-base-300 rounded-xl p-5 mb-4 shadow-sm hover:shadow-md transition">
+                            <!-- Header -->
+                            <div class="flex items-center mb-3">
+                                <h2 class="font-semibold text-lg text-base-content">
                                     {{ $item->name }}
-                                    @if ($item->isMain)
-                                        <span class="badge badge-primary badge-xs badge-outline p-2">utama</span>
-                                    @endif
                                 </h2>
-                                <address>
-                                    {{ $item->address }}
-                                </address>
-                                <p x-data="{ note: '{{ $item->noteForCurrier }}' }" x-text="'('+note+')'" x-show="note"></p>
-
-                                <div class="flex gap-2 leading-relaxed mt-2">
-                                    <span class="opacity-75">Provinsi :</span><span>{{ $item->province }}</span>
-                                </div>
-
-                                <div class="flex gap-2 leading-relaxed mt-2">
-                                    <span class="opacity-75">Kota / Kabupaten :</span><span>{{ $item->city }}</span>
-                                </div>
-
-                                <div class="flex gap-2 leading-relaxed mt-2">
-                                    <span class="opacity-75">Kecamatan :</span><span>{{ $item->district }}</span>
-                                </div>
-
-                                <div class="flex gap-2 leading-relaxed mt-2">
-                                    <span class="opacity-75">Kode POS :</span><span>{{ $item->postal_code }}</span>
-                                </div>
-
-                                <div class="flex gap-2 leading-relaxed mt-2">
-                                    <span class="opacity-75">Penerima :</span><span>{{ $item->recipient }}</span>
-                                </div>
-
-                                <div class="flex items-center">
-                                    <div class="flex gap-2">
-                                        <span class="opacity-75">HP :</span><span>{{ $item->hp }}</span>
-                                    </div>
-                                    <div class="ml-auto">
-                                        @if (!$item->isMain)
-                                            <button type="button" class="btn btn-error btn-sm"
-                                                @click.prevent="$dispatch('open-modal', {data: '{{ $item }}', name: 'confirm-address-deletion'})">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        @endif
-                                        <button class="btn btn-primary btn-sm"
-                                            @click.prevent="$dispatch('open-modal', {data: '{{ $item }}', name: 'address-form-update'})"><i
-                                                class="fas fa-pencil"></i></button>
-                                    </div>
-                                </div>
+                                @if ($item->isMain)
+                                    <span class="ml-3 badge badge-primary badge-sm">Utama</span>
+                                @endif
                             </div>
-                        @endforeach
-                    </div>
 
-                    <div x-show="activeTab === 4">
-                        <section>
-                            <header>
-                                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                                    {{ __('Testimonial') }}
-                                </h2>
+                            <!-- Address -->
+                            <p class="text-sm text-gray-700 leading-relaxed">
+                                {{ $item->address }}
+                            </p>
 
-                                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                                    {{ __('Bagikan pengalaman Anda menggunakan layanan kami.') }}
-                                </p>
-                            </header>
+                            <!-- Note -->
+                            <p x-data="{ note: '{{ $item->noteForCurrier }}' }" x-text="'('+note+')'" x-show="note"
+                                class="text-xs text-gray-500 mt-1"></p>
 
-                            <form method="post" action="{{ route('profile.testimonial.save') }}"
-                                class="mt-6 space-y-6">
-                                @csrf
-                                @method('post')
+                            <!-- Detail Info Grid -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 text-sm">
+                                <div><span class="opacity-60">Provinsi:</span> <span
+                                        class="font-medium">{{ $item->province }}</span></div>
+                                <div><span class="opacity-60">Kota / Kabupaten:</span> <span
+                                        class="font-medium">{{ $item->city }}</span></div>
+                                <div><span class="opacity-60">Kecamatan:</span> <span
+                                        class="font-medium">{{ $item->district }}</span></div>
+                                <div><span class="opacity-60">Kode POS:</span> <span
+                                        class="font-medium">{{ $item->postal_code }}</span></div>
+                                <div><span class="opacity-60">Penerima:</span> <span
+                                        class="font-medium">{{ $item->recipient }}</span></div>
+                                <div><span class="opacity-60">HP:</span> <span
+                                        class="font-medium">{{ $item->hp }}</span></div>
+                            </div>
 
-                                <div>
-                                    <x-input-label for="testimonial_message_label" :value="__('Testimonial anda')" />
-                                    <textarea id="testimonial_message_label" name="message"
-                                        class="mt-1 block w-full h-32 resize-none border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">{{ old('message', $testimonial->message ?? '') }}</textarea>
+                            <!-- Actions -->
+                            <div class="flex justify-end gap-2 mt-4">
+                                @if (!$item->isMain)
+                                    <button type="button" class="btn btn-outline btn-error btn-sm"
+                                        @click.prevent="$dispatch('open-modal', {data: '{{ $item }}', name: 'confirm-address-deletion'})">
+                                        <i class="fas fa-trash"></i> Hapus
+                                    </button>
+                                @endif
+                                <button class="btn btn-outline btn-primary btn-sm"
+                                    @click.prevent="$dispatch('open-modal', {data: '{{ $item }}', name: 'address-form-update'})">
+                                    <i class="fas fa-pencil"></i> Edit
+                                </button>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
 
-                                    <x-input-error :messages="$errors->testimonialMessage->get('testimonial_message')" class="mt-2" />
+                <div x-show="activeTab === 4">
+                    <section>
+                        <header>
+                            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                                {{ __('Testimonial') }}
+                            </h2>
+
+                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                {{ __('Bagikan pengalaman Anda menggunakan layanan kami.') }}
+                            </p>
+                        </header>
+
+                        <form method="post" action="{{ route('profile.testimonial.save') }}"
+                            class="mt-6 space-y-6">
+                            @csrf
+                            @method('post')
+
+                            <div>
+                                <x-input-label for="testimonial_message_label" :value="__('Testimonial anda')" />
+                                <textarea id="testimonial_message_label" name="message"
+                                    class="mt-1 block w-full h-32 resize-none border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">{{ old('message', $testimonial->message ?? '') }}</textarea>
+
+                                <x-input-error :messages="$errors->testimonialMessage->get('testimonial_message')" class="mt-2" />
+                            </div>
+
+                            <div class="flex items-center gap-4">
+                                <x-primary-button>{{ __('Simpan') }}</x-primary-button>
+
+                                @if (session('status') === 'testimonial_message')
+                                    <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"
+                                        class="text-sm text-gray-600 dark:text-gray-400">
+                                        {{ __('Simpan.') }}</p>
+                                @endif
+                            </div>
+                        </form>
+                    </section>
+
+                </div>
+
+                <div x-show="activeTab === 5">
+                    <section>
+                        <header>
+                            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                                {{ __('Perbarui Password') }}
+                            </h2>
+
+                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                {{ __('Pastikan akun Anda menggunakan password yang panjang dan acak untuk tetap aman.') }}
+                            </p>
+                        </header>
+
+                        <form method="post" action="{{ route('password.update') }}" class="mt-6 space-y-6">
+                            @csrf
+                            @method('put')
+
+                            <div>
+                                <x-input-label for="update_password_current_password" :value="__('Password Saat Ini')" />
+
+                                <div x-data="{ show: false }" class="relative">
+                                    <x-text-input id="update_password_current_password"
+                                        class="block mt-1 w-full pr-10" x-bind:type="show ? 'text' : 'password'"
+                                        name="current_password" required autocomplete="current-password" />
+
+                                    <!-- Toggle button -->
+                                    <button type="button" @click="show = !show"
+                                        class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+
+                                        <!-- Mata terbuka -->
+                                        <span x-show="!show" class="material-symbols-outlined">
+                                            visibility
+                                        </span>
+
+                                        <!-- Mata tertutup -->
+                                        <span x-show="show" class="material-symbols-outlined">
+                                            visibility_off
+                                        </span>
+                                    </button>
                                 </div>
+                                <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2" />
+                            </div>
 
-                                <div class="flex items-center gap-4">
-                                    <x-primary-button>{{ __('Simpan') }}</x-primary-button>
+                            <div>
+                                <x-input-label for="update_password_password" :value="__('Password Baru')" />
 
-                                    @if (session('status') === 'testimonial_message')
-                                        <p x-data="{ show: true }" x-show="show" x-transition
-                                            x-init="setTimeout(() => show = false, 2000)" class="text-sm text-gray-600 dark:text-gray-400">
-                                            {{ __('Simpan.') }}</p>
-                                    @endif
+                                <div x-data="{ show: false }" class="relative">
+                                    <x-text-input id="update_password_password" class="block mt-1 w-full pr-10"
+                                        x-bind:type="show ? 'text' : 'password'" name="password" required
+                                        autocomplete="new-password" />
+
+                                    <!-- Toggle button -->
+                                    <button type="button" @click="show = !show"
+                                        class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+
+                                        <!-- Mata terbuka -->
+                                        <span x-show="!show" class="material-symbols-outlined">
+                                            visibility
+                                        </span>
+
+                                        <!-- Mata tertutup -->
+                                        <span x-show="show" class="material-symbols-outlined">
+                                            visibility_off
+                                        </span>
+                                    </button>
                                 </div>
-                            </form>
-                        </section>
+                                <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-2" />
+                            </div>
 
-                    </div>
+                            <div>
+                                <x-input-label for="update_password_password_confirmation" :value="__('Konfirmasi Password')" />
 
-                    <div x-show="activeTab === 5">
-                        <section>
-                            <header>
-                                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                                    {{ __('Perbarui Password') }}
-                                </h2>
+                                <div x-data="{ show: false }" class="relative">
+                                    <x-text-input id="update_password_password_confirmation"
+                                        class="block mt-1 w-full pr-10" x-bind:type="show ? 'text' : 'password'"
+                                        name="password_confirmation" required autocomplete="new-password" />
 
-                                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                                    {{ __('Pastikan akun Anda menggunakan password yang panjang dan acak untuk tetap aman.') }}
-                                </p>
-                            </header>
+                                    <!-- Toggle button -->
+                                    <button type="button" @click="show = !show"
+                                        class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
 
-                            <form method="post" action="{{ route('password.update') }}" class="mt-6 space-y-6">
-                                @csrf
-                                @method('put')
+                                        <!-- Mata terbuka -->
+                                        <span x-show="!show" class="material-symbols-outlined">
+                                            visibility
+                                        </span>
 
-                                <div>
-                                    <x-input-label for="update_password_current_password" :value="__('Password Saat Ini')" />
-
-                                    <div x-data="{ show: false }" class="relative">
-                                        <x-text-input id="update_password_current_password"
-                                            class="block mt-1 w-full pr-10" x-bind:type="show ? 'text' : 'password'"
-                                            name="current_password" required autocomplete="current-password" />
-
-                                        <!-- Toggle button -->
-                                        <button type="button" @click="show = !show"
-                                            class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-
-                                            <!-- Mata terbuka -->
-                                            <span x-show="!show" class="material-symbols-outlined">
-                                                visibility
-                                            </span>
-
-                                            <!-- Mata tertutup -->
-                                            <span x-show="show" class="material-symbols-outlined">
-                                                visibility_off
-                                            </span>
-                                        </button>
-                                    </div>
-                                    <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2" />
+                                        <!-- Mata tertutup -->
+                                        <span x-show="show" class="material-symbols-outlined">
+                                            visibility_off
+                                        </span>
+                                    </button>
                                 </div>
+                                <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-2" />
+                            </div>
 
-                                <div>
-                                    <x-input-label for="update_password_password" :value="__('Password Baru')" />
+                            <div class="flex items-center gap-4">
+                                <x-primary-button>{{ __('Simpan') }}</x-primary-button>
 
-                                    <div x-data="{ show: false }" class="relative">
-                                        <x-text-input id="update_password_password" class="block mt-1 w-full pr-10"
-                                            x-bind:type="show ? 'text' : 'password'" name="password" required
-                                            autocomplete="new-password" />
-
-                                        <!-- Toggle button -->
-                                        <button type="button" @click="show = !show"
-                                            class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-
-                                            <!-- Mata terbuka -->
-                                            <span x-show="!show" class="material-symbols-outlined">
-                                                visibility
-                                            </span>
-
-                                            <!-- Mata tertutup -->
-                                            <span x-show="show" class="material-symbols-outlined">
-                                                visibility_off
-                                            </span>
-                                        </button>
-                                    </div>
-                                    <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-2" />
-                                </div>
-
-                                <div>
-                                    <x-input-label for="update_password_password_confirmation" :value="__('Konfirmasi Password')" />
-
-                                    <div x-data="{ show: false }" class="relative">
-                                        <x-text-input id="update_password_password_confirmation"
-                                            class="block mt-1 w-full pr-10" x-bind:type="show ? 'text' : 'password'"
-                                            name="password_confirmation" required autocomplete="new-password" />
-
-                                        <!-- Toggle button -->
-                                        <button type="button" @click="show = !show"
-                                            class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-
-                                            <!-- Mata terbuka -->
-                                            <span x-show="!show" class="material-symbols-outlined">
-                                                visibility
-                                            </span>
-
-                                            <!-- Mata tertutup -->
-                                            <span x-show="show" class="material-symbols-outlined">
-                                                visibility_off
-                                            </span>
-                                        </button>
-                                    </div>
-                                    <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-2" />
-                                </div>
-
-                                <div class="flex items-center gap-4">
-                                    <x-primary-button>{{ __('Simpan') }}</x-primary-button>
-
-                                    @if (session('status') === 'password-updated')
-                                        <p x-data="{ show: true }" x-show="show" x-transition
-                                            x-init="setTimeout(() => show = false, 2000)" class="text-sm text-gray-600 dark:text-gray-400">
-                                            {{ __('Tersimpan.') }}</p>
-                                    @endif
-                                </div>
-                            </form>
-                        </section>
-                    </div>
+                                @if (session('status') === 'password-updated')
+                                    <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"
+                                        class="text-sm text-gray-600 dark:text-gray-400">
+                                        {{ __('Tersimpan.') }}</p>
+                                @endif
+                            </div>
+                        </form>
+                    </section>
                 </div>
             </div>
         </div>
@@ -764,6 +765,20 @@
             <style>
                 .select2 {
                     width: 100% !important;
+                }
+
+                .no-scrollbar::-webkit-scrollbar {
+                    display: none;
+                }
+
+                .no-scrollbar {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                    scroll-snap-type: x mandatory;
+                }
+
+                .no-scrollbar>* {
+                    scroll-snap-align: start;
                 }
             </style>
         @endpush
