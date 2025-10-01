@@ -44,6 +44,7 @@ Route::middleware(['auth', 'check-banned', 'verified', 'can:is-member'])->group(
     Route::delete('/remove-item/{cart}', [CartController::class, 'remove_item'])->name('client.remove_item');
     Route::post('/order', OrderController::class);
     Route::get('/order/{order}', [OrderController::class, 'order_by_id']);
+    Route::get('/order/{order}/tracking', [OrderController::class, 'order_tracking']);
     Route::patch('/order/{order}', [OrderController::class, 'upload_bukti_bayar']);
     Route::get('/profile', [ProfileController::class, 'index'])->name('client.profile')->middleware('auth', 'can:is-member');
     Route::post('/coupon', [CouponController::class, 'check_coupon']);
@@ -78,7 +79,9 @@ Route::prefix('admin')
         Route::get('order/{order}', [OrderController::class, 'show'])->name('admin-order.show');
         Route::patch('order/{order}', [OrderController::class, 'next_state'])->name('admin-order.next-state');
         Route::post('order/{order}/receipt', [OrderController::class, 'save_receipt'])->name('admin-order.save-receipt');
+        Route::post('order/{order}/confirm', [OrderController::class, 'confirm_order'])->name('admin-order.confirm_order');
         Route::patch('cancel-order/{order}', [OrderController::class, 'cancel'])->name('admin-order.cancel');
+        Route::get('order/{order}/tracking', [OrderController::class, 'order_tracking'])->name('admin-order.order_tracking');
 
         // PAGES ADMIN
         Route::prefix('pages')->group(function () {

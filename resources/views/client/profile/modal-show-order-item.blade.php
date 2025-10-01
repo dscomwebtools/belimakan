@@ -52,22 +52,21 @@
 
         <!-- Pembayaran & Status Pembayaran -->
         <div class="flex flex-col md:flex-row md:justify-between mb-4 gap-4">
-            <div class="md:w-1/2">
-                <h2 class="font-bold text-lg">Pembayaran</h2>
-                <span x-text="$store.cart.orderDetail.payment_method"></span>
-                <span x-text="$store.cart.orderDetail.bank_account?.bank_name"></span>
-                <div class="relative inline-block">
+            <div class="md:w-1/2 space-y-1">
+                <h2 class="font-semibold text-lg">Pembayaran</h2>
+                <p class="text-gray-700">
+                    <span x-text="$store.cart.orderDetail.payment_method"></span>
+                    <span x-text="$store.cart.orderDetail.bank_account?.bank_name"></span>
+                </p>
+                <div class="flex items-center gap-2" x-show="$store.cart.orderDetail.bank_account">
                     <span x-text="$store.cart.orderDetail.bank_account?.account_number"></span>
                     <button @click="$store.cart.copyToClipboard($store.cart.orderDetail.bank_account?.account_number)"
-                        class="tooltip" data-tip="Copy nomor rekening">
-                        <span class="far fa-copy"></span>
+                        class="text-gray-500 hover:text-gray-700 tooltip" data-tip="Copy nomor rekening">
+                        <i class="far fa-copy"></i>
                     </button>
-
-                    <span x-show="$store.cart.showNotifSuccess" x-text="$store.cart.message"
-                        class="absolute left-[100%] top-full -translate-x-1/2 mt-2
-           bg-white border border-gray-300 text-black 
-           text-sm px-3 py-1 rounded shadow-lg whitespace-nowrap"></span>
                 </div>
+                <span x-show="$store.cart.showNotifSuccess" x-text="$store.cart.message"
+                    class="text-xs text-green-600"></span>
             </div>
 
             <div class="md:w-1/2 md:text-end">
@@ -77,30 +76,47 @@
         </div>
 
         <!-- Delivery Receipt -->
-        <div x-if="$store.cart.orderDetail.receipt">
-            <div class="mb-4">
-                <h2 class="font-bold text-lg">Resi Pengiriman</h2>
-                <div class="flex flex-col gap-2">
-                    <div>
-                        <span class="font-semibold">Nomor Resi:</span>
-                        <span x-text="$store.cart.orderDetail.receipt?.receipt_number || '-'"></span>
-                    </div>
-                    <div>
-                        <span class="font-semibold">Bukti Resi:</span>
-                        <template x-if="$store.cart.orderDetail.receipt?.receipt_img">
-                            <div class="tooltip" data-tip="Download Resi">
-                                <a :href="$store.cart.orderDetail.receipt.receipt_img_url"
-                                    :download="'resi-' + $store.cart.orderDetail.id + '.jpg'" class="inline-block">
-                                    <i class="fa fa-download text-blue-600"></i>
-                                </a>
-                            </div>
-                        </template>
-                        <template x-if="!$store.cart.orderDetail.receipt?.receipt_img">
-                            <span class="text-gray-500">Resi belum dibuat</span>
-                        </template>
-                    </div>
+        <div class="bg-white shadow rounded-lg p-4 mb-4">
+            <h2 class="font-bold text-lg mb-3">Resi Pengiriman</h2>
+
+            <div class="space-y-3 text-sm">
+                <!-- Nomor Resi -->
+                <div class="flex items-center justify-between">
+                    <span class="font-semibold">Nomor Resi:</span>
+                    <span
+                        x-text="$store.cart.orderDetail.receipt?.receipt_number || $store.cart.orderDetail.biteship_waybill || '-'"></span>
+                </div>
+
+                <!-- Bukti Resi -->
+                <div class="flex items-center justify-between">
+                    <span class="font-semibold">Bukti Resi:</span>
+                    <template x-if="$store.cart.orderDetail.receipt?.receipt_img">
+                        <a :href="$store.cart.orderDetail.receipt.receipt_img_url"
+                            :download="'resi-' + ($store.cart.orderDetail.receipt?.receipt_number || $store.cart.orderDetail
+                                .biteship_waybill) + '.jpg'"
+                            class="text-blue-600 hover:underline flex items-center gap-1">
+                            <i class="fa fa-download"></i> Download
+                        </a>
+                    </template>
+                    <template x-if="!$store.cart.orderDetail.receipt?.receipt_img">
+                        <span class="text-gray-500">Belum ada</span>
+                    </template>
                 </div>
             </div>
+
+            <!-- Tracking link -->
+            <template x-if="$store.cart.orderDetail.biteship_waybill">
+                <div class="mt-4 pt-3 border-t text-sm">
+                    <a href="#"
+                        @click.prevent="
+                    $dispatch('open-modal', 'modal-show-order-tracking'); 
+                    $store.cart.getTrackingDetail($store.cart.orderDetail.id)
+               "
+                        class="text-teal-600 hover:underline flex items-center gap-1">
+                        <i class="fa fa-eye"></i> Lihat Pengiriman
+                    </a>
+                </div>
+            </template>
         </div>
 
         <!-- Data Barang -->

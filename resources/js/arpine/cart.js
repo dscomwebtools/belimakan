@@ -214,6 +214,32 @@ export default {
         this.orderDetail = await (await fetch(`/order/${order_id}`)).json();
     },
 
+    trackingDetail: null,
+    async getTrackingDetail(order_id) {
+        this.trackingDetail = null;
+        let response = await fetch(`/order/${order_id}/tracking`);
+        let data = await response.json();
+
+        if (data.status && data.response.success) {
+            this.trackingDetail = data.response;
+        } else {
+            console.warn("Tracking not available:", data.response?.message || data.message);
+            this.trackingDetail = null;
+        }
+    },
+
+    async getAdminTrackingDetail(order_id) {
+        let response = await fetch(`/admin/order/${order_id}/tracking`);
+        let data = await response.json();
+
+        if (data.status && data.response.success) {
+            this.trackingDetail = data.response;
+        } else {
+            console.warn("Tracking not available:", data.response?.message || data.message);
+            this.trackingDetail = {};
+        }
+    },
+
     proceedToCheckout() {
         window.location.href = "/checkout";
     },

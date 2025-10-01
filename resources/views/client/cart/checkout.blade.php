@@ -304,6 +304,12 @@
                             </div>
                         </template>
                     </div>
+
+                    <div class="bg-base-200 p-6 rounded mb-4 flex flex-col gap-4">
+                        <label for="note" class="font-semibold">Catatan untuk Pesanan</label>
+                        <textarea id="note" x-model="$store.checkout.note" placeholder="Contoh: Tolong hati-hati mudah pecah"
+                            class="my-input flex-1 min-h-[80px]"></textarea>
+                    </div>
                 </div>
 
             </div>
