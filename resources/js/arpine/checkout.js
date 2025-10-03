@@ -103,6 +103,7 @@ export default {
         // 🔹 Ambil destination dari addressSelected
         const destination_latitude = this.addressSelected.latitude;
         const destination_longitude = this.addressSelected.longitude;
+        console.log("Isi ? ", destination_latitude, destination_longitude, this.addressSelected)
 
         if (!destination_latitude || !destination_longitude) {
             this.showNotificationFailed('Alamat tujuan belum lengkap.');
