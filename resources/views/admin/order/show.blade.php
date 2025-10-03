@@ -393,7 +393,7 @@
                                                 Konfirm Order <i class="fa fa-check"></i>
                                             </button>
                                         </form>
-                                    @else
+                                    {{-- @else
                                         <form action="{{ route('admin-order.next-state', $data->id) }}"
                                             method="post" class="inline-block">
                                             @csrf
@@ -403,7 +403,7 @@
                                                 {{ $needsReceipt ? 'disabled' : '' }}>
                                                 Next Status <i class="fa fa-arrow-right"></i>
                                             </button>
-                                        </form>
+                                        </form> --}}
                                     @endif
                                 @endif
 

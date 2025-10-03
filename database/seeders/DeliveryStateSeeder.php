@@ -43,7 +43,7 @@ class DeliveryStateSeeder extends Seeder
             ['biteship_status' => 'picked',            'biteship_status_name' => 'Paket Sudah Diambil Kurir', 'description' => 'Paket berhasil dijemput kurir.'],
             ['biteship_status' => 'cancelled',         'biteship_status_name' => 'Order Dibatalkan',       'description' => 'Order dibatalkan.'],
             ['biteship_status' => 'on_hold',           'biteship_status_name' => 'Order Ditahan',          'description' => 'Pengiriman ditunda untuk alasan tertentu.'],
-            ['biteship_status' => 'dropping_off',      'biteship_status_name' => 'Sedang Dikirim',         'description' => 'Paket sedang dalam perjalanan ke penerima.'],
+            ['biteship_status' => 'dropping_off',      'biteship_status_name' => 'Paket Sedang Dikirim',         'description' => 'Paket sedang dalam perjalanan ke penerima.'],
             ['biteship_status' => 'return_in_transit', 'biteship_status_name' => 'Paket Dalam Proses Retur', 'description' => 'Paket sedang dalam perjalanan kembali ke pengirim.'],
             ['biteship_status' => 'returned',          'biteship_status_name' => 'Paket Sudah Dikembalikan', 'description' => 'Paket berhasil dikembalikan ke pengirim.'],
             ['biteship_status' => 'rejected',          'biteship_status_name' => 'Paket Ditolak',          'description' => 'Penerima menolak paket.'],

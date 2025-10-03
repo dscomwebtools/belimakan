@@ -1,3 +1,9 @@
+<x-slot name="title">
+    Register - DSCOMPUTER SOLUTION
+</x-slot>
+
+<x-meta title="Daftar - DSCOMPUTER SOLUTION"
+    description="Buat akun baru di DSCOMPUTER SOLUTION dan nikmati pengalaman belanja yang lebih cepat, aman, dan nyaman." />
 <x-guest-layout>
     <form method="POST" action="{{ route('register') }}">
         @csrf
@@ -79,7 +85,8 @@
             <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
 
             <div x-data="{ show: false }" class="relative">
-                <x-text-input id="password_confirmation" class="block mt-1 w-full pr-10" x-bind:type="show ? 'text' : 'password'" name="password_confirmation" required
+                <x-text-input id="password_confirmation" class="block mt-1 w-full pr-10"
+                    x-bind:type="show ? 'text' : 'password'" name="password_confirmation" required
                     autocomplete="new-password" />
 
                 <!-- Toggle button -->
@@ -89,12 +96,12 @@
                     <!-- Mata terbuka -->
                     <span x-show="!show" class="material-symbols-outlined">
                         visibility
-                        </span>
+                    </span>
 
                     <!-- Mata tertutup -->
                     <span x-show="show" class="material-symbols-outlined">
                         visibility_off
-                        </span>
+                    </span>
                 </button>
             </div>
 

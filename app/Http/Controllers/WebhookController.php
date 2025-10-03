@@ -55,9 +55,18 @@ class WebhookController extends Controller
 
             case 'order.price':
                 if ($order->shipping_method_id) {
-                    ShippingMethod::where('id', $order->shipping_method_id)->update([
-                        'price' => $data['price'],
-                    ]);
+                    $shipping = ShippingMethod::find($order->shipping_method_id);
+
+                    if ($shipping) {
+                        $oldPrice = $shipping->price ?? 0;
+                        $newPrice = $data['price'];
+
+                        $shipping->update([
+                            'price' => $newPrice,
+                        ]);
+
+                        $order->additional_shipping_fee = $newPrice - $oldPrice;
+                    }
                 }
 
                 $order->delivery_state_id = $deliveryState->id;
@@ -68,6 +77,16 @@ class WebhookController extends Controller
                 $order->biteship_waybill  = $data['courier_waybill_id'];
                 $order->delivery_state_id = $deliveryState->id;
                 $order->save();
+
+                if ($order->receipt) {
+                    $order->receipt->receipt_number = $data['courier_waybill_id'];
+                    $order->receipt->save();
+                } else {
+                    $order->receipt()->create([
+                        'receipt_number' => $data['courier_waybill_id'],
+                    ]);
+                }
+
                 break;
         }
 

@@ -4,23 +4,8 @@
     {{ $product->name }}
 </x-slot>
 
-<x-slot name="meta">
-    {{-- Open Graph (for WhatsApp, FB, LinkedIn, etc.) --}}
-    <meta property="og:title" content="{{ $product->name }}">
-    <meta property="og:description" content="{{ Str::limit(strip_tags($product->description), 150) }}">
-    <meta property="og:image"
-        content="{{ url(Storage::url($product->product_pictures->first()->path ?? 'default.jpg')) }}">
-    <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:type" content="product">
-
-    {{-- Twitter Card --}}
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $product->name }}">
-    <meta name="twitter:description" content="{{ Str::limit(strip_tags($product->description), 150) }}">
-    <meta name="twitter:image"
-        content="{{ url(Storage::url($product->product_pictures->first()->path ?? 'default.jpg')) }}">
-    <meta name="twitter:url" content="{{ url()->current() }}">
-</x-slot>
+<x-meta title="{{ $product->name }}" description="{{ Str::limit(strip_tags($product->description), 150) }}"
+    image="{{ url(Storage::url($product->product_pictures->first()->path ?? 'default.jpg')) }}" type="product" />
 
 <div class="flex flex-wrap gap-2 mb-4" x-data>
     @if (isset($product->auction) && $product->auction->active)
