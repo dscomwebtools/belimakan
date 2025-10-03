@@ -180,6 +180,14 @@ class OrderController extends Controller
             "origin_contact_phone"  => $origin->hp,
             "origin_address"        => $origin->address,
             "origin_postal_code"    => $origin->postal_code,
+            "origin_coordinate" => [
+                "latitude"  => $origin->latitude,
+                "longitude" => $origin->longitude,
+            ],
+            "destination_coordinate" => [
+                "latitude"  => $address['latitude'],
+                "longitude" => $address['longitude'],
+            ],
             "destination_contact_name"  => $address['recipient'],
             "destination_contact_phone" => $address['hp'],
             "destination_address"       => $address['address'],

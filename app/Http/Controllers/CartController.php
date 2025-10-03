@@ -8,6 +8,7 @@ use App\Models\BankAccount;
 use App\Models\Cart;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\SettingAddress;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -150,8 +151,10 @@ class CartController extends Controller
     {
         // return 'disable dulu';
         $validated = $request->validate([
-            'origin_area_id' => ['required', 'string'],
-            'destination_area_id' => ['required', 'string'],
+            'origin_latitude' => ['required', 'string'],
+            'origin_longitude' => ['required', 'string'],
+            'destination_latitude' => ['required', 'string'],
+            'destination_longitude' => ['required', 'string'],
             'couriers' => ['required', 'string'],
             'items' => ['required', 'array']
         ]);
@@ -165,8 +168,10 @@ class CartController extends Controller
         ])->post(
             'https://api.biteship.com/v1/rates/couriers',
             [
-                'origin_area_id' => $validated["origin_area_id"],
-                "destination_area_id" => $validated["destination_area_id"],
+                'origin_latitude' => $validated["origin_latitude"],
+                'origin_longitude' => $validated["origin_longitude"],
+                'destination_latitude' => $validated["destination_latitude"],
+                'destination_longitude' => $validated["destination_longitude"],
                 'couriers' => $validated["couriers"],
                 'items' => $validated["items"],
                 // item nya hanya bisa satu, jadi sum dy
@@ -174,5 +179,23 @@ class CartController extends Controller
         );
 
         return response()->json($response->json());
+    }
+
+    function origin_address(Request $request)
+    {
+        $origin = SettingAddress::first();
+
+        if (!$origin || !$origin->latitude || !$origin->longitude) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Origin address belum diatur'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'latitude' => $origin->latitude,
+            'longitude' => $origin->longitude,
+        ]);
     }
 }

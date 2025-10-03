@@ -15,25 +15,55 @@
     </div>
 
     <!-- LIST ORDER -->
+    <!-- LIST ORDER -->
     <div class="grid gap-6">
         @foreach ($data as $item)
             <div class="bg-base-200 rounded-xl shadow-md overflow-hidden border border-base-300">
                 <!-- Header -->
-                <div class="flex justify-between items-center bg-base-300 px-4 py-2">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 bg-base-300 px-4 py-2">
                     <div>
-                        <p class="font-semibold text-sm">Order
-                            #{{ $loop->iteration + ($data->currentPage() - 1) * $data->perPage() }}</p>
-                        <p class="text-xs opacity-70">{{ $item->created_at->isoFormat('LL') }}</p>
+                        <p class="font-semibold text-sm sm:text-base">
+                            Invoice {{ $item->invoice }}
+                        </p>
+                        <p class="text-xs sm:text-sm opacity-70">
+                            {{ $item->created_at->isoFormat('LL') }}
+                        </p>
                     </div>
-                    <span class="badge badge-primary badge-outline">{{ $item->delivery_state->name }}</span>
+                    <span
+                        class="badge badge-outline whitespace-nowrap 
+                        {{ $item->delivery_state_id == 6 ? 'badge-error' : 'badge-primary' }}
+                        md:text-base text-sm">
+                        {{ $item->delivery_state->name }}
+                    </span>
                 </div>
 
                 <!-- Body -->
-                <div class="p-4 grid sm:grid-cols-2 gap-2 text-sm">
-                    <p><span class="font-semibold">Alamat:</span> {{ $item->order_address->name }}</p>
-                    <p><span class="font-semibold">Pembayaran:</span> {{ $item->payment_method }}</p>
-                    <p><span class="font-semibold">Bank:</span> {{ $item->bank_account->bank_name ?? '-' }}</p>
-                    <p><span class="font-semibold">Total:</span> <x-client.format-rp value="{{ $item->total }}" /></p>
+                <div class="p-4 flex gap-4">
+                    <!-- Gambar produk pertama -->
+                    @php
+                        $firstDetail = $item->order_detail->first();
+                    @endphp
+                    @if ($firstDetail && $firstDetail->product)
+                        <div class="w-24 md:w-32 h-24 md:h-32 flex-shrink-0 overflow-hidden rounded-lg border bg-white">
+                            <img src="{{ asset('storage/' . $firstDetail->product->product_pictures[0]->path) }}"
+                                alt="{{ $firstDetail->product->name }}" class="w-full h-full object-cover">
+                        </div>
+                    @endif
+
+                    <!-- Info ringkas -->
+                    <div class="flex flex-col gap-2 text-sm md:text-base">
+                        <p class="font-semibold">
+                            {{ $firstDetail?->product?->name ?? 'Produk tidak ditemukan' }}
+                            @if ($item->order_detail->count() > 1)
+                                <span class="text-xs opacity-70">
+                                    +{{ $item->order_detail->count() - 1 }} produk lain
+                                </span>
+                            @endif
+                        </p>
+                        <p class="mt-1">
+                            Total: <x-client.format-rp value="{{ $item->total }}" />
+                        </p>
+                    </div>
                 </div>
 
                 <!-- Footer (Actions) -->
@@ -56,7 +86,7 @@
                             </button>
                         </form>
                     </div>
-                    <div class="tooltip" data-tip="Lihat">
+                    <div class="tooltip mr-4" data-tip="Lihat Detail">
                         <a href="#"
                             @click.prevent="$dispatch('open-modal', 'modal-show-order-item'); $store.cart.getOrderDetail('{{ $item->id }}')">
                             <i class="fa fa-eye text-teal-600 hover:scale-110 transition"></i>
