@@ -1,3 +1,9 @@
+<x-slot name="title">
+    Login - DSCOMPUTER SOLUTION
+</x-slot>
+
+<x-meta title="Login - DSCOMPUTER SOLUTION"
+    description="Masuk ke akun DSCOMPUTER SOLUTION Anda untuk melanjutkan belanja dengan mudah, aman, dan cepat." />
 <x-guest-layout>
     <form method="POST" action="{{ route('login') }}">
         @csrf

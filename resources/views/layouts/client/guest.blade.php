@@ -12,19 +12,8 @@
     @if (isset($meta))
         {{ $meta }}
     @else
-        <meta property="og:title" content="DSCOMPUTER SOLUTION">
-        <meta property="og:description"
-            content="Toko online DS Computer Solution. Temukan beragam produk pilihan dari merk ternama dan terpercaya. Kami hanya menghadirkan barang berkualitas dengan jaminan keaslian, kondisi terbaik, bergaransi resmi sesuai ketentuan produk, dan siap membantu bila ada masalah setelah barang diterima.">
-        <meta property="og:image" content="{{ asset('assets/images/logo.webp') }}">
-        <meta property="og:url" content="{{ url()->current() }}">
-        <meta property="og:type" content="website">
-
-        {{-- Twitter Card mirrors OG --}}
-        <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" content="{{ $title ?? 'DSCOMPUTER SOLUTION' }}">
-        <meta name="twitter:description"
-            content="{{ isset($meta) ? '' : 'Toko online DS Computer Solution. Temukan beragam produk pilihan dari merk ternama dan terpercaya. Kami hanya menghadirkan barang berkualitas dengan jaminan keaslian, kondisi terbaik, bergaransi resmi sesuai ketentuan produk, dan siap membantu bila ada masalah setelah barang diterima.' }}">
-        <meta name="twitter:image" content="{{ asset('assets/images/logo.webp') }}">
+        <x-meta title="DSCOMPUTER SOLUTION"
+            description="Toko online DSCOMPUTER SOLUTION. Temukan beragam produk pilihan dari merk ternama, bergaransi resmi, dan pelayanan terbaik." />
     @endif
 
     <!-- Scripts -->
