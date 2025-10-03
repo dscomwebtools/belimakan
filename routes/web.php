@@ -21,13 +21,11 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SosmedController;
 use App\Http\Controllers\TestimonialController;
-use App\Http\Controllers\WebhookController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [ClientController::class, 'home'])->name('client.home');
 Route::get('/product/{slug}', [ProductController::class, 'product'])->name('client.product');
-Route::post('/webhook/biteship', [WebhookController::class, 'biteship']);
 
 Route::middleware(['auth', 'check-banned', 'verified'])->group(function () {
     Route::get('/promo', [ClientController::class, 'promo'])->name('client.promo');

@@ -34,22 +34,22 @@ class DeliveryStateSeeder extends Seeder
             );
         }
 
-        // --- STATUS DARI BITESHIP ---
+        // --- STATUS DARI BITESHIP (dengan label user-friendly) ---
         $biteshipStatuses = [
-            ['biteship_status' => 'confirmed',      'biteship_status_name' => 'Terkonfirmasi',       'description' => 'Order is ready to be confirmed. AWB has been generated.'],
-            ['biteship_status' => 'scheduled',      'biteship_status_name' => 'Dijadwalkan',        'description' => 'Order has been scheduled to be delivered. AWB has been generated.'],
-            ['biteship_status' => 'allocated',      'biteship_status_name' => 'Dialokasikan',       'description' => 'Order has been allocated, courier will pickup the package.'],
-            ['biteship_status' => 'picking_up',     'biteship_status_name' => 'Sedang dijemput',    'description' => 'Courier is on the way to pickup the package. (First Mile)'],
-            ['biteship_status' => 'picked',         'biteship_status_name' => 'Sudah dijemput',     'description' => 'Package has been picked up by courier.'],
-            ['biteship_status' => 'cancelled',      'biteship_status_name' => 'Dibatalkan',         'description' => 'Order has been cancelled.'],
-            ['biteship_status' => 'on_hold',        'biteship_status_name' => 'Ditahan',            'description' => 'Order is on hold for any reason.'],
-            ['biteship_status' => 'dropping_off',   'biteship_status_name' => 'Sedang dikirim',     'description' => 'Courier is dropping off the package to the receiver. (Last Mile)'],
-            ['biteship_status' => 'return_in_transit', 'biteship_status_name' => 'Dalam pengembalian', 'description' => 'Package is on the transit for a return to sender.'],
-            ['biteship_status' => 'returned',       'biteship_status_name' => 'Sudah dikembalikan', 'description' => 'Package has been returned to sender.'],
-            ['biteship_status' => 'rejected',       'biteship_status_name' => 'Ditolak',            'description' => 'Order has been rejected.'],
-            ['biteship_status' => 'disposed',       'biteship_status_name' => 'Dihancurkan',        'description' => 'Package has been disposed / destroyed.'],
-            ['biteship_status' => 'courier_not_found', 'biteship_status_name' => 'Kurir tidak ditemukan', 'description' => 'Cannot find courier for the order.'],
-            ['biteship_status' => 'delivered',      'biteship_status_name' => 'Terkirim',           'description' => 'Package has been delivered to the receiver.'],
+            ['biteship_status' => 'confirmed',         'biteship_status_name' => 'Order Terkonfirmasi',    'description' => 'Order sudah terkonfirmasi, siap diproses.'],
+            ['biteship_status' => 'scheduled',         'biteship_status_name' => 'Pengiriman Dijadwalkan', 'description' => 'Sudah dijadwalkan untuk dikirim.'],
+            ['biteship_status' => 'allocated',         'biteship_status_name' => 'Kurir Dialokasikan',     'description' => 'Kurir sudah ditugaskan untuk pickup.'],
+            ['biteship_status' => 'picking_up',        'biteship_status_name' => 'Kurir Menuju Lokasi Pickup', 'description' => 'Kurir sedang menuju lokasi pengambilan paket.'],
+            ['biteship_status' => 'picked',            'biteship_status_name' => 'Paket Sudah Diambil Kurir', 'description' => 'Paket berhasil dijemput kurir.'],
+            ['biteship_status' => 'cancelled',         'biteship_status_name' => 'Order Dibatalkan',       'description' => 'Order dibatalkan.'],
+            ['biteship_status' => 'on_hold',           'biteship_status_name' => 'Order Ditahan',          'description' => 'Pengiriman ditunda untuk alasan tertentu.'],
+            ['biteship_status' => 'dropping_off',      'biteship_status_name' => 'Paket Sedang Dikirim',         'description' => 'Paket sedang dalam perjalanan ke penerima.'],
+            ['biteship_status' => 'return_in_transit', 'biteship_status_name' => 'Paket Dalam Proses Retur', 'description' => 'Paket sedang dalam perjalanan kembali ke pengirim.'],
+            ['biteship_status' => 'returned',          'biteship_status_name' => 'Paket Sudah Dikembalikan', 'description' => 'Paket berhasil dikembalikan ke pengirim.'],
+            ['biteship_status' => 'rejected',          'biteship_status_name' => 'Paket Ditolak',          'description' => 'Penerima menolak paket.'],
+            ['biteship_status' => 'disposed',          'biteship_status_name' => 'Paket Dihancurkan',      'description' => 'Paket dimusnahkan.'],
+            ['biteship_status' => 'courier_not_found', 'biteship_status_name' => 'Kurir Tidak Ditemukan',  'description' => 'Sistem gagal menemukan kurir untuk order ini.'],
+            ['biteship_status' => 'delivered',         'biteship_status_name' => 'Paket Terkirim',         'description' => 'Paket sudah sampai ke penerima.'],
         ];
 
         foreach ($biteshipStatuses as $status) {
