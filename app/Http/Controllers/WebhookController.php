@@ -18,6 +18,10 @@ class WebhookController extends Controller
 
     public function biteship(Request $request)
     {
+        if (empty($request->all())) {
+            return response()->json(['ok' => true], 200);
+        }
+
         $authHeader = $request->header('Authorization');
 
         if ($authHeader !== $this->webhookSecret) {
