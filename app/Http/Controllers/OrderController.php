@@ -195,7 +195,7 @@ class OrderController extends Controller
             "destination_note"      => $address['noteForCurrier'],
             "courier_company"       => $shipping['company'],
             "courier_type"          => $shipping['type'],
-            "order_note"              => $new_order->delivery_note,
+            "order_note"              => $new_order->delivery_note ?? '',
             "delivery_type"         => "now",
             "items"                 => $items,
         ];
