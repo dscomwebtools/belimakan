@@ -80,7 +80,7 @@
                         <div class="text-base md:text-xl font-bold mb-1">Alamat Pengiriman</div>
                         {{-- SET ADDRESS DI ALPINE JS --}}
                         <div x-init="$store.checkout.setAddress(
-                            '{{ $address->id }}', '{{ $address->name }}', '{{ $address->recipient }}', '{{ $address->hp }}', '{{ $address->address }}', '{{ $address->district }}', '{{ $address->city }}', '{{ $address->province }}', '{{ $address->postal_code }}', '{{ $address->area_id }}'
+                            '{{ $address->id }}', '{{ $address->name }}', '{{ $address->recipient }}', '{{ $address->hp }}', '{{ $address->address }}', '{{ $address->district }}', '{{ $address->city }}', '{{ $address->province }}', '{{ $address->postal_code }}', '{{ $address->area_id }}', '{{ $address->latitude }}', '{{ $address->longitude }}'
                         )">
                         </div>
 

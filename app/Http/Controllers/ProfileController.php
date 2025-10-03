@@ -26,7 +26,7 @@ class ProfileController extends Controller
             'name' => ['string', 'nullable'],
         ]);
 
-        $data = Order::where('user_id', auth()->user()->id)->latest();
+        $data = Order::with(['order_detail.product', 'order_detail.product.product_pictures'])->where('user_id', auth()->user()->id)->latest();
 
         $testimonial = Testimonial::where('user_id', auth()->id())->first();
 
@@ -175,12 +175,14 @@ class ProfileController extends Controller
     function update_address(Request $request, Address $address)
     {
         $request->validateWithBag('address_update', [
-            'name' => ['required', 'string'],
-            'address' => ['required', 'string'],
-            'noteForCurrier' => ['nullable', 'string'],
-            'recipient' => ['required', 'string'],
-            'hp' => ['required', 'string', 'regex:/^(?:\+62|62|0)8[1-9][0-9]{6,9}$/'],
-            'isMain' => ['nullable', 'string'],
+            'name'            => ['required', 'string'],
+            'address'         => ['required', 'string'],
+            'noteForCurrier'  => ['nullable', 'string'],
+            'recipient'       => ['required', 'string'],
+            'hp'              => ['required', 'string', 'regex:/^(?:\+62|62|0)8[1-9][0-9]{6,9}$/'],
+            'isMain'          => ['nullable', 'string'],
+            'latitude'        => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude'       => ['nullable', 'numeric', 'between:-180,180'],
         ], [
             'hp.regex' => 'Format nomor HP tidak valid',
         ]);
@@ -204,6 +206,8 @@ class ProfileController extends Controller
         $address->recipient = $request->recipient;
         $address->hp = $request->hp;
         $address->isMain = $request->isMain ?? false;
+        $address->latitude = $request->latitude_update ?? $request->latitude_store;
+        $address->longitude = $request->longitude_update ?? $request->longitude_store;
         $address->area_id = $area["id"];
         $address->area_name = $area["name"];
         $address->province = $area["administrative_division_level_1_name"];

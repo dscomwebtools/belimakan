@@ -21,11 +21,14 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SosmedController;
 use App\Http\Controllers\TestimonialController;
+use App\Http\Controllers\WebhookController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [ClientController::class, 'home'])->name('client.home');
 Route::get('/product/{slug}', [ProductController::class, 'product'])->name('client.product');
+Route::post('/webhook/biteship', [WebhookController::class, 'biteship']);
+
 Route::middleware(['auth', 'check-banned', 'verified'])->group(function () {
     Route::get('/promo', [ClientController::class, 'promo'])->name('client.promo');
     Route::get('/lelang', [ClientController::class, 'lelang'])->name('client.lelang');
@@ -119,6 +122,7 @@ Route::post('/update-photo', [ProfileController::class, 'update_photo'])
 
 Route::get('/get-areas-single', [CartController::class, 'get_areas_single'])->name('get-areas-single');
 Route::post('/cek-ongkir', [CartController::class, 'cek_ongkir'])->name('cek-ongkir');
+Route::get('/origin-address', [CartController::class, 'origin_address'])->name('origin-address');
 
 // PUBLIC ROUTES
 // DATA CART DIPANGGIL DARI ALPINE, DIBUAT TANPA AUTH BIAR GA REDIRECT OLEH ROUTE INTEND 

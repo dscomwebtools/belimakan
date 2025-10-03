@@ -69,10 +69,10 @@ export default {
 
     // ==== CHECKOUT PAGE STUFF ====
     addressSelected: {},
-    setAddress(id, name, recipient, hp, address, district, city, province, postal_code, area_id) {
+    setAddress(id, name, recipient, hp, address, district, city, province, postal_code, area_id, latitude, longitude) {
         this.addressSelected = {
             id, name, recipient, hp, address,
-            district, city, province, postal_code, area_id,
+            district, city, province, postal_code, area_id, latitude, longitude
         };
     },
 
@@ -80,9 +80,36 @@ export default {
     async setCourierList() {
         if (this.courierList.length > 0) return;
 
-        const origin_area_id = "IDNP6IDNC147IDND833IDZ10730";
-        const destination_area_id = this.addressSelected.area_id;
+        // 🔹 Ambil origin dari API /origin-address
+        let originLat = null;
+        let originLng = null;
+        try {
+            const resOrigin = await fetch(`/origin-address`);
+            const dataOrigin = await resOrigin.json();
 
+            if (dataOrigin && dataOrigin.latitude && dataOrigin.longitude) {
+                originLat = dataOrigin.latitude;
+                originLng = dataOrigin.longitude;
+            } else {
+                this.showNotificationFailed('Origin address belum diatur.');
+                return;
+            }
+        } catch (err) {
+            console.error(err);
+            this.showNotificationFailed('Gagal ambil origin address.');
+            return;
+        }
+
+        // 🔹 Ambil destination dari addressSelected
+        const destination_latitude = this.addressSelected.latitude;
+        const destination_longitude = this.addressSelected.longitude;
+
+        if (!destination_latitude || !destination_longitude) {
+            this.showNotificationFailed('Alamat tujuan belum lengkap.');
+            return;
+        }
+
+        // 🔹 Items
         const items = this.selectedItems.map(item => {
             if (item.product_variant) {
                 return {
@@ -111,11 +138,14 @@ export default {
 
         const couriers = 'jne,jnt,sicepat,gojek,grab,lalamove,anteraja,pos,deliveree,sap';
 
+        // 🔹 Kirim request ke backend
         const response = await fetch(`/cek-ongkir`, {
             method: 'POST',
             body: JSON.stringify({
-                origin_area_id,
-                destination_area_id,
+                origin_latitude: originLat,
+                origin_longitude: originLng,
+                destination_latitude,
+                destination_longitude,
                 couriers,
                 items,
             }),
