@@ -39,38 +39,54 @@ class WebhookController extends Controller
         $deliveryState = DeliveryState::firstOrCreate(
             ['biteship_status' => $data['status']],
             [
-                'name'                => ucfirst(str_replace('_', ' ', $data['status'])),
+                'name'                 => ucfirst(str_replace('_', ' ', $data['status'])),
                 'biteship_status_name' => ucfirst(str_replace('_', ' ', $data['status'])),
-                'is_biteship_status'  => true,
-                'description'         => $data['status'],
+                'is_biteship_status'   => true,
+                'description'          => $data['status'],
             ]
         );
 
         switch ($data['event']) {
             case 'order.status':
-                $order->update([
-                    'delivery_state_id' => $deliveryState->id,
-                    'biteship_waybill'  => $data['courier_waybill_id'] ?? $order->biteship_waybill,
-                ]);
+                $order->delivery_state_id = $deliveryState->id;
+                $order->biteship_waybill  = $data['courier_waybill_id'] ?? $order->biteship_waybill;
+                $order->save();
                 break;
 
             case 'order.price':
                 if ($order->shipping_method_id) {
-                    ShippingMethod::where('id', $order->shipping_method_id)->update([
-                        'price' => $data['price'],
-                    ]);
+                    $shipping = ShippingMethod::find($order->shipping_method_id);
+
+                    if ($shipping) {
+                        $oldPrice = $shipping->price ?? 0;
+                        $newPrice = $data['price'];
+
+                        $shipping->update([
+                            'price' => $newPrice,
+                        ]);
+
+                        $order->additional_shipping_fee = $newPrice - $oldPrice;
+                    }
                 }
 
-                $order->update([
-                    'delivery_state_id' => $deliveryState->id,
-                ]);
+                $order->delivery_state_id = $deliveryState->id;
+                $order->save();
                 break;
 
             case 'order.waybill_id':
-                $order->update([
-                    'biteship_waybill'  => $data['courier_waybill_id'],
-                    'delivery_state_id' => $deliveryState->id,
-                ]);
+                $order->biteship_waybill  = $data['courier_waybill_id'];
+                $order->delivery_state_id = $deliveryState->id;
+                $order->save();
+
+                if ($order->receipt) {
+                    $order->receipt->receipt_number = $data['courier_waybill_id'];
+                    $order->receipt->save();
+                } else {
+                    $order->receipt()->create([
+                        'receipt_number' => $data['courier_waybill_id'],
+                    ]);
+                }
+
                 break;
         }
 
