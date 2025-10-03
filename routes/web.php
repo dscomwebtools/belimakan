@@ -27,7 +27,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [ClientController::class, 'home'])->name('client.home');
 Route::get('/product/{slug}', [ProductController::class, 'product'])->name('client.product');
-Route::post('/webhook/biteship', [WebhookController::class, 'biteship']);
+// Route::post('/webhook/biteship', [WebhookController::class, 'biteship']);
+
+Route::post('/webhook/biteship', function () {
+    return response()->json(['ok' => true], 200);
+});
 
 Route::middleware(['auth', 'check-banned', 'verified'])->group(function () {
     Route::get('/promo', [ClientController::class, 'promo'])->name('client.promo');
