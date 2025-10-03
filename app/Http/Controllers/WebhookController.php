@@ -39,19 +39,18 @@ class WebhookController extends Controller
         $deliveryState = DeliveryState::firstOrCreate(
             ['biteship_status' => $data['status']],
             [
-                'name'                => ucfirst(str_replace('_', ' ', $data['status'])),
+                'name'                 => ucfirst(str_replace('_', ' ', $data['status'])),
                 'biteship_status_name' => ucfirst(str_replace('_', ' ', $data['status'])),
-                'is_biteship_status'  => true,
-                'description'         => $data['status'],
+                'is_biteship_status'   => true,
+                'description'          => $data['status'],
             ]
         );
 
         switch ($data['event']) {
             case 'order.status':
-                $order->update([
-                    'delivery_state_id' => $deliveryState->id,
-                    'biteship_waybill'  => $data['courier_waybill_id'] ?? $order->biteship_waybill,
-                ]);
+                $order->delivery_state_id = $deliveryState->id;
+                $order->biteship_waybill  = $data['courier_waybill_id'] ?? $order->biteship_waybill;
+                $order->save();
                 break;
 
             case 'order.price':
@@ -61,16 +60,14 @@ class WebhookController extends Controller
                     ]);
                 }
 
-                $order->update([
-                    'delivery_state_id' => $deliveryState->id,
-                ]);
+                $order->delivery_state_id = $deliveryState->id;
+                $order->save();
                 break;
 
             case 'order.waybill_id':
-                $order->update([
-                    'biteship_waybill'  => $data['courier_waybill_id'],
-                    'delivery_state_id' => $deliveryState->id,
-                ]);
+                $order->biteship_waybill  = $data['courier_waybill_id'];
+                $order->delivery_state_id = $deliveryState->id;
+                $order->save();
                 break;
         }
 
