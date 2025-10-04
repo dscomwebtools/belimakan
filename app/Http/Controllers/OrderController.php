@@ -102,6 +102,7 @@ class OrderController extends Controller
         $new_order->coupon_code = $request->voucherCode ?? null;
         $new_order->coupon_discount = $request->voucherDiscount ?? 0;
         $new_order->delivery_note = $request->deliveryNote;
+        $shippingSource = $request->shippingSource;
 
         if ($new_order->coupon_id) {
             Coupon::where('id', $new_order->coupon_id)->increment('used_count');
@@ -112,7 +113,7 @@ class OrderController extends Controller
             $new_order->delivery_state_id = 2; //Jika Cash set status langsung 'Menunggu Konfirmasi', jika tidak maka defaultnya 'menunggu pembayaran'
         }
 
-        DB::transaction(function () use ($new_order, $request, $addressData, $shippingMethodData, $shipping_method_manual) {
+        DB::transaction(function () use ($new_order, $request, $addressData, $shippingMethodData, $shipping_method_manual, $shippingSource) {
             // 1. Save order first so it has an ID
             $new_order->save();
 
@@ -149,7 +150,7 @@ class OrderController extends Controller
                 $items = $this->buildItemsFromCarts($carts);
 
                 // 4. Call Biteship
-                $response = $this->sendToBiteship($new_order, $addressData, $shippingMethodData, $items);
+                $response = $this->sendToBiteship($new_order, $addressData, $shippingMethodData, $items, $shippingSource);
                 if (!($response['status'] ?? false)) {
                     throw new \Exception("Gagal membuat draft order di Biteship");
                 }
@@ -168,7 +169,7 @@ class OrderController extends Controller
         return response()->json(["status" => 1, "message" => "Order berhasil dibuat", $new_order]);
     }
 
-    public function sendToBiteship($new_order, $address, $shipping, $items)
+    public function sendToBiteship($new_order, $address, $shipping, $items, $shippingSource)
     {
         $origin = SettingAddress::first();
 
@@ -180,27 +181,39 @@ class OrderController extends Controller
             "origin_contact_phone"  => $origin->hp,
             "origin_address"        => $origin->address,
             "origin_postal_code"    => $origin->postal_code,
-            "origin_coordinate" => [
-                "latitude"  => $origin->latitude,
-                "longitude" => $origin->longitude,
-            ],
-            "destination_coordinate" => [
-                "latitude"  => $address['latitude'],
-                "longitude" => $address['longitude'],
-            ],
             "destination_contact_name"  => $address['recipient'],
             "destination_contact_phone" => $address['hp'],
             "destination_address"       => $address['address'],
             "destination_postal_code"   => strval($address['postal_code']),
-            "destination_note"      => $address['noteForCurrier'],
-            "courier_company"       => $shipping['company'],
-            "courier_type"          => $shipping['type'],
-            "order_note"              => $new_order->delivery_note ?? '',
-            "delivery_type"         => "now",
-            "items"                 => $items,
+            "destination_note"          => $address['noteForCurrier'],
+            "courier_company"           => $shipping['company'],
+            "courier_type"              => $shipping['type'],
+            "courier_insurance"         => 0,
+            "order_note"                => $new_order->delivery_note ?? '',
+            "delivery_type"             => "now",
+            "items"                     => $items,
         ];
 
-        // 👇 call API Biteship
+        if ($shippingSource == 'regular') {
+            $payload["origin_area_id"] = $origin->area_id;
+        }
+        if ($shippingSource == 'instant') {
+            $payload["origin_coordinate"] = [
+                "latitude"  => $origin->latitude,
+                "longitude" => $origin->longitude,
+            ];
+        }
+
+        if ($shippingSource == 'regular') {
+            $payload["destination_area_id"] = $address['area_id'];
+        }
+        if ($shippingSource == 'instant') {
+            $payload["destination_coordinate"] = [
+                "latitude"  => $address['latitude'],
+                "longitude" => $address['longitude'],
+            ];
+        }
+
         $response = Http::withHeaders([
             "authorization" => "{$this->key}",
             "content-type" => "application/json",

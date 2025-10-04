@@ -119,6 +119,7 @@
         </div>
 
         <div class="mt-6 flex gap-2 items-center">
+            <input type="hidden" name="isMain" value="0">
             <input type="checkbox" name="isMain" value="1" :checked="data?.isMain ? true : false" />
             <label for="isMain">{{ __('Utama') }}</label>
         </div>
@@ -141,8 +142,10 @@
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     function(position) {
-                        document.querySelector('input[name=latitude_update]').value = position.coords.latitude.toFixed(6);
-                        document.querySelector('input[name=longitude_update]').value = position.coords.longitude.toFixed(6);
+                        document.querySelector('input[name=latitude_update]').value = position.coords.latitude.toFixed(
+                            6);
+                        document.querySelector('input[name=longitude_update]').value = position.coords.longitude
+                            .toFixed(6);
                     },
                     function(error) {
                         alert("Gagal mendapatkan lokasi: " + error.message);

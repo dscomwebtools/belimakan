@@ -73,7 +73,6 @@
                             class="text-bold text-green-500">disini</a>
                     </div>
                 </div>
-                '{{ $address->latitude }}', '{{ $address->longitude }}'
                 {{-- END LIST PRODUCT --}}
 
                 <div class="flex flex-col gap-2 flex-1 mt-10">
@@ -84,7 +83,6 @@
                             '{{ $address->id }}', '{{ $address->name }}', '{{ $address->recipient }}', '{{ $address->hp }}', '{{ $address->address }}', '{{ $address->district }}', '{{ $address->city }}', '{{ $address->province }}', '{{ $address->postal_code }}', '{{ $address->area_id }}', '{{ $address->latitude }}', '{{ $address->longitude }}'
                         )">
                         </div>
-                        '{{ $address->latitude }}', '{{ $address->longitude }}'
 
                         <div class="flex flex-col gap-4 text-sm md:text-base">
                             <div class="flex-1 capitalize">
@@ -123,6 +121,8 @@
                                         $event.target.options[$event.target.selectedIndex].dataset.province,
                                         $event.target.options[$event.target.selectedIndex].dataset.postal_code,
                                         $event.target.options[$event.target.selectedIndex].dataset.area_id,
+                                        $event.target.options[$event.target.selectedIndex].dataset.latitude,
+                                        $event.target.options[$event.target.selectedIndex].dataset.longitude,
                                     )">
                                     @foreach ($addresses as $address)
                                         <option value="{{ $address->id }}" data-name="{{ $address->name }}"
@@ -131,7 +131,9 @@
                                             data-district="{{ $address->district }}" data-city="{{ $address->city }}"
                                             data-province="{{ $address->province }}"
                                             data-postal_code="{{ $address->postal_code }}"
-                                            data-area_id="{{ $address->area_id }}">
+                                            data-area_id="{{ $address->area_id }}"
+                                            data-latitude="{{ $address->latitude }}"
+                                            data-longitude="{{ $address->longitude }}">
                                             {{ $address->name }}
                                         </option>
                                     @endforeach
