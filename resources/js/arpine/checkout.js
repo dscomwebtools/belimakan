@@ -189,6 +189,7 @@ export default {
                     }
                 });
                 const resultInstant = await responseInstant.json();
+                this.instant_loading = false;
                 if (resultInstant.success) {
                     this.courierListInstant = resultInstant.pricing;
                     this.groupedCourierListInstant = this.groupByCourier(resultInstant.pricing);
