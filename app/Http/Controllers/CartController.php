@@ -40,7 +40,7 @@ class CartController extends Controller
         }
 
         // yg ini untuk dropdown
-        $addresses = Address::where('user_id', auth()->user()->id)->get();
+        $addresses = Address::orderByDesc('isMain')->where('user_id', auth()->user()->id)->get();
 
         if ($addresses->isEmpty()) {
             return redirect()->back()->withErrors(["no_address" => "Data alamat pengiriman tidak ditemukan, silahkan tambahkan data alamat Anda pada menu profile !"]);
@@ -149,33 +149,38 @@ class CartController extends Controller
 
     function cek_ongkir(Request $request)
     {
-        // return 'disable dulu';
         $validated = $request->validate([
-            'origin_latitude' => ['required', 'string'],
-            'origin_longitude' => ['required', 'string'],
-            'destination_latitude' => ['required', 'string'],
-            'destination_longitude' => ['required', 'string'],
+            'origin_area_id' => ['nullable', 'string'],
+            'destination_area_id' => ['nullable', 'string'],
+            'origin_latitude' => ['nullable', 'string'],
+            'origin_longitude' => ['nullable', 'string'],
+            'destination_latitude' => ['nullable', 'string'],
+            'destination_longitude' => ['nullable', 'string'],
             'couriers' => ['required', 'string'],
             'items' => ['required', 'array']
         ]);
 
+        $payload = [
+            'couriers' => $validated['couriers'],
+            'items'    => $validated['items'],
+        ];
+
+        if (!empty($validated['origin_area_id']) && !empty($validated['destination_area_id'])) {
+            $payload['origin_area_id'] = $validated['origin_area_id'];
+            $payload['destination_area_id'] = $validated['destination_area_id'];
+        } else {
+            $payload['origin_latitude'] = $validated['origin_latitude'];
+            $payload['origin_longitude'] = $validated['origin_longitude'];
+            $payload['destination_latitude'] = $validated['destination_latitude'];
+            $payload['destination_longitude'] = $validated['destination_longitude'];
+        }
 
         $response = Http::withHeaders([
-            'authorization' => "{$this->key}",
-            // 'authorization' => '${this->key}',
-            'content-type' => 'application/json',
-            // DIBAWAH CONTOH CEK ONGKIR / COURIER RATES
+            'authorization' => $this->key,
+            'content-type'  => 'application/json',
         ])->post(
             'https://api.biteship.com/v1/rates/couriers',
-            [
-                'origin_latitude' => $validated["origin_latitude"],
-                'origin_longitude' => $validated["origin_longitude"],
-                'destination_latitude' => $validated["destination_latitude"],
-                'destination_longitude' => $validated["destination_longitude"],
-                'couriers' => $validated["couriers"],
-                'items' => $validated["items"],
-                // item nya hanya bisa satu, jadi sum dy
-            ]
+            $payload
         );
 
         return response()->json($response->json());
@@ -194,8 +199,7 @@ class CartController extends Controller
 
         return response()->json([
             'success' => true,
-            'latitude' => $origin->latitude,
-            'longitude' => $origin->longitude,
+            'data' => $origin,
         ]);
     }
 }

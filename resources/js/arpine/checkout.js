@@ -69,105 +69,157 @@ export default {
 
     // ==== CHECKOUT PAGE STUFF ====
     addressSelected: {},
+    profileHasLocation: false,
     setAddress(id, name, recipient, hp, address, district, city, province, postal_code, area_id, latitude, longitude) {
         this.addressSelected = {
             id, name, recipient, hp, address,
             district, city, province, postal_code, area_id, latitude, longitude
         };
+
+        console.log(latitude, longitude);
+
+        this.profileHasLocation = !!(latitude && longitude);
     },
 
-    courierList: [],
-    async setCourierList() {
-        if (this.courierList.length > 0) return;
+    courierCategories(type = 'regular') {
+        if (type === 'regular') {
+            return "jne,jnt,sicepat,anteraja"; // daftar kurir reguler
+        }
+        if (type === 'instant') {
+            return "gojek,grab,lalamove"; // daftar kurir instant
+        }
+        return "";
+    },
 
-        // 🔹 Ambil origin dari API /origin-address
-        let originLat = null;
-        let originLng = null;
+    courierListReguler: [],
+    courierListInstant: [],
+    groupedCourierListRegular: [],
+    groupedCourierListInstant: [],
+    lastAddressId: "",
+    destination_latitude: "",
+    destination_longitude: "",
+    regular_loading: true,
+    instant_loading: true,
+    courierSelected: null,
+    courierSource: null, // "regular" | "instant" | "manual"
+    async setCourierList() {
+        if (
+            this.lastAddressId === this.addressSelected?.id &&
+            this.courierListRegular &&
+            (this.courierListInstant || !this.profileHasLocation)
+        ) {
+            return;
+        }
+
+        this.regular_loading = true;
+        this.instant_loading = true;
+
+        this.lastAddressId = this.addressSelected?.id;
+        this.destination_latitude = this.addressSelected.latitude;
+        this.destination_longitude = this.addressSelected.longitude;
+        let dataOrigin = null;
+        let originAreaId = null;
+
+        console.log("What ? ", this.destination_latitude, this.destination_longitude);
+
         try {
             const resOrigin = await fetch(`/origin-address`);
-            const dataOrigin = await resOrigin.json();
-
-            if (dataOrigin && dataOrigin.latitude && dataOrigin.longitude) {
-                originLat = dataOrigin.latitude;
-                originLng = dataOrigin.longitude;
-            } else {
-                this.showNotificationFailed('Origin address belum diatur.');
-                return;
+            dataOrigin = await resOrigin.json();
+            if (dataOrigin.data?.area_id) {
+                originAreaId = dataOrigin.data.area_id;
             }
         } catch (err) {
-            console.error(err);
-            this.showNotificationFailed('Gagal ambil origin address.');
-            return;
+            console.error('Gagal ambil origin address:', err);
         }
 
-        // 🔹 Ambil destination dari addressSelected
-        const destination_latitude = this.addressSelected.latitude;
-        const destination_longitude = this.addressSelected.longitude;
-        console.log("Isi ? ", destination_latitude, destination_longitude, this.addressSelected)
-
-        if (!destination_latitude || !destination_longitude) {
-            this.showNotificationFailed('Alamat tujuan belum lengkap.');
-            return;
-        }
-
-        // 🔹 Items
         const items = this.selectedItems.map(item => {
-            if (item.product_variant) {
-                return {
-                    name: item.product.name,
-                    value: item.product_variant.price,
-                    weight: +item.product_variant.weight,
-                    quantity: item.quantity,
-                    sku: item.product_variant.sku,
-                    length: +item.product.dimention.length,
-                    width: +item.product.dimention.width,
-                    height: +item.product.dimention.height,
-                }
-            } else {
-                return {
-                    name: item.product.name,
-                    value: item.product.product_variant[0].price,
-                    weight: +item.product.product_variant[0].weight,
-                    quantity: item.quantity,
-                    sku: item.product.product_variant[0].sku,
-                    length: +item.product.dimention.length,
-                    width: +item.product.dimention.width,
-                    height: +item.product.dimention.height,
-                }
-            }
+            const variant = item.product_variant ?? item.product.product_variant[0];
+            return {
+                name: item.product.name,
+                value: variant.price,
+                weight: +variant.weight,
+                quantity: item.quantity,
+                sku: variant.sku,
+                length: +item.product.dimention.length,
+                width: +item.product.dimention.width,
+                height: +item.product.dimention.height,
+            };
         });
 
-        const couriers = 'jne,jnt,sicepat,gojek,grab,lalamove,anteraja,pos,deliveree,sap';
-
-        // 🔹 Kirim request ke backend
-        const response = await fetch(`/cek-ongkir`, {
-            method: 'POST',
-            body: JSON.stringify({
-                origin_latitude: originLat,
-                origin_longitude: originLng,
-                destination_latitude,
-                destination_longitude,
-                couriers,
-                items,
-            }),
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Content-Type': 'application/json',
+        try {
+            const responseRegular = await fetch(`/cek-ongkir`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    origin_area_id: originAreaId,
+                    destination_area_id: this.addressSelected.area_id,
+                    couriers: this.courierCategories('regular'),
+                    items,
+                }),
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json',
+                }
+            });
+            const resultRegular = await responseRegular.json();
+            if (resultRegular.success) {
+                this.courierListRegular = resultRegular.pricing;
+                this.groupedCourierListRegular = this.groupByCourier(resultRegular.pricing);
+                this.regular_loading = false;
             }
-        });
+        } catch (err) {
+            this.regular_loading = false;
+            console.error("Error fetch regular couriers:", err);
+        }
 
-        const result = await response.json();
-
-        if (result.success) {
-            this.courierList = result.pricing;
+        if (this.destination_latitude && this.destination_longitude) {
+            try {
+                const responseInstant = await fetch(`/cek-ongkir`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        origin_latitude: dataOrigin?.data?.latitude ?? null,
+                        origin_longitude: dataOrigin?.data?.longitude ?? null,
+                        destination_latitude: this.destination_latitude,
+                        destination_longitude: this.destination_longitude,
+                        couriers: this.courierCategories('instant'),
+                        items,
+                    }),
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Content-Type': 'application/json',
+                    }
+                });
+                const resultInstant = await responseInstant.json();
+                if (resultInstant.success) {
+                    this.courierListInstant = resultInstant.pricing;
+                    this.groupedCourierListInstant = this.groupByCourier(resultInstant.pricing);
+                    this.instant_loading = false;
+                }
+            } catch (err) {
+                this.instant_loading = false;
+                console.error("Error fetch instant couriers:", err);
+            }
         } else {
-            this.showNotificationFailed('Terjadi kesalahan saat cek ongkir, segera hubungi admin !');
+            this.instant_loading = false;
         }
     },
 
+    groupByCourier(list) {
+        const grouped = {};
+        list.forEach(item => {
+            const courier = item.courier_name;
+            if (!grouped[courier]) {
+                grouped[courier] = { open: false, data: [] };
+            }
+            grouped[courier].data.push(item);
+        });
+        return grouped;
+    },
+
+
     courierSelected: {},
-    setCourierSelected(courier) {
+    setCourierSelected(courier, source) {
         this.courierSelected = courier;
+        this.courierSource = source;
     },
 
     paymentMethod: null,
@@ -228,6 +280,7 @@ export default {
                 total: this.subtotal + (this.courierSelected.price || 0) - (this.voucherDiscount || 0),
                 orderAddressId: this.addressSelected.id,
                 shippingMethod: this.courierSelected,
+                shippingSource: this.courierSource,
                 bankAccountId: this.paymentMethod === 'Transfer' ? this.bankSelected.id : null,
                 selectedCartIds: this.selectedIds,
                 voucherId: this.voucherId || null,

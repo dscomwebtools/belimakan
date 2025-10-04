@@ -205,7 +205,6 @@ class ProfileController extends Controller
         $address->noteForCurrier = $request->noteForCurrier;
         $address->recipient = $request->recipient;
         $address->hp = $request->hp;
-        $address->isMain = $request->isMain ?? false;
         $address->latitude = $request->latitude_update ?? $request->latitude_store;
         $address->longitude = $request->longitude_update ?? $request->longitude_store;
         $address->area_id = $area["id"];
@@ -214,6 +213,10 @@ class ProfileController extends Controller
         $address->city = $area["administrative_division_level_2_name"];
         $address->district = $area["administrative_division_level_3_name"];
         $address->postal_code = $area["postal_code"];
+
+        if ($request->has('isMain')) {
+            $address->isMain = $request->isMain ? true : false;
+        }
 
         DB::transaction(function () use ($address, $request) {
             // JADIKAN ALAMAT YANG LAIN BUKAN UTAMA JIKA ALAMAT INI DIBAUT MENJADI UTAMA

@@ -53,7 +53,7 @@
         }
 
         .info-table td {
-            padding: 4px 0px 4px 8px;
+            padding: 4px 8px;
             vertical-align: top;
         }
 
@@ -135,25 +135,22 @@
         <table class="info-table">
             <tr>
                 <td class="info-label">Penjual</td>
-                <td style="white-space: nowrap; vertical-align: top;">DS Computer</td>
+                <td>DS Computer</td>
                 <td class="info-label">Nama</td>
                 <td>{{ $order->order_address->recipient }}</td>
             </tr>
             <tr>
-                <td class="info-label" rowspan="3">Pembayaran</td>
-                <td rowspan="5" style="vertical-align: top;">{{ $order->payment_method }}</td>
-
                 <td class="info-label">Alamat</td>
                 <td>
                     {{ $order->order_address->address }} <br>
                     {{ $order->order_address->area_name }}
                 </td>
-            </tr>
-            <tr>
                 <td class="info-label">Telp / WA</td>
                 <td>{{ $order->order_address->hp }}</td>
             </tr>
             <tr>
+                <td class="info-label">Metode Pembayaran</td>
+                <td>{{ $order->payment_method }}</td>
                 <td class="info-label">Kurir</td>
                 <td>
                     @isset($order->shipping_method)
@@ -221,22 +218,16 @@
         </table>
 
         <!-- TOTALS -->
-        @php
-            $ongkir = $order->shipping_method->price ?? 0;
-            $grandTotal = $totalBayar + $ongkir;
-        @endphp
         <table class="totals">
             <tr>
-                <td>Subtotal</td>
+                <td>
+                    TOTAL HARGA
+                </td>
                 <td style="text-align: right;">Rp {{ number_format($totalBayar, 0, ',', '.') }}</td>
             </tr>
             <tr>
-                <td>Ongkir</td>
-                <td style="text-align: right;">Rp {{ number_format($ongkir, 0, ',', '.') }}</td>
-            </tr>
-            <tr>
                 <td>Total Bayar</td>
-                <td style="text-align: right;"><strong>Rp {{ number_format($grandTotal, 0, ',', '.') }}</strong></td>
+                <td style="text-align: right;"><strong>Rp {{ number_format($totalBayar, 0, ',', '.') }}</strong></td>
             </tr>
         </table>
     </div>
