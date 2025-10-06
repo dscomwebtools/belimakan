@@ -76,40 +76,18 @@
                 {{-- END LIST PRODUCT --}}
 
                 <div class="flex flex-col gap-2 flex-1 mt-10">
-                    <div class="address bg-base-200 p-6 rounded mb-4">
-                        <div class="text-base md:text-xl font-bold mb-1">Alamat Pengiriman</div>
-                        {{-- SET ADDRESS DI ALPINE JS --}}
-                        <div x-init="$store.checkout.setAddress(
-                            '{{ $address->id }}', '{{ $address->name }}', '{{ $address->recipient }}', '{{ $address->hp }}', '{{ $address->address }}', '{{ $address->district }}', '{{ $address->city }}', '{{ $address->province }}', '{{ $address->postal_code }}', '{{ $address->area_id }}', '{{ $address->latitude }}', '{{ $address->longitude }}'
-                        )">
-                        </div>
+                    <div class="address bg-base-200 p-6 mb-4 flex flex-col gap-4">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-base md:text-xl font-bold flex items-center gap-2 text-gray-800">
+                                <i class="fa fa-location-dot text-primary"></i>
+                                Alamat Pengiriman
+                            </h2>
 
-                        <div class="flex flex-col gap-4 text-sm md:text-base">
-                            <div class="flex-1 capitalize">
-                                <div class="">
-                                    <i class="fa fa-map-location-dot mr-2"></i>
-                                    <span x-text="$store.checkout.addressSelected.name"></span> •
-                                    <span x-text="$store.checkout.addressSelected.recipient"></span> •
-                                    <span x-text="$store.checkout.addressSelected.hp"></span>
-                                </div>
-                                <div class="mt-4">
-                                    <span x-text="$store.checkout.addressSelected.address"></span>
-                                </div>
-                                <div class="mt-4">
-                                    Kec. <span x-text="$store.checkout.addressSelected.district"></span>
-                                </div>
-                                <div class="">
-                                    Kota/Kabupaten <span x-text="$store.checkout.addressSelected.city"></span>
-                                </div>
-                                <div class="">
-                                    Prov. <span x-text="$store.checkout.addressSelected.province"></span>
-                                </div>
-                                <div class="">
-                                    Kode Pos <span x-text="$store.checkout.addressSelected.postal_code"></span>
-                                </div>
-                            </div>
-                            <div class="flex-1 self-start tooltip tooltip-right" data-tip="Ubah alamat">
-                                <select name="addresses" id="addresses" class="my-input"
+                            <!-- Dropdown pilih alamat -->
+                            <div class="flex items-center gap-2 text-sm">
+                                <label for="addresses" class="font-medium text-gray-600 hidden sm:block">Ubah:</label>
+                                <select name="addresses" id="addresses"
+                                    class="my-input border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none transition-all"
                                     @change="$store.checkout.setAddress(
                                         $event.target.value,
                                         $event.target.options[$event.target.selectedIndex].dataset.name,
@@ -122,7 +100,7 @@
                                         $event.target.options[$event.target.selectedIndex].dataset.postal_code,
                                         $event.target.options[$event.target.selectedIndex].dataset.area_id,
                                         $event.target.options[$event.target.selectedIndex].dataset.latitude,
-                                        $event.target.options[$event.target.selectedIndex].dataset.longitude,
+                                        $event.target.options[$event.target.selectedIndex].dataset.longitude
                                     )">
                                     @foreach ($addresses as $address)
                                         <option value="{{ $address->id }}" data-name="{{ $address->name }}"
@@ -138,6 +116,49 @@
                                         </option>
                                     @endforeach
                                 </select>
+                            </div>
+                        </div>
+
+                        {{-- INIT ADDRESS DI ALPINE --}}
+                        <div x-init="$store.checkout.setAddress(
+                            '{{ $address->id }}',
+                            '{{ $address->name }}',
+                            '{{ $address->recipient }}',
+                            '{{ $address->hp }}',
+                            '{{ $address->address }}',
+                            '{{ $address->district }}',
+                            '{{ $address->city }}',
+                            '{{ $address->province }}',
+                            '{{ $address->postal_code }}',
+                            '{{ $address->area_id }}',
+                            '{{ $address->latitude }}',
+                            '{{ $address->longitude }}'
+                        )"></div>
+
+                        <div class="flex flex-col gap-2 text-sm md:text-base leading-relaxed text-gray-700">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <i class="fa fa-user text-primary"></i>
+                                <span class="capitalize font-medium"
+                                    x-text="$store.checkout.addressSelected.name"></span>
+                                <span>•</span>
+                                <span x-text="$store.checkout.addressSelected.recipient"></span>
+                                <span>•</span>
+                                <span x-text="$store.checkout.addressSelected.hp"></span>
+                            </div>
+
+                            <div class="flex items-start gap-2">
+                                <i class="fa fa-map-location-dot text-primary mt-1"></i>
+                                <div class="flex flex-col gap-1">
+                                    <div x-text="$store.checkout.addressSelected.address"></div>
+                                    <div>
+                                        Kec. <span x-text="$store.checkout.addressSelected.district"></span>,
+                                        <span x-text="$store.checkout.addressSelected.city"></span>
+                                    </div>
+                                    <div>
+                                        Prov. <span x-text="$store.checkout.addressSelected.province"></span>,
+                                        Kode Pos <span x-text="$store.checkout.addressSelected.postal_code"></span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -176,7 +197,7 @@
 
                             <div class="flex flex-col items-center">
                                 <div>Estimasi</div>
-                                <div x-text="$store.checkout.courierSelected.duration">
+                                <div x-text="`${$store.checkout.translateDuration($store.checkout.courierSelected.duration)}`">
                                 </div>
                             </div>
                         </div>
@@ -194,7 +215,7 @@
                                 class="text-base-content text-center text-sm md:text-base">
                                 Pilih metode pembayaran !
                             </div>
-                            <div class="flex gap-4 justify-center md:justify-end flex-1 flex-col sm:flex-row">
+                            <div class="flex gap-4 justify-center md:justify-end flex-1 flex-row">
                                 <button x-ref="transferBtn"
                                     :class="`btn ${$store.checkout.paymentMethod=='Transfer' ? 'btn-primary' : 'bg-gray-300'} shadow-md`"
                                     @click.prevent="$store.checkout.setPaymentMethod('Transfer')"><i
@@ -213,11 +234,13 @@
 
                         </div>
                         {{-- Bank List --}}
-                        <div x-show="$store.checkout.paymentMethod=='Transfer'" class="flex flex-col gap-2 w-full">
+                        <div x-show="$store.checkout.paymentMethod=='Transfer'" x-transition
+                            class="flex flex-col gap-3 w-full border-t border-gray-300 pt-4">
 
                             <!-- Dropdown pilih bank -->
+                            <label class="font-semibold text-gray-700">Pilih Bank Tujuan:</label>
                             <select name="bank_account_id" id="bank_account_id"
-                                class="my-input w-full border rounded p-2"
+                                class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
                                 @change="$store.checkout.setBankSelected(
                                     $event.target.value,
                                     $event.target.options[$event.target.selectedIndex].dataset.logo,
@@ -225,9 +248,9 @@
                                     $event.target.options[$event.target.selectedIndex].dataset.account_name,
                                     $event.target.options[$event.target.selectedIndex].dataset.account_number
                                 )">
-                                <option value="">Pilih Bank</option>
+                                <option value="">-- Pilih Bank --</option>
                                 @foreach ($bank_accounts as $bank_account)
-                                    <option value="{{ $bank_account->id }}"" data-logo="{{ $bank_account->logo }}"
+                                    <option value="{{ $bank_account->id }}" data-logo="{{ $bank_account->logo }}"
                                         data-bank_name="{{ $bank_account->bank_name }}"
                                         data-account_name="{{ $bank_account->account_name }}"
                                         data-account_number="{{ $bank_account->account_number }}">
@@ -269,42 +292,65 @@
                     {{-- END METODE PEMBAYARAN --}}
 
                     {{-- Voucher Coupon --}}
-                    <div class="bg-base-200 p-6 rounded mb-4 flex flex-col gap-4">
-                        <label for="voucher" class="font-semibold">Voucher / Kupon</label>
+                    <div class="bg-base-200 p-6 mb-4 flex flex-col gap-4">
+                        <label for="voucher" class="font-semibold text-gray-800 flex items-center gap-2">
+                            <i class="fa fa-ticket-alt text-primary"></i>
+                            Voucher / Kupon
+                        </label>
+
                         <div class="flex flex-col sm:flex-row gap-2">
                             <input type="text" id="voucher" x-model="$store.checkout.voucherCode"
                                 @keyup.enter.prevent="$store.checkout.applyVoucher()"
-                                placeholder="Masukkan kode voucher" class="my-input flex-1" />
+                                placeholder="Masukkan kode voucher"
+                                class="my-input flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none transition-all" />
 
-                            <button type="button" class="btn btn-primary w-full sm:w-auto"
+                            <button type="button" class="btn btn-primary w-full sm:w-auto font-medium"
                                 @click="$store.checkout.applyVoucher()">
                                 Terapkan
                             </button>
                         </div>
+
+                        <!-- Error -->
                         <template x-if="$store.checkout.voucherError">
-                            <p class="text-red-500 text-sm"
-                                x-text="
-                                    $store.checkout.voucherError
-                                        ? $store.checkout.voucherError.replace(
-                                                /Rp(\d+)/g, 
-                                                (_, n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n)
-                                            )
-                                        : ''
-                                ">
-                            </p>
+                            <div
+                                class="flex items-start gap-2 text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                                <i class="fa fa-circle-xmark mt-[2px]"></i>
+                                <p
+                                    x-text="
+                $store.checkout.voucherError
+                    ? $store.checkout.voucherError.replace(
+                            /Rp(\d+)/g, 
+                            (_, n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n)
+                        )
+                    : ''
+            ">
+                                </p>
+                            </div>
                         </template>
 
+                        <!-- Success -->
                         <template x-if="$store.checkout.voucherSuccess">
-                            <div class="text-green-600 text-sm">
-                                Voucher <span class="font-bold" x-text="$store.checkout.voucherCode"></span> berhasil
-                                digunakan!
-                                <div>
-                                    <span x-text="$store.checkout.voucherDescription">
-                                    </span>
-                                    <span
-                                        x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format($store.checkout.voucherDiscount)">
-                                    </span>
+                            <div
+                                class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg px-3 py-2">
+                                <div class="flex items-start sm:items-center gap-2">
+                                    <i class="fa fa-circle-check mt-[2px]"></i>
+                                    <div>
+                                        <span>Voucher </span>
+                                        <span class="font-semibold" x-text="$store.checkout.voucherCode"></span>
+                                        <span> berhasil digunakan!</span>
+                                        <div class="text-green-600 text-xs mt-1 sm:mt-0">
+                                            <span x-text="$store.checkout.voucherDescription"></span>
+                                            <span
+                                                x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format($store.checkout.voucherDiscount)">
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
+                                <button type="button"
+                                    class="self-end md:self-center text-xs text-green-600 hover:text-green-800 underline"
+                                    @click="$store.checkout.removeVoucher()">
+                                    Batalkan
+                                </button>
                             </div>
                         </template>
                     </div>

@@ -96,7 +96,7 @@
             </div>
 
             <!-- Tab Contents -->
-            <div class="flex-1 p-6 bg-base-200 rounded text-sm mt-4 sm:mt-0">
+            <div class="flex-1 p-6 bg-base-200 rounded text-sm">
                 <div x-show="activeTab === 1">
                     <h2 class="font-bold uppercase mb-2">Data Diri</h2>
 
