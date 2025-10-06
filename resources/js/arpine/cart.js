@@ -240,6 +240,36 @@ export default {
         }
     },
 
+    cancelReason: [],
+    async getCancelReason() {
+        if (this.cancelReason.length > 0) return;
+
+        try {
+            const res = await fetch(`/order/cancel/reason`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                credentials: 'include',
+            });
+
+            const json = await res.json();
+            const data = json.response;
+
+            if (data.success && Array.isArray(data.cancellation_reasons)) {
+                this.cancelReason = data.cancellation_reasons;
+                console.log("This : ", this.cancelReason);
+            } else {
+                console.warn("Gagal ambil alasan pembatalan:", data.message);
+                this.cancelReason = [];
+            }
+        } catch (error) {
+            console.error("Error saat fetch alasan pembatalan:", error);
+            this.cancelReason = [];
+        }
+    },
+
     proceedToCheckout() {
         window.location.href = "/checkout";
     },

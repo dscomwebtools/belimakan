@@ -497,4 +497,72 @@ class OrderController extends Controller
 
         return back()->with('success', 'Resi berhasil disimpan!');
     }
+
+    function order_cancel_reason()
+    {
+        $response = Http::withHeaders([
+            "authorization" => $this->key,
+            "content-type"  => "application/json",
+        ])->get("{$this->base}/v1/orders/cancellation_reasons?lang=id");
+
+        return [
+            "status"   => $response->successful(),
+            "response" => $response->json(),
+        ];
+    }
+
+    function order_cancel_request(Order $order, Request $request)
+    {
+        $request->validate([
+            'cancel_reason' => 'required|string',
+            'description'   => 'nullable|string|max:255',
+        ]);
+
+        $order->cancel_code = $request->cancel_reason;
+        $order->cancel_reason = $request->description;
+        $order->cancel_status = 'pending';
+        $order->save();
+
+        return back()->with('success', 'Pembatalan berhasil diajukan!');
+    }
+
+    function order_cancel(Order $order, Request $request)
+    {
+        $request->validate([
+            'status' => 'required|in:approved,rejected',
+        ]);
+
+        $order->cancel_status = $request->status;
+
+        if ($request->status === 'approved') {
+            $payload = [
+                'cancellation_reason_code' => $order->cancel_code ?? 'others',
+            ];
+
+            if ($order->cancel_code === 'others' && !empty($order->cancel_reason)) {
+                $payload['cancellation_reason'] = $order->cancel_reason;
+            }
+
+            $order->delivery_state_id = 12;
+
+            $order->save();
+
+            $response = Http::withHeaders([
+                'authorization' => $this->key,
+                'content-type'  => 'application/json',
+            ])->post("{$this->base}/v1/orders/{$order->biteship_order_id}/cancel", $payload);
+
+            if (!$response->successful()) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Gagal membatalkan pesanan di Biteship.',
+                    'api_response' => $response->json(),
+                ], 500);
+            }
+        }
+
+        $order->save();
+
+        return back()->with('success', 'Pembatalan berhasil!');
+    }
 }
