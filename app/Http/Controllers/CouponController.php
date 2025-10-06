@@ -124,9 +124,10 @@ class CouponController extends Controller
             ], 400);
         }
 
-        // Validasi tanggal berlaku
-        $today = now()->toDateString();
-        if ($coupon->valid_from && $today < $coupon->valid_from) {
+        $today = now()->startOfDay();
+        $validFrom = \Carbon\Carbon::parse($coupon->valid_from)->startOfDay();
+
+        if ($coupon->valid_from && $today->lt($validFrom)) {
             return response()->json([
                 'valid' => false,
                 'message' => 'Kode voucher belum berlaku.'

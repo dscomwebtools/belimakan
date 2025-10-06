@@ -79,6 +79,7 @@ export default {
         console.log(latitude, longitude);
 
         this.profileHasLocation = !!(latitude && longitude);
+        this.setCourierSelected({}, '');
     },
 
     courierCategories(type = 'regular') {
@@ -189,6 +190,7 @@ export default {
                     }
                 });
                 const resultInstant = await responseInstant.json();
+                this.instant_loading = false;
                 if (resultInstant.success) {
                     this.courierListInstant = resultInstant.pricing;
                     this.groupedCourierListInstant = this.groupByCourier(resultInstant.pricing);
@@ -201,6 +203,28 @@ export default {
         } else {
             this.instant_loading = false;
         }
+    },
+
+    translateDuration(duration) {
+        if (!duration) return '-';
+
+        // Hilangkan spasi berlebih & lowercase semua
+        let text = duration.toLowerCase().trim();
+
+        // Tambahkan spasi otomatis sebelum "hour"/"day" jika belum ada
+        text = text.replace(/(\d)(?=[a-z])/g, '$1 '); // ubah "1day" -> "1 day"
+
+        // Ubah tanda "-" jadi "–" (en dash)
+        text = text.replace(/-/g, '–');
+
+        // Terjemahan utama
+        if (text.includes('hour')) {
+            text = text.replace(/hours?/g, 'jam');
+        } else if (text.includes('day')) {
+            text = text.replace(/days?/g, 'hari');
+        }
+
+        return text;
     },
 
     groupByCourier(list) {
@@ -225,6 +249,15 @@ export default {
     paymentMethod: null,
     setPaymentMethod(method) {
         this.paymentMethod = method;
+    },
+
+    removeVoucher() {
+        this.voucherError = '';
+        this.voucherSuccess = false;
+        this.voucherDiscount = 0;
+        this.voucherCode = '';
+        this.voucherId = '';
+        this.voucherDescription = '';
     },
 
     async applyVoucher() {

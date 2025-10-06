@@ -92,12 +92,12 @@
                             <i class="fa fa-eye text-teal-600 hover:scale-110 transition"></i>
                         </a>
                     </div>
-                    <div class="tooltip mr-4" data-tip="Lihat Detail">
+                    {{-- <div class="tooltip mr-4" data-tip="Lihat Detail">
                         <a href="#"
                             @click.prevent="$dispatch('open-modal', 'modal-cancel-order'); $store.cart.getOrderDetail('{{ $item->id }}'); $store.cart.getCancelReason()">
                             <i class="fa fa-eye text-teal-600 hover:scale-110 transition"></i>
                         </a>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
         @endforeach

@@ -63,7 +63,8 @@
                                             x-text="new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR'}).format(courierRate.price)">
                                         </span>
                                     </div>
-                                    <div class="text-xs text-gray-500" x-text="`Estimasi: ${courierRate.duration}`">
+                                    <div class="text-xs text-gray-500"
+                                        x-text="`Estimasi: ${$store.checkout.translateDuration(courierRate.duration)}`">
                                     </div>
                                 </div>
                             </template>
@@ -97,6 +98,14 @@
                     Longitude) di profil Anda.
                 </div>
 
+                <!-- ⚠️ Kalau tidak ada kurir instant yang tersedia -->
+                <div x-show="$store.checkout.profileHasLocation && !$store.checkout.instant_loading && Object.keys($store.checkout.groupedCourierListInstant || {}).length === 0"
+                    class="p-3 bg-red-100 rounded text-sm text-red-700 border border-red-300">
+                    <b>Tidak ada kurir instant tersedia.</b><br>
+                    Lokasi tujuan kemungkinan terlalu jauh dari titik pengiriman, atau layanan belum mencakup area
+                    tersebut.
+                </div>
+
                 <!-- Courier Grouped Instant -->
                 <template x-if="$store.checkout.profileHasLocation">
                     <template x-for="(services, courier) in $store.checkout.groupedCourierListInstant"
@@ -117,7 +126,8 @@
                                                 x-text="new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR'}).format(courierRate.price)">
                                             </span>
                                         </div>
-                                        <div class="text-xs text-gray-500" x-text="`Estimasi: ${courierRate.duration}`">
+                                        <div class="text-xs text-gray-500"
+                                            x-text="`Estimasi: ${$store.checkout.translateDuration(courierRate.duration)}`">
                                         </div>
                                     </div>
                                 </template>

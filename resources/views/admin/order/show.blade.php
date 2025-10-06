@@ -157,82 +157,56 @@
                                         @endif
                                     </h1>
 
-                                    @if ($data->delivery_state_id >= 5)
-                                        {{-- SHOW-ONLY MODE --}}
-                                        <div class="space-y-4">
-                                            <div class="form-control">
-                                                <label class="label font-semibold">Nomor Resi</label>
-                                                <input type="text"
-                                                    value="{{ $data->receipt->receipt_number ?? $data->biteship_waybill }}"
-                                                    class="input input-bordered w-full bg-gray-100" readonly>
-                                            </div>
+                                    {{-- CREATE/UPDATE MODE --}}
+                                    <form action="{{ route('admin-order.save-receipt', $data->id) }}" method="POST"
+                                        enctype="multipart/form-data" class="space-y-4">
+                                        @csrf
 
-                                            <div class="form-control">
-                                                <label class="label font-semibold">Gambar Resi</label>
-                                                @if ($data->receipt?->receipt_img)
+                                        <div class="form-control">
+                                            <label for="receipt_number" class="label font-semibold">Nomor
+                                                Resi</label>
+
+                                            @if ($data->biteship_waybill)
+                                                {{-- Dari Biteship, readonly --}}
+                                                <input type="text" name="receipt_number" id="receipt_number"
+                                                    value="{{ $data->biteship_waybill }}"
+                                                    class="input input-bordered w-full bg-gray-100">
+                                                <input type="hidden" name="receipt_number"
+                                                    value="{{ $data->biteship_waybill }}">
+                                            @else
+                                                {{-- Manual, bisa diketik --}}
+                                                <input type="text" name="receipt_number" id="receipt_number"
+                                                    value="{{ $data->receipt->receipt_number ?? '' }}"
+                                                    class="input input-bordered w-full" required>
+                                            @endif
+                                        </div>
+
+                                        <div class="form-control">
+                                            <label for="receipt_img" class="label font-semibold">Upload Foto
+                                                Resi</label>
+                                            <input type="file" name="receipt_img" id="receipt_img"
+                                                class="file-input file-input-bordered w-full">
+                                            @if ($data->receipt?->receipt_img)
+                                                <div class="mt-3">
+                                                    <p class="text-xs text-warning">Pilih file baru jika ingin
+                                                        mengganti resi saat ini</p>
+                                                    <div class="mt-2 mb-1">Resi Saat Ini:</div>
                                                     <a href="{{ Storage::url($data->receipt->receipt_img) }}"
                                                         target="_blank" class="w-fit">
                                                         <img src="{{ Storage::url($data->receipt->receipt_img) }}"
                                                             alt="resi pengiriman"
                                                             class="w-40 h-[200px] object-contain rounded shadow">
                                                     </a>
-                                                @else
-                                                    <p class="text-gray-500">Belum ada gambar resi</p>
-                                                @endif
-                                            </div>
+                                                </div>
+                                            @endif
                                         </div>
-                                    @else
-                                        {{-- CREATE/UPDATE MODE --}}
-                                        <form action="{{ route('admin-order.save-receipt', $data->id) }}"
-                                            method="POST" enctype="multipart/form-data" class="space-y-4">
-                                            @csrf
 
-                                            <div class="form-control">
-                                                <label for="receipt_number" class="label font-semibold">Nomor
-                                                    Resi</label>
-
-                                                @if ($data->biteship_waybill)
-                                                    {{-- Dari Biteship, readonly --}}
-                                                    <input type="text" name="receipt_number" id="receipt_number"
-                                                        value="{{ $data->biteship_waybill }}"
-                                                        class="input input-bordered w-full bg-gray-100" readonly>
-                                                    <input type="hidden" name="receipt_number"
-                                                        value="{{ $data->biteship_waybill }}">
-                                                @else
-                                                    {{-- Manual, bisa diketik --}}
-                                                    <input type="text" name="receipt_number" id="receipt_number"
-                                                        value="{{ $data->receipt->receipt_number ?? '' }}"
-                                                        class="input input-bordered w-full" required>
-                                                @endif
-                                            </div>
-
-                                            <div class="form-control">
-                                                <label for="receipt_img" class="label font-semibold">Upload Foto
-                                                    Resi</label>
-                                                <input type="file" name="receipt_img" id="receipt_img"
-                                                    class="file-input file-input-bordered w-full">
-                                                @if ($data->receipt?->receipt_img)
-                                                    <div class="mt-3">
-                                                        <p class="text-xs text-warning">Pilih file baru jika ingin
-                                                            mengganti resi saat ini</p>
-                                                        <div class="mt-2 mb-1">Resi Saat Ini:</div>
-                                                        <a href="{{ Storage::url($data->receipt->receipt_img) }}"
-                                                            target="_blank" class="w-fit">
-                                                            <img src="{{ Storage::url($data->receipt->receipt_img) }}"
-                                                                alt="resi pengiriman"
-                                                                class="w-40 h-[200px] object-contain rounded shadow">
-                                                        </a>
-                                                    </div>
-                                                @endif
-                                            </div>
-
-                                            <div class="flex justify-end gap-2 pt-2">
-                                                <x-primary-button type="submit">
-                                                    Simpan <i class="fa fa-paper-plane ml-1"></i>
-                                                </x-primary-button>
-                                            </div>
-                                        </form>
-                                    @endif
+                                        <div class="flex justify-end gap-2 pt-2">
+                                            <x-primary-button type="submit">
+                                                Simpan <i class="fa fa-paper-plane ml-1"></i>
+                                            </x-primary-button>
+                                        </div>
+                                    </form>
                                 </div>
 
                                 <form method="dialog" class="modal-backdrop">
