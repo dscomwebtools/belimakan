@@ -332,67 +332,102 @@
                                 </span>
                             </div>
 
-                            @if ($data->delivery_state_id >= 3 && $data->biteship_waybill)
-                                <div class="mt-4 pt-3 border-t text-sm">
-                                    <a href="#"
-                                        @click.prevent="
-                                                $dispatch('open-modal', 'modal-show-order-tracking'); 
-                                                $store.cart.getAdminTrackingDetail({{ $data->id }})
-                                            "
-                                        class="text-teal-600 hover:underline flex items-center gap-1">
-                                        <i class="fa fa-eye"></i> Lihat Pengiriman
-                                    </a>
-                                </div>
-                            @endif
+                            <div class="mt-6 border-t pt-4">
+                                <div class="flex flex-wrap items-center gap-2 justify-between">
+                                    {{-- Tombol kiri --}}
+                                    <div class="flex flex-wrap gap-2">
+                                        {{-- Tombol Kembali --}}
+                                        <a href="{{ route('admin-order.index') }}" class="btn btn-secondary btn-sm">
+                                            <i class="fa fa-arrow-left"></i> Kembali
+                                        </a>
 
-                            <div class="flex gap-2 mt-6">
-                                <a href="{{ route('admin-order.index') }}" class="btn btn-secondary btn-sm">
-                                    {{ __('Kembali') }}
-                                </a>
-
-                                @if ($data->delivery_state_id < 5)
-                                    @php
-                                        $needsReceipt =
-                                            $data->delivery_state_id == 3 &&
-                                            (!$data->receipt ||
-                                                !$data->receipt->receipt_number ||
-                                                !$data->receipt->receipt_img);
-                                    @endphp
-
-                                    @if ($data->delivery_state_id == 2)
-                                        <form action="{{ route('admin-order.confirm_order', $data->id) }}"
-                                            method="post" class="inline-block">
-                                            @csrf
-                                            <button type="submit" class="btn btn-success btn-sm">
-                                                Konfirm Order <i class="fa fa-check"></i>
-                                            </button>
-                                        </form>
-                                        {{-- @else
-                                        <form action="{{ route('admin-order.next-state', $data->id) }}"
-                                            method="post" class="inline-block">
-                                            @csrf
-                                            @method('patch')
-                                            <button type="submit"
-                                                class="btn btn-primary btn-sm {{ $needsReceipt ? 'btn-disabled cursor-not-allowed opacity-50' : '' }}"
-                                                {{ $needsReceipt ? 'disabled' : '' }}>
-                                                Next Status <i class="fa fa-arrow-right"></i>
-                                            </button>
-                                        </form> --}}
-                                    @endif
-                                @endif
-
-                                @if (
-                                    ($data->delivery_state_id >= 3 && $data->delivery_state_id != 6) ||
-                                        ($data->delivery_state_id == 6 && $data->receipt))
-                                    <button class="btn btn-primary btn-sm" onclick="receiptModal.showModal()">
-                                        <i class="fas fa-receipt"></i>
-                                        @if ($data->delivery_state_id >= 5)
-                                            Lihat Resi
-                                        @else
-                                            {{ $data->receipt ? 'Edit Resi' : 'Upload Resi' }}
+                                        {{-- Tombol Konfirmasi Order --}}
+                                        @if ($data->delivery_state_id == 2)
+                                            <form action="{{ route('admin-order.confirm_order', $data->id) }}"
+                                                method="post" class="inline-block">
+                                                @csrf
+                                                <button type="submit" class="btn btn-success btn-sm">
+                                                    <i class="fa fa-check"></i> Konfirm Order
+                                                </button>
+                                            </form>
                                         @endif
-                                    </button>
-                                @endif
+                                    </div>
+
+                                    {{-- Dropdown Aksi Tambahan --}}
+                                    <div class="dropdown dropdown-top dropdown-end">
+                                        <label tabindex="0" class="btn btn-sm btn-primary flex items-center gap-1">
+                                            <i class="fa fa-cog"></i> Aksi Lain
+                                        </label>
+                                        <ul tabindex="0"
+                                            class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-56">
+
+                                            {{-- Lihat / Upload Resi --}}
+                                            @if (
+                                                ($data->delivery_state_id >= 3 && $data->delivery_state_id != 6) ||
+                                                    ($data->delivery_state_id == 6 && $data->receipt))
+                                                <li>
+                                                    <a onclick="receiptModal.showModal()">
+                                                        <i class="fas fa-receipt"></i>
+                                                        {{ $data->delivery_state_id >= 5 ? 'Lihat Resi' : ($data->receipt ? 'Edit Resi' : 'Upload Resi') }}
+                                                    </a>
+                                                </li>
+                                            @endif
+
+                                            {{-- Tracking Pengiriman --}}
+                                            @if ($data->delivery_state_id >= 3 && $data->biteship_waybill)
+                                                <li>
+                                                    <a href="#"
+                                                        @click.prevent="
+                                                            $dispatch('open-modal', 'modal-show-order-tracking');
+                                                            $store.cart.getAdminTrackingDetail({{ $data->id }})
+                                                        ">
+                                                        <i class="fa fa-eye"></i> Lihat Pengiriman
+                                                    </a>
+                                                </li>
+                                            @endif
+
+                                            {{-- Approve / Reject Pembatalan --}}
+                                            @if ($data->cancel_status === 'pending')
+                                                <li
+                                                    class="border-t mt-1 pt-1 text-sm font-semibold text-gray-400 px-2">
+                                                    Pembatalan Pesanan
+                                                </li>
+                                                <li>
+                                                    <form action="{{ route('admin-order.order_cancel', $data->id) }}"
+                                                        method="post"
+                                                        onsubmit="return confirm('Yakin ingin menyetujui pembatalan pesanan ini?')">
+                                                        @csrf
+                                                        <input type="hidden" name="status" value="approved">
+                                                        <button type="submit" class="text-green-600">
+                                                            <i class="fa fa-check"></i> Setujui Pembatalan
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                                <li>
+                                                    <form action="{{ route('admin-order.order_cancel', $data->id) }}"
+                                                        method="post"
+                                                        onsubmit="return confirm('Tolak pembatalan pesanan ini?')">
+                                                        @csrf
+                                                        <input type="hidden" name="status" value="rejected">
+                                                        <button type="submit" class="text-red-600">
+                                                            <i class="fa fa-times"></i> Tolak Pembatalan
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            @elseif ($data->cancel_status === 'approved')
+                                                <li
+                                                    class="text-green-600 font-medium flex items-center gap-2 border-t mt-1 pt-1 px-2">
+                                                    <i class="fa fa-check-circle"></i> Pembatalan Disetujui
+                                                </li>
+                                            @elseif ($data->cancel_status === 'rejected')
+                                                <li
+                                                    class="text-red-600 font-medium flex items-center gap-2 border-t mt-1 pt-1 px-2">
+                                                    <i class="fa fa-times-circle"></i> Pembatalan Ditolak
+                                                </li>
+                                            @endif
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
