@@ -32,15 +32,35 @@
                     <!-- Tab Contents -->
                     <div class="p-6 bg-base-200 rounded text-sm">
                         <div x-show="activeTab === 1">
-                            <div class="flex items-center gap-4">
-                                <h2 class="font-bold uppercase mb-2 dark:text-base-content">No Invoice : <b
-                                        class="text-base-content">{{ $data->invoice }}</b></h2>
-                                <div class="tooltip" data-tip="Download Invoice">
+                            <div
+                                class="flex items-center justify-between">
+                                <!-- Invoice Info -->
+                                <h2 class="font-semibold text-base-content uppercase text-sm md:text-base">
+                                    No Invoice :
+                                    <span class="font-bold text-primary">{{ $data->invoice }}</span>
+                                </h2>
+
+                                <!-- Action Buttons -->
+                                <div class="flex items-center gap-2">
+                                    <!-- Download Invoice -->
                                     <form action="{{ route('download-invoice', $data->id) }}" method="post"
-                                        target="_blank" class="inline-block">
+                                        target="_blank" class="tooltip" data-tip="Download Invoice">
                                         @csrf
-                                        <button type="submit">
-                                            <i class="fa fa-download text-blue-600"></i>
+                                        <button type="submit"
+                                            class="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white border-none flex items-center gap-1">
+                                            <i class="fa fa-file-pdf-o"></i>
+                                            <span class="hidden sm:inline">Invoice</span>
+                                        </button>
+                                    </form>
+
+                                    <!-- Download Resi -->
+                                    <form action="{{ route('download-resi', $data->id) }}" method="post"
+                                        target="_blank" class="tooltip" data-tip="Download Resi">
+                                        @csrf
+                                        <button type="submit"
+                                            class="btn btn-sm bg-emerald-600 hover:bg-emerald-700 text-white border-none flex items-center gap-1">
+                                            <i class="fa fa-barcode"></i>
+                                            <span class="hidden sm:inline">Resi</span>
                                         </button>
                                     </form>
                                 </div>
@@ -215,7 +235,7 @@
                             </dialog>
 
                             <div class="mb-4">
-                                <h2 class="font-bold text-lg text-center dark:text-primary-content">Data Barang</h2>
+                                <h2 class="font-bold text-lg text-center dark:text-primary-content">Data Pesanan</h2>
 
                                 <div class="overflow-auto max-h-40">
                                     <table class="table">

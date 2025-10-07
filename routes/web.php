@@ -35,6 +35,7 @@ Route::middleware(['auth', 'check-banned', 'verified'])->group(function () {
     Route::get('/products', [ProductController::class, 'allProducts'])->name('client.products');
     Route::get('/products/category/{category}', [ProductController::class, 'productsByCategory'])->name('client.productsByCategory');
     Route::post('/download-invoice/{order}', [OrderController::class, 'download_invoice'])->name('download-invoice');
+    Route::post('/download-resi/{order}', [OrderController::class, 'download_resi'])->name('download-resi');
 });
 
 // MEMBER ROUTES
