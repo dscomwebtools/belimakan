@@ -246,7 +246,8 @@
                     <!-- Kolom kanan: Logo ekspedisi -->
                     <td style="text-align:right; width:30%; vertical-align:middle;">
                         @if (!empty($shippingLogo) && file_exists($shippingLogo))
-                            <img src="{{ $shippingLogo }}" alt="Logo Ekspedisi" style="width:80px;">
+                            <img src="{{ $shippingLogo }}" alt="Logo Ekspedisi"
+                                style="max-width:100px; max-height:50px; object-fit:contain; display:inline-block;">
                         @endif
                     </td>
                 </tr>
