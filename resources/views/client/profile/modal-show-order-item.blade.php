@@ -121,7 +121,7 @@
 
         <!-- Data Barang -->
         <div class="mb-4">
-            <h2 class="font-bold text-lg text-center">Data Barang</h2>
+            <h2 class="font-bold text-lg text-center">Data Pesanan</h2>
 
             <div class="overflow-auto max-h-40">
                 <table class="table min-w-max">

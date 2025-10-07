@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
+use Milon\Barcode\DNS1D;
 
 class OrderController extends Controller
 {
@@ -157,8 +158,14 @@ class OrderController extends Controller
 
                 $biteship = $response['response'];
 
+                $response = $this->updateBiteshipCourier($shippingMethodData, $biteship['id']);
+                if (!($response['status'] ?? false)) {
+                    throw new \Exception("Gagal update draft order di Biteship");
+                }
+
                 // 5. Update order with biteship fields
                 $new_order->biteship_draft_order_id = $biteship['id'] ?? null;
+                $new_order->biteship_reference_id   = $biteship['reference_id'] ?? null;
                 $new_order->biteship_order_id       = $biteship['order_id'] ?? null;
                 $new_order->biteship_waybill        = $biteship['courier']['waybill_id'] ?? null;
             }
@@ -219,6 +226,25 @@ class OrderController extends Controller
             "content-type" => "application/json",
         ])
             ->post($this->base . "/v1/draft_orders", $payload);
+
+        return [
+            "status"   => $response->successful(),
+            "response" => $response->json(),
+        ];
+    }
+
+    public function updateBiteshipCourier($shipping, $id)
+    {
+        $payload = [
+            "courier_company"           => $shipping['company'],
+            "courier_type"              => $shipping['type'],
+        ];
+
+        $response = Http::withHeaders([
+            "authorization" => "{$this->key}",
+            "content-type" => "application/json",
+        ])
+            ->post($this->base . "/v1/draft_orders/" . $id, $payload);
 
         return [
             "status"   => $response->successful(),
@@ -322,6 +348,51 @@ class OrderController extends Controller
         return $pdf->stream('invoice-' . $order->id . '.pdf');
         return $pdf->download('invoice-' . $order->id . '.pdf');
     }
+
+    function download_resi(Order $order)
+    {
+        $order->load([
+            'delivery_state',
+            'order_address',
+            'shipping_method',
+            'order_detail.product',
+            'order_detail.product_variant.product_detail.variant_value.variant',
+            'bank_account',
+            'receipt'
+        ]);
+
+        $barcode = (new DNS1D())->getBarcodePNG($order->receipt->receipt_number ?? '24BIT00000000013', 'C128');
+        $reference = (new DNS1D())->getBarcodePNG($order->invoice ?? '24BIT00000000013', 'C128');
+        $origin = SettingAddress::first();
+
+        $courier = strtolower($order->shipping_method->courier_name ?? '');
+        $shippingLogo = null;
+
+        $dir = public_path('assets/images/shipping');
+
+        foreach (['png', 'jpg', 'jpeg', 'webp'] as $ext) {
+            $path = "$dir/$courier.$ext";
+            if (file_exists($path)) {
+                $shippingLogo = $path;
+                break;
+            }
+        }
+
+        if (!$shippingLogo) {
+            $shippingLogo = public_path('images/shipping/default.png');
+        }
+
+        $totalWeight = $order->order_detail->sum(function ($detail) {
+            return ($detail->product_variant->weight ?? 0) * $detail->quantity;
+        });
+
+        $totalWeightKg = round($totalWeight / 1000, 2);
+
+        $pdf = Pdf::loadView('pdf.resi', compact('order', 'barcode', 'reference', 'shippingLogo', 'origin', 'totalWeightKg'));
+
+        return $pdf->stream('resi-' . $order->id . '.pdf');
+    }
+
 
     // FOR ADMIN ROUTE
     public function index(Request $request)
