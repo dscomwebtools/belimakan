@@ -153,7 +153,7 @@
                             </div>
                         </template>
 
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-3 text-sm">
+                        <div class="grid grid-cols-3 gap-2 mt-3 text-sm">
                             <div>
                                 <div class="text-gray-400">Harga</div>
                                 <div class="font-medium"
@@ -163,6 +163,12 @@
                             </div>
 
                             <div>
+                                <div class="text-gray-400">Qty</div>
+                                <div class="font-medium" x-text="orderDetail.quantity">
+                                </div>
+                            </div>
+
+                            <div x-show="orderDetail.discount > 0">
                                 <div class="text-gray-400">Diskon</div>
                                 <div class="font-medium"
                                     x-text="orderDetail.discount > 0 
@@ -171,13 +177,12 @@
                             : '-'">
                                 </div>
                             </div>
-
-                            <div>
-                                <div class="text-gray-400">Subtotal</div>
-                                <div class="font-semibold text-green-600 dark:text-green-400"
-                                    x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })
+                        </div>
+                        <div>
+                            <div class="text-gray-400">Subtotal</div>
+                            <div class="font-semibold text-green-600 dark:text-green-400"
+                                x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })
                             .format((orderDetail.price - (orderDetail.price * (orderDetail.discount / 100))) * orderDetail.quantity)">
-                                </div>
                             </div>
                         </div>
                     </div>
