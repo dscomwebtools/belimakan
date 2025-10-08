@@ -32,8 +32,7 @@
                     <!-- Tab Contents -->
                     <div class="p-6 bg-base-200 rounded text-sm">
                         <div x-show="activeTab === 1">
-                            <div
-                                class="flex items-center justify-between">
+                            <div class="flex items-center justify-between">
                                 <!-- Invoice Info -->
                                 <h2 class="font-semibold text-base-content uppercase text-sm md:text-base">
                                     No Invoice :
@@ -208,15 +207,29 @@
                                                 class="file-input file-input-bordered w-full">
                                             @if ($data->receipt?->receipt_img)
                                                 <div class="mt-3">
-                                                    <p class="text-xs text-warning">Pilih file baru jika ingin
-                                                        mengganti resi saat ini</p>
+                                                    <p class="text-xs text-warning">
+                                                        Pilih file baru jika ingin mengganti resi saat ini
+                                                    </p>
                                                     <div class="mt-2 mb-1">Resi Saat Ini:</div>
-                                                    <a href="{{ Storage::url($data->receipt->receipt_img) }}"
-                                                        target="_blank" class="w-fit">
-                                                        <img src="{{ Storage::url($data->receipt->receipt_img) }}"
-                                                            alt="resi pengiriman"
-                                                            class="w-40 h-[200px] object-contain rounded shadow">
-                                                    </a>
+
+                                                    @if ($data->receipt?->receipt_img)
+                                                        <a href="{{ Storage::url($data->receipt->receipt_img) }}"
+                                                            target="_blank"
+                                                            class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
+                                                                fill="none" viewBox="0 0 24 24"
+                                                                stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" />
+                                                            </svg>
+                                                            Download Resi
+                                                            ({{ $data->receipt?->receipt_number ?? 'Tanpa Nomor' }})
+                                                        </a>
+                                                    @else
+                                                        <span class="text-gray-500 text-sm">Belum ada resi
+                                                            diunggah</span>
+                                                    @endif
                                                 </div>
                                             @endif
                                         </div>

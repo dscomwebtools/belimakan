@@ -53,13 +53,14 @@
         }
 
         .info-table td {
-            padding: 4px 8px;
+            padding: 4px 0px;
             vertical-align: top;
+            min-width: 100px;
         }
 
         .info-label {
             font-weight: bold;
-            width: 120px;
+            width: 100px;
             white-space: nowrap;
         }
 
@@ -89,7 +90,7 @@
         /* TOTALS */
         .totals {
             margin-top: 20px;
-            width: 40%;
+            width: 50%;
             margin-left: auto;
             border-collapse: collapse;
         }
@@ -140,17 +141,6 @@
                 <td>{{ $order->order_address->recipient }}</td>
             </tr>
             <tr>
-                <td class="info-label">Alamat</td>
-                <td>
-                    {{ $order->order_address->address }} <br>
-                    {{ $order->order_address->area_name }}
-                </td>
-                <td class="info-label">Telp / WA</td>
-                <td>{{ $order->order_address->hp }}</td>
-            </tr>
-            <tr>
-                <td class="info-label">Metode Pembayaran</td>
-                <td>{{ $order->payment_method }}</td>
                 <td class="info-label">Kurir</td>
                 <td>
                     @isset($order->shipping_method)
@@ -159,6 +149,17 @@
                         Manual - {{ $order->shipping_method_manual }}
                     @endisset
                 </td>
+                <td class="info-label">Alamat</td>
+                <td>
+                    {{ $order->order_address->address }} <br>
+                    {{ $order->order_address->area_name }}
+                </td>
+            </tr>
+            <tr>
+                <td class="info-label">Pembayaran</td>
+                <td>{{ $order->payment_method }}</td>
+                <td class="info-label">Telp / WA</td>
+                <td>{{ $order->order_address->hp }}</td>
             </tr>
         </table>
 
@@ -166,7 +167,7 @@
         <table class="product-table">
             <thead>
                 <tr>
-                    <th>Produk</th>
+                    <th>Deskripsi Produk</th>
                     <th>Jumlah</th>
                     <th>Harga Satuan</th>
                     <th>Diskon</th>
@@ -218,18 +219,41 @@
         </table>
 
         <!-- TOTALS -->
+        @php
+            $voucherAmount = 0;
+            $voucherCode = null;
+
+            if ($order && $order->coupon_discount > 0) {
+                $voucherAmount = $order->coupon_discount;
+                $voucherCode = $order->coupon_code;
+            }
+
+            $grandTotal = max($totalBayar - $voucherAmount, 0);
+        @endphp
+
         <table class="totals">
             <tr>
-                <td>
-                    TOTAL HARGA
-                </td>
+                <td>Total Harga</td>
                 <td style="text-align: right;">Rp {{ number_format($totalBayar, 0, ',', '.') }}</td>
             </tr>
+
+            @if ($voucherAmount > 0)
+                <tr>
+                    <td>Voucher ({{ $voucherCode }})</td>
+                    <td style="text-align: right; color: red;">- Rp {{ number_format($voucherAmount, 0, ',', '.') }}
+                    </td>
+                </tr>
+            @endif
+
             <tr>
-                <td>Total Bayar</td>
-                <td style="text-align: right;"><strong>Rp {{ number_format($totalBayar, 0, ',', '.') }}</strong></td>
+                <td><strong>Total Bayar</strong></td>
+                <td style="text-align: right;"><strong>Rp {{ number_format($grandTotal, 0, ',', '.') }}</strong></td>
             </tr>
         </table>
+
+        <div class="footer">
+            <p>Terima kasih telah berbelanja di DS Computer.</p>
+        </div>
     </div>
 </body>
 
