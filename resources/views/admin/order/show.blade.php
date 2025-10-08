@@ -405,6 +405,22 @@
                                                     </a>
                                                 </li>
                                             @endif
+                                            @if (
+                                                ($data->delivery_state_id >= 3 && $data->delivery_state_id != 5) ||
+                                                    ($data->delivery_state_id == 6 && $data->receipt))
+                                                <li>
+                                                    <form action="{{ route('admin-order.next-state', $data->id) }}"
+                                                        method="POST" class="inline">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit"
+                                                            class="flex items-center gap-2 text-left">
+                                                            <i class="fas fa-receipt"></i>
+                                                            Update Status Selanjutnya
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            @endif
 
                                             {{-- Tracking Pengiriman --}}
                                             @if ($data->delivery_state_id >= 3 && $data->biteship_waybill)
