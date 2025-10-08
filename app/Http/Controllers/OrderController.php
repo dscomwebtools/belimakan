@@ -346,10 +346,10 @@ class OrderController extends Controller
         $pdf = Pdf::loadView('pdf.invoice', compact('order'));
 
         return $pdf->stream('invoice-' . $order->id . '.pdf');
-        return $pdf->download('invoice-' . $order->id . '.pdf');
+        // return $pdf->download('invoice-' . $order->id . '.pdf');
     }
 
-    function download_resi(Order $order)
+    protected function generateResiPdf(Order $order)
     {
         $order->load([
             'delivery_state',
@@ -365,9 +365,8 @@ class OrderController extends Controller
         $reference = (new DNS1D())->getBarcodePNG($order->invoice ?? '24BIT00000000013', 'C128');
         $origin = SettingAddress::first();
 
-        $courier = strtolower($order->shipping_method->courier_name ?? '');
+        $courier = strtolower($order->shipping_method->company ?? '');
         $shippingLogo = null;
-
         $dir = public_path('assets/images/shipping');
 
         foreach (['png', 'jpg', 'jpeg', 'webp'] as $ext) {
@@ -385,14 +384,16 @@ class OrderController extends Controller
         $totalWeight = $order->order_detail->sum(function ($detail) {
             return ($detail->product_variant->weight ?? 0) * $detail->quantity;
         });
-
         $totalWeightKg = round($totalWeight / 1000, 2);
 
-        $pdf = Pdf::loadView('pdf.resi', compact('order', 'barcode', 'reference', 'shippingLogo', 'origin', 'totalWeightKg'));
-
-        return $pdf->stream('resi-' . $order->id . '.pdf');
+        return Pdf::loadView('pdf.resi', compact('order', 'barcode', 'reference', 'shippingLogo', 'origin', 'totalWeightKg'));
     }
 
+    public function download_resi(Order $order)
+    {
+        $pdf = $this->generateResiPdf($order);
+        return $pdf->stream('resi-' . $order->id . '.pdf');
+    }
 
     // FOR ADMIN ROUTE
     public function index(Request $request)
@@ -485,21 +486,43 @@ class OrderController extends Controller
             $response = Http::withHeaders([
                 "authorization" => "{$this->key}",
                 "content-type" => "application/json",
-            ])
-                ->post($this->base . "/v1/draft_orders/" . $order->biteship_draft_order_id . "/confirm");
+            ])->post($this->base . "/v1/draft_orders/" . $order->biteship_draft_order_id . "/confirm");
 
             $data = $response->json();
 
             if (isset($data['success']) && $data['success'] === true) {
-                $order->biteship_order_id  = $data['id'] ?? null;
-                $order->biteship_waybill   = $data['courier']['waybill_id'] ?? null;
+                $order->biteship_order_id = $data['id'] ?? null;
+                $order->biteship_waybill  = $data['courier']['waybill_id'] ?? null;
             }
         }
 
         if ($order->delivery_state_id == 3) {
             $order->is_paid = true;
         }
+
         $order->save();
+
+        if ($order->biteship_waybill) {
+            $receiptAttrs = [
+                'receipt_number' => $order->biteship_waybill,
+            ];
+
+            $receipt = OrderReceipt::updateOrCreate(
+                ['id' => $order->order_receipt_id],
+                $receiptAttrs
+            );
+
+            if (!$order->order_receipt_id) {
+                $order->order_receipt_id = $receipt->id;
+                $order->save();
+            }
+
+            $pdf = $this->generateResiPdf($order->fresh('receipt'));
+            $pdfPath = 'receipts/resi-' . $order->id . '.pdf';
+            Storage::disk('public')->put($pdfPath, $pdf->output());
+
+            $receipt->update(['receipt_img' => $pdfPath]);
+        }
 
         return redirect()->back()->with('success', 'Berhasil update status menjadi ' . $order->delivery_state->name);
     }
@@ -531,7 +554,7 @@ class OrderController extends Controller
     function save_receipt(Request $request, Order $order)
     {
         $rules = [
-            'receipt_img' => 'nullable|image|max:2048',
+            'receipt_img' => 'nullable|file|max:2048',
         ];
 
         // Kalau manual, wajib isi nomor resi

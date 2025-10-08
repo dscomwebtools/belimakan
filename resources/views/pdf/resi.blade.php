@@ -10,11 +10,11 @@
         }
 
         body {
-            margin: 20px;
+            margin: 40px 40px;
             padding: 0;
             text-align: center;
             font-family: DejaVu Sans, sans-serif;
-            font-size: 12px;
+            font-size: 16px;
         }
 
         .label-container {
@@ -24,7 +24,6 @@
             border: 1px solid #000;
             border-collapse: collapse;
             width: 100%;
-            max-width: 600px;
         }
 
         /* HEADER */
@@ -50,7 +49,7 @@
         }
 
         .subtext {
-            font-size: 12px;
+            font-size: 14px;
             color: #555;
         }
 
@@ -105,7 +104,7 @@
 
         .address-header {
             font-weight: bold;
-            font-size: 13px;
+            font-size: 14px;
             margin-bottom: 2px;
         }
 
@@ -113,7 +112,7 @@
             position: absolute;
             top: 6px;
             right: 8px;
-            font-size: 11px;
+            font-size: 14px;
             color: #333;
         }
 
@@ -175,8 +174,9 @@
 
         .order-summary .label {
             font-weight: bold;
-            font-size: 12px;
+            font-size: 14px;
             margin-top: 4px;
+            margin-bottom: 4px;
         }
 
         .order-summary .right div {
@@ -210,7 +210,7 @@
         /* FOOTER */
         .footer {
             text-align: center;
-            font-size: 11px;
+            font-size: 12px;
             padding: 6px;
             border-top: 1px solid #000;
         }
@@ -230,13 +230,13 @@
                             <tr>
                                 <td style="vertical-align:middle; padding:0; margin:0;">
                                     <img src="{{ public_path('storage/logo.webp') }}" alt="Logo DSComputer"
-                                        style="width:40px; margin-right:10px; padding:0; display:inline-block;">
+                                        style="width:50px; margin-right:10px; padding:0; display:inline-block;">
                                 </td>
                                 <td style="vertical-align:middle; padding:0; margin:0;">
                                     <div class="brand"
-                                        style="font-size:18px; font-weight:bold; margin:0; line-height:1;">DSComputer
+                                        style="font-size:20px; font-weight:bold; margin:0; line-height:1;">DSComputer
                                     </div>
-                                    <div class="subtext" style="font-size:12px; color:#555; margin:0; line-height:1;">
+                                    <div class="subtext" style="font-size:14px; color:#555; margin:0; line-height:1;">
                                         dscomputer.id</div>
                                 </td>
                             </tr>
@@ -247,7 +247,7 @@
                     <td style="text-align:right; width:30%; vertical-align:middle;">
                         @if (!empty($shippingLogo) && file_exists($shippingLogo))
                             <img src="{{ $shippingLogo }}" alt="Logo Ekspedisi"
-                                style="max-width:100px; max-height:50px; object-fit:contain; display:inline-block;">
+                                style="max-width:120px; max-height:60px; object-fit:contain; display:inline-block;">
                         @endif
                     </td>
                 </tr>
@@ -349,10 +349,10 @@
         </div>
 
         <!-- FOOTER -->
-        <div class="footer">
+        {{-- <div class="footer">
             Pengiriman melalui platform DSComputer<br>
             dscomputer.id
-        </div>
+        </div> --}}
 
     </div>
 </body>

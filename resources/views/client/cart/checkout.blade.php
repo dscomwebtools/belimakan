@@ -136,14 +136,16 @@
                         )"></div>
 
                         <div class="flex flex-col gap-2 text-sm md:text-base leading-relaxed text-gray-700">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <i class="fa fa-user text-primary"></i>
-                                <span class="capitalize font-medium"
-                                    x-text="$store.checkout.addressSelected.name"></span>
-                                <span>•</span>
-                                <span x-text="$store.checkout.addressSelected.recipient"></span>
-                                <span>•</span>
-                                <span x-text="$store.checkout.addressSelected.hp"></span>
+                            <div class="flex items-start gap-2">
+                                <i class="fa fa-user text-primary mt-0.5"></i>
+                                <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                    <span class="capitalize font-medium"
+                                        x-text="$store.checkout.addressSelected.name"></span>
+                                    <span>•</span>
+                                    <span x-text="$store.checkout.addressSelected.recipient"></span>
+                                    <span>•</span>
+                                    <span x-text="$store.checkout.addressSelected.hp"></span>
+                                </div>
                             </div>
 
                             <div class="flex items-start gap-2">
@@ -197,7 +199,8 @@
 
                             <div class="flex flex-col items-center">
                                 <div>Estimasi</div>
-                                <div x-text="`${$store.checkout.translateDuration($store.checkout.courierSelected.duration)}`">
+                                <div
+                                    x-text="`${$store.checkout.translateDuration($store.checkout.courierSelected.duration)}`">
                                 </div>
                             </div>
                         </div>

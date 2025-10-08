@@ -84,7 +84,7 @@ export default {
 
     courierCategories(type = 'regular') {
         if (type === 'regular') {
-            return "jne,jnt,sicepat,anteraja"; // daftar kurir reguler
+            return "jne,jnt,sicepat,anteraja,sentralcargo"; // daftar kurir reguler
         }
         if (type === 'instant') {
             return "gojek,grab,lalamove"; // daftar kurir instant
