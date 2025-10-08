@@ -406,8 +406,7 @@
                                                 </li>
                                             @endif
                                             @if (
-                                                ($data->delivery_state_id >= 3 && $data->delivery_state_id != 5) ||
-                                                    ($data->delivery_state_id == 6 && $data->receipt))
+                                                ($data->delivery_state_id >= 3 && $data->delivery_state_id != 5) && !$data->biteship_waybill)
                                                 <li>
                                                     <form action="{{ route('admin-order.next-state', $data->id) }}"
                                                         method="POST" class="inline">
