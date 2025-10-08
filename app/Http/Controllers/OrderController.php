@@ -196,6 +196,7 @@ class OrderController extends Controller
             "courier_company"           => $shipping['company'],
             "courier_type"              => $shipping['type'],
             "courier_insurance"         => 0,
+            "reference_id"              => $new_order->invoice,
             "order_note"                => $new_order->delivery_note ?? '',
             "delivery_type"             => "now",
             "items"                     => $items,
