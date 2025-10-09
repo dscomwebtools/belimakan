@@ -192,7 +192,7 @@ class OrderController extends Controller
             "destination_contact_phone" => $address['hp'],
             "destination_address"       => $address['address'],
             "destination_postal_code"   => strval($address['postal_code']),
-            "destination_note"          => $address['noteForCurrier'],
+            "destination_note"          => $address['noteForCurrier'] ?? "",
             "courier_company"           => $shipping['company'],
             "courier_type"              => $shipping['type'],
             "courier_insurance"         => 0,
@@ -335,7 +335,7 @@ class OrderController extends Controller
             $order->bukti_pembayaran = $path;
         }
 
-        $order->delivery_state_id = 2;
+        $order->delivery_state_id = 3;
         $order->save();
 
         return redirect()->route('client.profile')
@@ -471,7 +471,7 @@ class OrderController extends Controller
     {
         $order->delivery_state_id += 1;
 
-        if ($order->delivery_state_id == 3) {
+        if ($order->delivery_state_id == 4) {
             $order->is_paid = true;
         }
         $order->save();
@@ -481,9 +481,16 @@ class OrderController extends Controller
 
     function confirm_order(Order $order)
     {
-        $order->delivery_state_id = 3;
+        if ($order->delivery_state_id == 1) {
+            $order->delivery_state_id = $order->payment_method === "Cash" ? 4 : 2;
+        } else {
+            $order->delivery_state_id = 4;
+            $order->is_paid = true;
+        }
 
-        if (!$order->shipping_method_manual) {
+        $order->save();
+
+        if (!$order->shipping_method_manual && $order->delivery_state_id == 4) {
             $response = Http::withHeaders([
                 "authorization" => "{$this->key}",
                 "content-type" => "application/json",
@@ -495,10 +502,6 @@ class OrderController extends Controller
                 $order->biteship_order_id = $data['id'] ?? null;
                 $order->biteship_waybill  = $data['courier']['waybill_id'] ?? null;
             }
-        }
-
-        if ($order->delivery_state_id == 3) {
-            $order->is_paid = true;
         }
 
         $order->save();

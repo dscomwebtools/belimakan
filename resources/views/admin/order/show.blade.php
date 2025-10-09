@@ -111,35 +111,6 @@
                             <div class="flex gap-2 leading-10">
                                 <span class="opacity-75 dark:text-base-content">Jenis Pembayaran
                                     :</span><span class="dark:text-base-content">{{ $data->payment_method }}</span>
-                                @if ($data->payment_method === 'Transfer')
-                                    <span>{{ $data->bank_account->bank_name ?? '' }}</span> -
-                                    <span>{{ $data->bank_account->account_number ?? '' }}</span>
-                                    <button
-                                        @click="$store.cart.copyToClipboard('{{ $data->bank_account->account_number ?? '' }}')"
-                                        class="tooltip" data-tip="Copy nomor rekening">
-                                        <span class="far fa-copy"></span>
-                                    </button>
-
-                                    {{-- TAMPILKAN NOTIF COPY TO CLIPBOARD BERHASIL (INI KARENA PENAMBAHAN BELAKANGAN DI DATA ORDER INI JADI BERANTAKAN NGAMBIL DARI STORE CART, HARUS NYA DI ORGANIZE NANTI) --}}
-                                    <div x-show="$store.cart.showNotifSuccess" x-transition:leave.duration.500ms
-                                        class="toast toast-top toast-end mt-24 z-50">
-                                        <div role="alert" class="alert alert-success mb-4">
-                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                class="stroke-current shrink-0 h-6 w-6" fill="none"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                            <span x-text="$store.cart.message"></span>
-                                        </div>
-                                    </div>
-                                @endif
-                                @if ($data->payment_method === 'Transfer' && $data->delivery_state_id > 1)
-                                    <span class="tooltip" data-tip="Lihat bukti bayar">
-                                        <a href="{{ Storage::url($data->bukti_pembayaran) }}" target="_blank"><i
-                                                class="fa fa-download text-blue-500"></i></a>
-                                    </span>
-                                @endif
                             </div>
 
                             <div class="flex gap-2 leading-10">
@@ -207,7 +178,7 @@
                                                 class="file-input file-input-bordered w-full">
                                             @if ($data->receipt?->receipt_img)
                                                 <div class="mt-3">
-                                                    <p class="text-xs text-warning">
+                                                    <p class="text-sm text-red-500">
                                                         Pilih file baru jika ingin mengganti resi saat ini
                                                     </p>
                                                     <div class="mt-2 mb-1">Resi Saat Ini:</div>
@@ -215,7 +186,7 @@
                                                     @if ($data->receipt?->receipt_img)
                                                         <a href="{{ Storage::url($data->receipt->receipt_img) }}"
                                                             target="_blank"
-                                                            class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition">
+                                                            class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-base rounded-md hover:bg-blue-700 transition">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
                                                                 fill="none" viewBox="0 0 24 24"
                                                                 stroke="currentColor">
@@ -375,7 +346,7 @@
                                         </a>
 
                                         {{-- Tombol Konfirmasi Order --}}
-                                        @if ($data->delivery_state_id == 2)
+                                        @if ($data->delivery_state_id == 3)
                                             <form action="{{ route('admin-order.confirm_order', $data->id) }}"
                                                 method="post" class="inline-block">
                                                 @csrf
@@ -396,17 +367,29 @@
 
                                             {{-- Lihat / Upload Resi --}}
                                             @if (
-                                                ($data->delivery_state_id >= 3 && $data->delivery_state_id != 6) ||
-                                                    ($data->delivery_state_id == 6 && $data->receipt))
+                                                ($data->delivery_state_id >= 4 && $data->delivery_state_id != 7) ||
+                                                    ($data->delivery_state_id == 7 && $data->receipt))
                                                 <li>
                                                     <a onclick="receiptModal.showModal()">
                                                         <i class="fas fa-receipt"></i>
-                                                        {{ $data->delivery_state_id >= 5 ? 'Lihat Resi' : ($data->receipt ? 'Edit Resi' : 'Upload Resi') }}
+                                                        {{ $data->delivery_state_id >= 6 ? 'Lihat Resi' : ($data->receipt ? 'Edit Resi' : 'Upload Resi') }}
+                                                    </a>
+                                                </li>
+                                            @endif
+                                            @if ($data->payment_method === 'Transfer' && $data->delivery_state_id > 2)
+                                                <li>
+                                                    <a href="{{ Storage::url($data->bukti_pembayaran) }}"
+                                                        download="Bukti_Transfer_{{ $data->invoice }}.jpg">
+                                                        <i class="fa fa-download text-blue-500"></i> Unduh bukti
+                                                        transfer
                                                     </a>
                                                 </li>
                                             @endif
                                             @if (
-                                                ($data->delivery_state_id >= 3 && $data->delivery_state_id != 5) && !$data->biteship_waybill)
+                                                $data->delivery_state_id >= 1 &&
+                                                    $data->delivery_state_id != 6 &&
+                                                    !$data->biteship_waybill &&
+                                                    $data->delivery_state_id != 3)
                                                 <li>
                                                     <form action="{{ route('admin-order.next-state', $data->id) }}"
                                                         method="POST" class="inline">
@@ -422,7 +405,7 @@
                                             @endif
 
                                             {{-- Tracking Pengiriman --}}
-                                            @if ($data->delivery_state_id >= 3 && $data->biteship_waybill)
+                                            @if ($data->delivery_state_id >= 4 && $data->biteship_waybill)
                                                 <li>
                                                     <a href="#"
                                                         @click.prevent="
