@@ -76,8 +76,6 @@ export default {
             district, city, province, postal_code, area_id, latitude, longitude
         };
 
-        console.log(latitude, longitude);
-
         this.profileHasLocation = !!(latitude && longitude);
         this.setCourierSelected({}, '');
     },
@@ -120,8 +118,6 @@ export default {
         this.destination_longitude = this.addressSelected.longitude;
         let dataOrigin = null;
         let originAreaId = null;
-
-        console.log("What ? ", this.destination_latitude, this.destination_longitude);
 
         try {
             const resOrigin = await fetch(`/origin-address`);
@@ -242,8 +238,13 @@ export default {
 
     courierSelected: {},
     setCourierSelected(courier, source) {
-        this.courierSelected = courier;
-        this.courierSource = source;
+        if (courier && Object.keys(courier).length > 0) {
+            this.courierSelected = courier;
+            this.courierSource = source;
+            if (source !== "manual") {
+                this.paymentMethod = "Transfer";
+            }
+        }
     },
 
     paymentMethod: null,

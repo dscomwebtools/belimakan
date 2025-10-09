@@ -126,16 +126,6 @@
             <div class="space-y-3">
                 <template x-for="(orderDetail, key) in $store.cart.orderDetail.order_detail" :key="key">
                     <div class="border rounded-xl p-3 bg-white dark:bg-gray-800">
-                        <div class="flex justify-between items-center mb-2">
-                            {{-- <div class="text-sm font-semibold text-gray-700 dark:text-gray-100">
-                                <span>No.</span> <span x-text="++key"></span>
-                            </div> --}}
-                            <div
-                                class="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-                                Qty: <span x-text="orderDetail.quantity"></span>
-                            </div>
-                        </div>
-
                         <div class="text-base font-semibold text-gray-900 dark:text-gray-50">
                             <span x-text="orderDetail.product.name"></span>
                         </div>

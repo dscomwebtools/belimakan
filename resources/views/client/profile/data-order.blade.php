@@ -68,9 +68,9 @@
 
                 <!-- Footer (Actions) -->
                 <div class="flex justify-end gap-4 px-4 py-3 bg-base-100 border-t">
-                    @if ($item->payment_method == 'Transfer')
+                    @if ($item->delivery_state_id > 1)
                         <div class="tooltip"
-                            data-tip="{{ $item->delivery_state_id < 3 ? 'Upload Bukti Bayar' : 'Lihat Bukti Transfer' }}">
+                            data-tip="{{ $item->delivery_state_id < 4 ? 'Upload Bukti Bayar' : 'Lihat Bukti Transfer' }}">
                             <a href="#"
                                 @click.prevent="$dispatch('open-modal', 'modal-upload-bukti-bayar'); $store.cart.getOrderDetail('{{ $item->id }}')">
                                 <i class="fa fa-money-bills text-red-600 hover:scale-110 transition"></i>

@@ -14,12 +14,13 @@ class DeliveryStateSeeder extends Seeder
     {
         // --- STATUS INTERNAL SISTEM ---
         $states = [
-            1 => "Menunggu Pembayaran",
-            2 => "Menunggu Konfirmasi",
-            3 => "Diproses",
-            4 => "Dikirim",
-            5 => "Selesai",
-            6 => "Dibatalkan",
+            1 => "Menunggu Konfirmasi",
+            2 => "Menunggu Pembayaran",
+            3 => "Menunggu Verifikasi Pembayaran",
+            4 => "Diproses",
+            5 => "Dikirim",
+            6 => "Selesai",
+            7 => "Dibatalkan",
         ];
 
         foreach ($states as $id => $name) {
@@ -35,6 +36,7 @@ class DeliveryStateSeeder extends Seeder
         }
 
         // --- STATUS DARI BITESHIP (dengan label user-friendly) ---
+        $startId = 8;
         $biteshipStatuses = [
             ['biteship_status' => 'confirmed',         'biteship_status_name' => 'Order Terkonfirmasi',    'description' => 'Order sudah terkonfirmasi, siap diproses.'],
             ['biteship_status' => 'scheduled',         'biteship_status_name' => 'Pengiriman Dijadwalkan', 'description' => 'Sudah dijadwalkan untuk dikirim.'],
@@ -52,10 +54,11 @@ class DeliveryStateSeeder extends Seeder
             ['biteship_status' => 'delivered',         'biteship_status_name' => 'Paket Terkirim',         'description' => 'Paket sudah sampai ke penerima.'],
         ];
 
-        foreach ($biteshipStatuses as $status) {
+        foreach ($biteshipStatuses as $index => $status) {
             DeliveryState::updateOrCreate(
                 ['biteship_status' => $status['biteship_status']],
                 [
+                    'id' => $startId + $index,
                     'name' => $status['biteship_status_name'],
                     'biteship_status_name' => $status['biteship_status_name'],
                     'description' => $status['description'],

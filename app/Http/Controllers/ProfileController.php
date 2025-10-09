@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateProfileRequest;
 use App\Models\Address;
+use App\Models\BankAccount;
 use App\Models\Order;
 use App\Models\Testimonial;
 use App\Http\Requests\UpdateTestimonialRequest;
@@ -34,12 +35,15 @@ class ProfileController extends Controller
             $data = $data->where('name', 'like', '%' . $validated["name"] . '%');
         }
 
+        $bank_accounts = BankAccount::all();
+        // dd($bank_accounts);
+
         $numb_per_page = $request['numb_per_page'] ?? 10;
 
         $data = $data->paginate($numb_per_page)->appends(array_merge($validated, ['numb_per_page' => $numb_per_page]));
         $indexNumber = (request()->input('page', 1) - 1) * $numb_per_page;
 
-        return view('client.profile.index', compact('data', 'indexNumber', 'validated', 'numb_per_page', 'testimonial'));
+        return view('client.profile.index', compact('data', 'indexNumber', 'validated', 'numb_per_page', 'testimonial', 'bank_accounts'));
         // return view('client.profile.index', compact('orders'));
     }
 

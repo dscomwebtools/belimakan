@@ -227,17 +227,25 @@
                                         class="fa fa-circle-check text-[#FFFFFF]"></i>
                                 </button>
                                 <button
-                                    :class="`btn ${$store.checkout.paymentMethod=='Cash' ? 'btn-primary' : 'bg-gray-300'} shadow-md`"
-                                    @click.prevent="$store.checkout.setPaymentMethod('Cash')"><i
-                                        class="fa fa-money-bills"></i>
-                                    Cash <i x-show="$store.checkout.paymentMethod=='Cash'"
+                                    :disabled="$store.checkout.courierSource && $store.checkout.courierSource !== 'manual'"
+                                    :class="[
+                                        'btn shadow-md',
+                                        $store.checkout.paymentMethod === 'Cash' ? 'btn-primary' : 'bg-gray-300',
+                                        ($store.checkout.courierSource && $store.checkout
+                                        .courierSource !== 'manual') ?
+                                        'btn-disabled opacity-50 cursor-not-allowed' :
+                                        ''
+                                    ]"
+                                    @click.prevent="$store.checkout.setPaymentMethod('Cash')">
+                                    <i class="fa fa-money-bills"></i>
+                                    Cash
+                                    <i x-show="$store.checkout.paymentMethod === 'Cash'"
                                         class="fa fa-circle-check text-[#FFFFFF]"></i>
                                 </button>
                             </div>
-
                         </div>
                         {{-- Bank List --}}
-                        <div x-show="$store.checkout.paymentMethod=='Transfer'" x-transition
+                        {{-- <div x-show="$store.checkout.paymentMethod=='Transfer'" x-transition
                             class="flex flex-col gap-3 w-full border-t border-gray-300 pt-4">
 
                             <!-- Dropdown pilih bank -->
@@ -290,7 +298,7 @@
                                     </button>
                                 </div>
                             </div>
-                        </div>
+                        </div> --}}
                     </div>
                     {{-- END METODE PEMBAYARAN --}}
 
@@ -431,7 +439,16 @@
                     <!-- Tombol ORDER -->
                     <div class="card-actions mb-2 mt-2">
                         <a href="#"
-                            :class="`btn btn-primary btn-block font-bold h-4 ${!$store.checkout.paymentMethod || Object.keys($store.checkout.courierSelected).length == 0 || $store.checkout.isLoading || $store.checkout.totalItem == 0 || ($store.checkout.paymentMethod == 'Transfer' ? Object.keys($store.checkout.bankSelected).length == 0 : false) || $store.checkout.isThereItemWithNoStock ? 'btn-disabled' : ''}`"
+                            :class="[
+                                'btn btn-primary btn-block font-bold h-4',
+                                (
+                                    !$store.checkout.paymentMethod ||
+                                    Object.keys($store.checkout.courierSelected).length === 0 ||
+                                    $store.checkout.isLoading ||
+                                    $store.checkout.totalItem === 0 ||
+                                    $store.checkout.isThereItemWithNoStock
+                                ) ? 'btn-disabled' : ''
+                            ]"
                             @click.prevent="$store.checkout.submitOrder()">
                             <span x-show="!$store.checkout.isLoading">
                                 <i class="fa fa-paper-plane"></i>
