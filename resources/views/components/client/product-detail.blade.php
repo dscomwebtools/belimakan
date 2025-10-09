@@ -4,8 +4,10 @@
     {{ $product->name }}
 </x-slot>
 
-<x-meta title="{{ $product->name }}" description="{{ Str::limit(strip_tags($product->description), 150) }}"
-    image="{{ url(Storage::url($product->product_pictures->first()->path ?? 'default.jpg')) }}" type="product" />
+@section('meta')
+    <x-meta title="{{ $product->name }}" description="{{ Str::limit(strip_tags($product->description), 150) }}"
+        image="{{ url(Storage::url($product->product_pictures->first()->path ?? 'default.jpg')) }}" type="product" />
+@endsection
 
 <div class="flex flex-wrap gap-2 mb-4" x-data>
     @if (isset($product->auction) && $product->auction->active)

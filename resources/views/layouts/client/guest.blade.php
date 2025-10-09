@@ -11,6 +11,8 @@
 
     @if (isset($meta))
         {{ $meta }}
+    @elseif (View::hasSection('meta'))
+        @yield('meta')
     @else
         <x-meta title="DSCOMPUTER SOLUTION"
             description="Toko online DSCOMPUTER SOLUTION. Temukan beragam produk pilihan dari merk ternama, bergaransi resmi, dan pelayanan terbaik." />
