@@ -3,11 +3,11 @@
         <h1 class="text-2xl font-bold text-center text-gray-800">💳 Bukti Pembayaran</h1>
 
         {{-- Daftar Bank --}}
-        @if ($item->delivery_state_id > 1 && $item->delivery_state_id < 4)
-            <div class="grid gap-4">
-                @foreach ($bank_accounts as $bank)
-                    <div
-                        class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white border border-gray-200 rounded-2xl p-4">
+        <div class="grid gap-4">
+            @foreach ($bank_accounts as $bank)
+                <div
+                    class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white border border-gray-200 rounded-2xl p-4">
+                    <div class="w-full flex items-center justify-between">
                         <div class="flex items-center gap-4">
                             @if ($bank->logo)
                                 <img src="{{ asset('storage/' . $bank->logo) }}" alt="{{ $bank->bank_name }}"
@@ -22,14 +22,13 @@
                                 </div>
                             </div>
                         </div>
-
                         <div x-data="{ copied: false }">
                             <button type="button"
                                 @click="
-            navigator.clipboard.writeText('{{ $bank->account_number }}');
-            copied = true;
-            setTimeout(() => copied = false, 2000);
-        "
+                                    navigator.clipboard.writeText('{{ $bank->account_number }}');
+                                    copied = true;
+                                    setTimeout(() => copied = false, 2000);
+                                "
                                 class="mt-3 sm:mt-0 flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-100 active:scale-[.97] transition">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" class="w-4 h-4">
                                     <path
@@ -39,9 +38,9 @@
                             </button>
                         </div>
                     </div>
-                @endforeach
-            </div>
-        @endif
+                </div>
+            @endforeach
+        </div>
 
         {{-- Upload Bukti Pembayaran --}}
         <template x-if="$store.cart.orderDetail.delivery_state_id <= 3">
@@ -74,7 +73,7 @@
         </template>
 
         {{-- Read Only --}}
-        <template x-if="$store.cart.orderDetail.delivery_state_id > 2">
+        <template x-if="$store.cart.orderDetail.delivery_state_id > 3">
             <div class="text-center">
                 <template x-if="$store.cart.orderDetail.bukti_pembayaran">
                     <div>
