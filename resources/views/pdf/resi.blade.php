@@ -5,6 +5,11 @@
     <meta charset="UTF-8">
     <title>Label Pengiriman - DSComputer</title>
     <style>
+        * {
+            margin:0;
+            padding:0;
+        }
+
         @page {
             margin: 0;
         }
@@ -61,12 +66,13 @@
 
         .barcode img {
             width: 90%;
-            height: 55px;
+            height: 60px;
         }
 
         .resi {
             text-align: center;
             font-weight: bold;
+            font-size: 24px;
             border-bottom: 1px solid #000;
             padding: 6px 0;
         }
@@ -136,15 +142,16 @@
         .order-summary {
             display: table;
             width: 100%;
+            margin-top: 0;
             border-bottom: 1px solid #000;
         }
 
         .order-summary .left {
-            width: 70%;
+            width: 50%;
         }
 
         .order-summary .right {
-            width: 30%;
+            width: 50%;
         }
 
         .order-summary .left,
@@ -154,8 +161,11 @@
             vertical-align: top;
         }
 
-        .order-summary .left {
+        .order-summary .barcode {
             text-align: center;
+        }
+
+        .order-summary .left {
             border-right: 1px solid #000;
             padding-right: 10px;
         }
@@ -167,7 +177,7 @@
 
         .order-summary img {
             max-width: 90%;
-            height: 70px;
+            height: 60px;
             display: block;
             margin: 0 auto 4px;
         }
@@ -175,7 +185,7 @@
         .order-summary .label {
             font-weight: bold;
             font-size: 14px;
-            margin-top: 4px;
+            margin-top: 0;
             margin-bottom: 4px;
         }
 
@@ -299,15 +309,17 @@
 
         <!-- ORDER SUMMARY -->
         <div class="order-summary">
-            <div class="left">
+            <div class="barcode">
                 <div class="label">Purchase Number</div>
                 <img src="data:image/png;base64,{{ $reference }}" alt="Order ID Barcode">
                 <div>{{ $order->invoice }}</div>
             </div>
         </div>
         <div class="order-summary">
-            <div class="right">
+            <div class="left">
                 <div><strong>Quantity:</strong> {{ $order->order_detail->sum('quantity') }}</div>
+            </div>
+            <div class="right">
                 <div><strong>Weight:</strong> {{ $totalWeightKg ?? 1 }} Kg</div>
             </div>
         </div>
