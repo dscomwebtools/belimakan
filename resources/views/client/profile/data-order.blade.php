@@ -23,7 +23,7 @@
                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 bg-base-300 px-4 py-2">
                     <div>
                         <p class="font-semibold text-sm sm:text-base">
-                            Invoice {{ $item->invoice }}
+                            Pesanan {{ $item->invoice }}
                         </p>
                         <p class="text-xs sm:text-sm opacity-70">
                             {{ $item->created_at->isoFormat('LL') }}
@@ -77,7 +77,7 @@
                             </a>
                         </div>
                     @endif
-                    <div class="tooltip" data-tip="Download Invoice">
+                    <div class="tooltip" data-tip="Download Pesanan">
                         <form action="{{ route('download-invoice', $item->id) }}" method="post" target="_blank"
                             class="inline-block">
                             @csrf

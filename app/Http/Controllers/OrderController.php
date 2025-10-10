@@ -98,7 +98,7 @@ class OrderController extends Controller
         $new_order->order_address_id = $order_address_id;
         $new_order->shipping_method_id = $shipping_method_id;
         $new_order->shipping_method_manual = $shipping_method_manual;
-        $new_order->bank_account_id = $request->bankAccountId;
+        // $new_order->bank_account_id = $request->bankAccountId;
         $new_order->coupon_id = $request->voucherId ?? null;
         $new_order->coupon_code = $request->voucherCode ?? null;
         $new_order->coupon_discount = $request->voucherDiscount ?? 0;

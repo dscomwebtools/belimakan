@@ -43,7 +43,7 @@
                                 <div class="flex items-center gap-2">
                                     <!-- Download Invoice -->
                                     <form action="{{ route('download-invoice', $data->id) }}" method="post"
-                                        target="_blank" class="tooltip" data-tip="Download Invoice">
+                                        target="_blank" class="tooltip" data-tip="Download Pesanan">
                                         @csrf
                                         <button type="submit"
                                             class="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white border-none flex items-center gap-1">
