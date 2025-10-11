@@ -53,7 +53,7 @@ class ProductController extends Controller
             $data = $data->where('name', 'like', '%' . $validated["nama"] . '%');
         }
         // NUMBER OF ROWS PER PAGE
-        $numbRows = $request['numbRows'] ?? 10;
+        $numbRows = $request['numbRows'] ?? 100;
 
         $data = $data->paginate($numbRows)->appends(array_merge($validated, ['numbRows' => $numbRows]));
         $indexNumber = (request()->input('page', 1) - 1) * $numbRows;
@@ -75,8 +75,8 @@ class ProductController extends Controller
                 return [
                     'id' => $pv->id,
                     'name' => $variantName,
-                    'price' => $pv->price,
-                    'stock' => $pv->stock,
+                    'price' => $pv->price ?? 0,
+                    'stock' => $pv->stock ?? 0,
                 ];
             });
 
