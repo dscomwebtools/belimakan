@@ -1,0 +1,309 @@
+<div class="sm:mx-6 lg:mx-8" x-data="productTable">
+    <x-modal name="modal-import-excel-product" :show="$errors->importExcelProduct->isNotEmpty()" focusable>
+        <h1 class="text-center mt-8 mb-2 font-bold text-xl mx-4">Import Data Excel Produk</h1>
+        <form method="post" action="{{ route('product.import') }}" class="p-6" enctype="multipart/form-data">
+            @csrf
+            <div class="flex justify-center gap-2">
+                <input type="file" name="product-excel" id="product-excel" required>
+                <button type="submit" class="btn btn-sm btn-primary">Import</button>
+            </div>
+        </form>
+    </x-modal>
+
+    <div class="flex">
+        <div class="flex flex-wrap items-center gap-2">
+            <a href="{{ route($routeName . '.create') }}" class="btn btn-primary btn-sm tooltip flex"
+                data-tip="Tambah data">
+                <i class="fa fa-plus"></i>
+            </a>
+            @isset($import)
+                <button class="btn bg-green-600 text-green-200 btn-sm"
+                    @click="$dispatch('open-modal', 'modal-import-excel-product')">
+                    Import Produk <i class="fa fa-file-excel"></i>
+                </button>
+            @endisset
+        </div>
+
+        <span class="ml-auto mb-3">
+            <form class="flex [&_option]:bg-secondary" id="form_search">
+                <div class="tooltip" data-tip="Data per halaman">
+                    <select id="numbRows" name="numbRows" class="my-input mr-2">
+                        <option value="5" @if ($numbRows == '5') selected @endif>5</option>
+                        <option value="10" @if ($numbRows == '10') selected @endif>10</option>
+                        <option value="25" @if ($numbRows == '25') selected @endif>25</option>
+                        <option value="50" @if ($numbRows == '50') selected @endif>50</option>
+                        <option value="100" @if ($numbRows == '100') selected @endif>100</option>
+                    </select>
+                </div>
+                <div class="inline-block whitespace-nowrap tooltip" data-tip="Pencarian">
+                    @if (count($queryParams) === 1)
+                        <input type="text" id="search" name="{{ key($queryParams) }}" class="my-input"
+                            placeholder="Cari berdasarkan {{ key($queryParams) }}"
+                            @isset($validated[key($queryParams)]) value="{{ $validated[key($queryParams)] }}" @endisset>
+                    @else
+                        @if (count($queryParams) > 1)
+                            <div class="tooltip" data-tip="Cari">
+                                <select id="search-by" class="my-input mr-2">
+                                    @foreach (array_keys($queryParams) as $item)
+                                        <option value="{{ $item }}"
+                                            @isset($validated[$item]) selected @endisset>
+                                            {{ $item }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="inline-block my-input whitespace-nowrap">
+                                <input type="text" id="search"
+                                    class="border-transparent focus:outline-none focus:ring-0 focus:border-transparent bg-transparent"
+                                    @foreach (array_keys($queryParams) as $item) @isset($validated[$item])
+                                        value="{{ $validated[$item] }}"
+                                    @endisset @endforeach>
+                            </div>
+                        @endif
+                    @endif
+                    <button type="submit"
+                        class="bg-primary/70 hover:bg-primary btn btn-circle btn-sm hover:scale-105 text-primary-content">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </span>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="table bg-base-200">
+            <thead>
+                <tr class="bg-base-300">
+                    @foreach ($headers as $header)
+                        <th @class(['text-center' => $header === 'Aksi'])>{{ $header }}</th>
+                    @endforeach
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($rows as $rowKey => $row)
+                    <tr class="odd:bg-primary/5">
+                        <td>{{ ++$indexNumber }}</td>
+
+                        @foreach ($row as $k => $cell)
+                            @if ($k === 'id')
+                                @continue
+                            @endif
+
+                            {{-- ✅ Inline Edit Harga per Varian --}}
+                            @if ($k === 'price')
+                                <td class="text-left">
+                                    @foreach ($cell as $variant)
+                                        <div x-data="{ editing: false, value: {{ $variant['price'] }}, saving: false }" class="mb-1 text-left">
+                                            <span class="font-semibold">{{ $variant['name'] }}:</span>
+                                            <template x-if="!editing">
+                                                <span @click="editing = true" class="cursor-pointer hover:underline"
+                                                    x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value)">
+                                                </span>
+                                            </template>
+                                            <template x-if="editing">
+                                                <input type="number" x-model="value"
+                                                    @keydown.enter.prevent="
+                                            saving = true;
+                                            fetch('{{ route('product.update-price', $row['id']) }}', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                                },
+                                                body: JSON.stringify({
+                                                    variant_id: {{ $variant['id'] }},
+                                                    price: value
+                                                })
+                                            })
+                                            .then(res => res.json())
+                                            .then(data => {
+                                                saving = false;
+                                                if (data.success) {
+                                                    alert('✅ Harga varian berhasil diubah');
+                                                } else {
+                                                    alert('❌ ' + (data.message || 'Gagal menyimpan harga varian!'));
+                                                }
+                                            })
+                                            .catch(() => {
+                                                saving = false;
+                                                alert('❌ Terjadi kesalahan saat menyimpan data');
+                                            })
+                                            .finally(() => editing = false);
+                                        "
+                                                    @blur="editing = false"
+                                                    class="border border-gray-300 rounded w-24 px-1 py-0.5 text-left focus:outline-none"
+                                                    autofocus>
+                                            </template>
+                                        </div>
+                                    @endforeach
+                                </td>
+                                @continue
+                            @endif
+
+                            {{-- ✅ Inline Edit Stok per Varian --}}
+                            @if ($k === 'stock')
+                                <td class="text-left">
+                                    @foreach ($cell as $variant)
+                                        <div x-data="{ editing: false, value: {{ $variant['stock'] }}, saving: false }" class="mb-1 text-left">
+                                            <span class="font-semibold">{{ $variant['name'] }}:</span>
+                                            <template x-if="!editing">
+                                                <span @click="editing = true" class="cursor-pointer hover:underline"
+                                                    x-text="value"></span>
+                                            </template>
+                                            <template x-if="editing">
+                                                <input type="number" x-model="value"
+                                                    @keydown.enter.prevent="
+                                            saving = true;
+                                            fetch('{{ route('product.update-stock', $row['id']) }}', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                                },
+                                                body: JSON.stringify({
+                                                    variant_id: {{ $variant['id'] }},
+                                                    stock: value
+                                                })
+                                            })
+                                            .then(res => res.json())
+                                            .then(data => {
+                                                saving = false;
+                                                if (data.success) {
+                                                    alert('✅ Stok varian berhasil diubah');
+                                                } else {
+                                                    alert('❌ ' + (data.message || 'Gagal menyimpan stok varian!'));
+                                                }
+                                            })
+                                            .catch(() => {
+                                                saving = false;
+                                                alert('❌ Terjadi kesalahan saat menyimpan data');
+                                            })
+                                            .finally(() => editing = false);
+                                        "
+                                                    @blur="editing = false"
+                                                    class="border border-gray-300 rounded w-20 px-1 py-0.5 text-left focus:outline-none"
+                                                    autofocus>
+                                            </template>
+                                        </div>
+                                    @endforeach
+                                </td>
+                                @continue
+                            @endif
+
+                            {{-- Kolom promo --}}
+                            @if ($k === 'promo')
+                                <td>
+                                    @if ($cell == 1)
+                                        <i class="fa fa-toggle-on text-[#086B35]"></i>
+                                    @else
+                                        <i class="fa fa-toggle-off text-gray-800"></i>
+                                    @endif
+                                </td>
+                                @continue
+                            @endif
+
+                            {{-- Kolom auction --}}
+                            @if ($k === 'auction')
+                                <td>
+                                    @if ($cell && isset($cell['active']) && $cell['active'] == 1)
+                                        <i class="fa fa-gear hover:rotate-90 duration-1000 cursor-pointer text-[#086B35]"
+                                            x-on:click="$dispatch('open-modal', {data: JSON.stringify(@js($cell)), name: 'modal-auction'})"></i>
+                                    @else
+                                        <i class="fa fa-gear hover:-rotate-90 duration-1000 cursor-pointer text-gray-800"
+                                            x-on:click="$dispatch('open-modal', {data: JSON.stringify(@js($cell)), name: 'modal-auction'})"></i>
+                                    @endif
+                                </td>
+                                @continue
+                            @endif
+
+                            {{-- Default cell --}}
+                            <td class="w-[500px]">
+                                @if (isset($specialCol) && $k === $specialCol['colName'] && $specialCol['type'] === 'list')
+                                    <ol class="list-decimal">
+                                        @foreach ($cell as $item)
+                                            <li class="border-b border-primary mb-2 pb-1">{{ $item }}</li>
+                                        @endforeach
+                                    </ol>
+                                @else
+                                    {!! $cell !!}
+                                @endif
+                            </td>
+                        @endforeach
+
+                        {{-- Aksi --}}
+                        <td class="flex justify-evenly gap-2">
+                            @if (Route::has($routeName . '.destroy'))
+                                <div class="tooltip" data-tip="Delete">
+                                    <form action="{{ route($routeName . '.destroy', $row['id']) }}" method="post"
+                                        class="inline-block">
+                                        @csrf
+                                        @method('delete')
+                                        <button type="submit" class="delete">
+                                            <i class="fa fa-trash text-red-600"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            @endif
+
+                            @if (Route::has($routeName . '.edit'))
+                                <div class="tooltip" data-tip="Edit">
+                                    <a href="{{ route($routeName . '.edit', $row['id']) }}">
+                                        <i class="fa fa-pen text-blue-600"></i>
+                                    </a>
+                                </div>
+                            @endif
+
+                            @if (Route::has($routeName . '.show'))
+                                <div class="tooltip" data-tip="Lihat">
+                                    <a href="{{ route($routeName . '.show', $row['id']) }}">
+                                        <i class="fa fa-eye text-teal-600"></i>
+                                    </a>
+                                </div>
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+        {!! $data->links() !!}
+    </div>
+
+    @include('admin.product.auction-modal')
+</div>
+
+@push('scripts')
+    <script>
+        (function() {
+            const deleteBtn = document.querySelectorAll('button.delete')
+            deleteBtn.forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    const isDeleteConfirmed = confirm('Apakah Anda yakin ingin menghapus item ini ?')
+                    if (!isDeleteConfirmed) e.preventDefault()
+                })
+            })
+
+            // UPDATE SEARCH INPUT PLACEHOLDER
+            const searchInput = document.getElementById('search')
+            const searchBy = document.getElementById('search-by')
+
+            function updateSearchInputAttr() {
+                searchInput.setAttribute('placeholder',
+                    `Cari berdasarkan ${searchBy ? searchBy.options[searchBy.selectedIndex].text : "nama"}`)
+                searchInput.setAttribute('name', searchBy ? searchBy.value : 'nama')
+            }
+            updateSearchInputAttr()
+            searchBy && searchBy.addEventListener('change', function() {
+                updateSearchInputAttr()
+                searchInput.value = null
+                searchInput.focus()
+            })
+
+            // SUBMIT SEARCH AFTER NUMBER OF ROWS FILTER CHANGED
+            const numbRows = document.getElementById('numbRows')
+            const submitForm = document.getElementById('form_search')
+            numbRows.addEventListener('change', function() {
+                submitForm.submit()
+            })
+        })()
+    </script>
+@endpush

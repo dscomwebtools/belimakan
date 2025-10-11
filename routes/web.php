@@ -71,9 +71,17 @@ Route::prefix('admin')
         Route::resource('product', ProductController::class);
         Route::resource('bank-account', BankAccountController::class);
 
+        Route::post('products/{product}/update-price', [ProductController::class, 'updatePriceSingle'])
+            ->name('product.update-price');
+
+        Route::post('products/{product}/update-stock', [ProductController::class, 'updateStockSingle'])
+            ->name('product.update-stock');
+
         Route::post('product-import', [ProductController::class, 'import'])->name('product.import');
 
         Route::get('profile', [ProfileController::class, 'indexAdmin'])->name('admin-profile.index');
+        Route::get('profile/address', [ProfileController::class, 'indexAdminAddress'])->name('admin-profile.address');
+        Route::patch('profile/address/update', [ProfileController::class, 'update_address_admin'])->name('admin-profile.address-update');
         Route::get('member', [MemberController::class, 'index'])->name('admin-member.index');
         Route::get('member/{user}', [MemberController::class, 'show'])->name('admin-member.show');
         Route::put('member-banned/{user}', [MemberController::class, 'ban'])->name('admin-member.ban');

@@ -6,6 +6,7 @@ use App\Http\Requests\UpdateProfileRequest;
 use App\Models\Address;
 use App\Models\BankAccount;
 use App\Models\Order;
+use App\Models\SettingAddress;
 use App\Models\Testimonial;
 use App\Http\Requests\UpdateTestimonialRequest;
 use Illuminate\Http\RedirectResponse;
@@ -50,6 +51,12 @@ class ProfileController extends Controller
     function indexAdmin(): View
     {
         return view('admin.profile.index');
+    }
+
+    function indexAdminAddress(): View
+    {
+        $data = SettingAddress::first();
+        return view('admin.profile.address', compact('data'));
     }
 
     /**
@@ -256,5 +263,53 @@ class ProfileController extends Controller
         );
 
         return back()->with('success', 'Testimonial berhasil disimpan!');
+    }
+
+    function update_address_admin(Request $request)
+    {
+        $request->validateWithBag('address_update', [
+            'name'       => ['required', 'string'],
+            'address'    => ['required', 'string'],
+            'hp'         => ['required', 'string', 'regex:/^(?:\+62|62|0)8[1-9][0-9]{6,9}$/'],
+            'latitude'   => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude'  => ['nullable', 'numeric', 'between:-180,180'],
+            'area_id'    => ['required', 'string'],
+        ], [
+            'hp.regex' => 'Format nomor HP tidak valid',
+        ]);
+
+        // 🔹 Ambil data area dari Biteship API
+        $area = Http::withHeaders([
+            'authorization' => 'biteship_test.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidGVzIiwidXNlcklkIjoiNjZjN2VlYTc5ZWE1NWYwMDEyZDcyYzIzIiwiaWF0IjoxNzI0NDY4OTY4fQ.tvttczzzVKaAvNUKFxkH2tBG68FdSLhiw7_7IoBikZE',
+            'content-type'  => 'application/json',
+        ])->get('https://api.biteship.com/v1/maps/areas/' . $request->area_id)->json();
+
+        if (empty($area['success']) || !$area['success']) {
+            return back()->withErrors(['message' => 'Gagal fetching data area!'])->withInput();
+        }
+
+        $area = $area['areas'][0];
+
+        $address = SettingAddress::first();
+
+        // 🔹 Update field yang diperlukan saja
+        $address->fill([
+            'name'        => $request->name,
+            'address'     => $request->address,
+            'hp'          => $request->hp,
+            'email'       => "dscomputerwebtools@gmail.com",
+            'latitude'    => $request->latitude ?? "",
+            'longitude'   => $request->longitude ?? "",
+            'area_id'     => $area["id"],
+            'area_name'   => $area["name"],
+            'province'    => $area["administrative_division_level_1_name"],
+            'city'        => $area["administrative_division_level_2_name"],
+            'district'    => $area["administrative_division_level_3_name"],
+            'postal_code' => $area["postal_code"],
+        ]);
+
+        DB::transaction(fn() => $address->save());
+
+        return redirect()->route('admin-profile.address')->with('success', 'Alamat berhasil diubah.');
     }
 }

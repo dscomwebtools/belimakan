@@ -12,6 +12,6 @@ class SettingAddress extends Model
     protected $table = 'setting_address';
     protected $fillable = [
         'name', 'hp', 'email', 'address', 'area_id',
-        'area_name', 'postal_code', 'province', 'city', 'district',
+        'area_name', 'postal_code', 'latitude', 'longitude', 'province', 'city', 'district',
     ];
 }
