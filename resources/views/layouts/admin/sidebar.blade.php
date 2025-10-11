@@ -153,10 +153,16 @@
          <a href="{{ route('admin-profile.index') }}" @class([
              'block px-4 py-3 mt-0 text-sm',
              'bg-primary text-primary-content' =>
-                 Request::RouteIs('admin-profile.index') ||
-                 Request::is('admin/profile/*'),
+                 Request::RouteIs('admin-profile.index')
          ])>
              Profile
+         </a>
+         <a href="{{ route('admin-profile.address') }}" @class([
+             'block px-4 py-3 mt-0 text-sm',
+             'bg-primary text-primary-content' =>
+                 Request::RouteIs('admin-profile.address')
+         ])>
+             Alamat
          </a>
          <a href="{{ route('homepage-client.index') }}" @class([
              'block px-4 py-3 mt-0 text-sm',

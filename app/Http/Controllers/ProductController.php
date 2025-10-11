@@ -40,7 +40,14 @@ class ProductController extends Controller
 
         $validated = $request->validate($queryParams);
 
-        $data = Product::with("product_variant", "promo", "auction")->latest();
+        $data = Product::with([
+            'product_pictures',
+            'promo',
+            'auction',
+            'product_variant' => function ($query) {
+                $query->with(['product_detail.variant_value.variant']);
+            }
+        ])->latest();
 
         if (isset($validated["nama"])) {
             $data = $data->where('name', 'like', '%' . $validated["nama"] . '%');
@@ -63,32 +70,24 @@ class ProductController extends Controller
         ];
 
         $rows = $data->map(function ($item) {
-            $stock = 0; // Initialize stock to 0
-            $prices = []; // Initialize an empty array to hold prices
+            $variantData = $item->product_variant->map(function ($pv) {
+                $variantName = optional(optional($pv->product_detail->first())->variant_value)->value ?? 'Tanpa Varian';
+                return [
+                    'id' => $pv->id,
+                    'name' => $variantName,
+                    'price' => $pv->price,
+                    'stock' => $pv->stock,
+                ];
+            });
 
-            foreach ($item->product_variant as $pv) {
-                $stock += $pv->stock;
-                $prices[] = $pv->price; // Add each price to the array
-            }
-
-            // Get the minimum and maximum prices from the prices array
-            $minPrice = !empty($prices) ? min($prices) : 0;
-            $maxPrice = !empty($prices) ? max($prices) : 0;
-
-            // Format the price based on the number of prices
-            if (count($prices) === 1) {
-                $priceFormatted = 'Rp. ' . number_format($minPrice, 0, ',', '.');
-            } else {
-                $priceFormatted = 'Rp. ' . number_format($minPrice, 0, ',', '.') . ' - Rp. ' . number_format($maxPrice, 0, ',', '.');
-            }
-
-            // ADD PRODUCT NAME TO DATA AUCTION UNTUK DITAMPILKAN DI FORM AUCTION
-            $auction = $item->auction ? array_merge($item->auction->toArray(), ['product_name' => $item->name]) : ['product_name' => $item->name, 'product_id' => $item->id];
+            $auction = $item->auction
+                ? array_merge($item->auction->toArray(), ['product_name' => $item->name])
+                : ['product_name' => $item->name, 'product_id' => $item->id];
 
             return [
                 'name' => $item->name,
-                'stock' => $stock,
-                'price' => $priceFormatted,
+                'stock' => $variantData,
+                'price' => $variantData,
                 'promo' => $item->promo->active ?? null,
                 'auction' => $auction,
                 'id' => $item->id,
@@ -741,5 +740,41 @@ class ProductController extends Controller
         Excel::import(new ProductImport, $request->file("product-excel"));
 
         return redirect()->back()->with('success', 'Berhasil import data product excel !');
+    }
+
+    public function updatePriceSingle(Request $request, Product $product)
+    {
+        $validated = $request->validate([
+            'price' => 'required|numeric|min:0',
+            'variant_id' => 'required|exists:product_variants,id',
+        ]);
+
+        $variant = $product->product_variant()->find($validated['variant_id']);
+
+        if (!$variant) {
+            return response()->json(['success' => false, 'message' => 'Varian tidak ditemukan'], 404);
+        }
+
+        $variant->update(['price' => $validated['price']]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function updateStockSingle(Request $request, Product $product)
+    {
+        $validated = $request->validate([
+            'stock' => 'required|numeric|min:0',
+            'variant_id' => 'required|exists:product_variants,id',
+        ]);
+
+        $variant = $product->product_variant()->find($validated['variant_id']);
+
+        if (!$variant) {
+            return response()->json(['success' => false, 'message' => 'Varian tidak ditemukan'], 404);
+        }
+
+        $variant->update(['stock' => $validated['stock']]);
+
+        return response()->json(['success' => true]);
     }
 }
