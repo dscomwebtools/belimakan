@@ -241,22 +241,89 @@
                             </select>
                         </div>
 
-                        {{-- PICTURES --}}
-                        <div class="flex flex-col flex-1">
-                            <label for="product_pictures" class="font-semibold mb-2 text-base-content">Foto
-                                Produk</label>
-                            <div class="tooltip text-left w-fit" data-tip="Bisa memilih beberapa gambar">
-                                <input type="file" name="product_pictures[]" id="product_pictures" multiple />
+                        {{-- 📸 PRODUCT PICTURES --}}
+                        <div class="flex flex-col flex-1 mb-6">
+                            <label for="product_pictures" class="font-semibold mb-2 text-base-content">
+                                Foto Produk
+                            </label>
+
+                            {{-- Upload input --}}
+                            <input type="file" name="product_pictures[]" id="product_pictures" multiple
+                                class="mb-4 border rounded p-2" />
+
+                            {{-- 🔹 Preview for NEW uploads (before save) --}}
+                            <div class="flex flex-wrap gap-2 mb-4" id="new-image-preview"></div>
+
+                            {{-- 🔹 Existing pictures (edit mode) --}}
+                            <div class="flex flex-wrap gap-2" id="image-preview">
+                                @foreach ($data->product_pictures as $pic)
+                                    <div class="relative w-32 h-32 cursor-move" data-id="{{ $pic->id }}">
+                                        <img src="{{ Storage::url($pic->path) }}" alt="Image {{ $loop->iteration }}"
+                                            class="object-cover w-full h-full rounded-lg border border-gray-300">
+                                        <button type="button"
+                                            class="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 text-xs delete-picture w-[20px] h-[20px] flex items-center justify-center"
+                                            data-id="{{ $pic->id }}">
+                                            ✕
+                                        </button>
+                                    </div>
+                                @endforeach
                             </div>
-                        </div>
-                        {{-- PICTURES PREVIEW --}}
-                        <div class="flex gap-2 flex-1 flex-wrap pic-preview-container">
-                        </div>
-                        {{-- PICTURES PREVIEW ON EDIT --}}
-                        <div class="flex gap-2 flex-1 flex-wrap pic-preview-container-on-edit">
+
+                            {{-- Hidden input for deleted pictures --}}
+                            <input type="hidden" name="deleted_pictures" id="deleted_pictures">
+
+                            {{-- Hidden input for image positions (sorted order) --}}
+                            <input type="hidden" name="picture_positions" id="picture_positions">
                         </div>
 
-                        <input type="hidden" name="deleted_pictures" id="deleted_pictures">
+                        @push('scripts')
+                            <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+                            <script>
+                                document.addEventListener('DOMContentLoaded', () => {
+                                    const imagePreview = document.getElementById('image-preview');
+                                    const newImagePreview = document.getElementById('new-image-preview');
+                                    const deletedPicturesInput = document.getElementById('deleted_pictures');
+                                    const picturePositionsInput = document.getElementById('picture_positions');
+                                    const deletedPictures = [];
+
+                                    // ✅ Handle sorting of existing images
+                                    new Sortable(imagePreview, {
+                                        animation: 150,
+                                        onSort: function() {
+                                            const orderedIds = Array.from(imagePreview.children).map(div => div.dataset.id);
+                                            picturePositionsInput.value = JSON.stringify(orderedIds);
+                                        }
+                                    });
+
+                                    // ✅ Handle deletion
+                                    imagePreview.addEventListener('click', (e) => {
+                                        if (e.target.closest('.delete-picture')) {
+                                            const btn = e.target.closest('.delete-picture');
+                                            const id = btn.dataset.id;
+                                            deletedPictures.push(id);
+                                            deletedPicturesInput.value = JSON.stringify(deletedPictures);
+                                            btn.parentElement.remove();
+                                        }
+                                    });
+
+                                    // ✅ Preview new uploaded images
+                                    document.getElementById('product_pictures').addEventListener('change', (e) => {
+                                        newImagePreview.innerHTML = '';
+                                        Array.from(e.target.files).forEach(file => {
+                                            const reader = new FileReader();
+                                            reader.onload = ev => {
+                                                const img = document.createElement('img');
+                                                img.src = ev.target.result;
+                                                img.classList.add('object-cover', 'w-32', 'h-32', 'rounded-lg',
+                                                    'border', 'border-dashed');
+                                                newImagePreview.appendChild(img);
+                                            };
+                                            reader.readAsDataURL(file);
+                                        });
+                                    });
+                                });
+                            </script>
+                        @endpush
 
                         {{-- PRODUCT DETAILS --}}
                         <div id="detail-product-container" class="mt-2 flex flex-col gap-4">
@@ -321,55 +388,6 @@
 
         <script>
             $(function() {
-                //pictures preview
-                const pictures = document.querySelector('#product_pictures')
-                const deletedPicturesInput = document.querySelector('#deleted_pictures');
-
-                let deletedPictures = [];
-
-                // Fungsi untuk menampilkan gambar
-                function displayPicture(src, id = null, containerClassname) {
-                    const picPreviewContainer = document.querySelector(containerClassname)
-                    const pictureWrapper = document.createElement('div');
-                    pictureWrapper.classList.add('picture-wrapper');
-
-                    const img = document.createElement('img');
-                    img.src = src;
-                    img.classList.add('border', 'border-primary', 'border-dashed', 'max-w-52');
-                    pictureWrapper.appendChild(img);
-
-                    if (id !== null) {
-                        const removeBtn = document.createElement('button');
-                        removeBtn.innerHTML = '<i class="fa fa-trash text-error"></i>';
-                        removeBtn.classList.add('remove-btn');
-                        removeBtn.addEventListener('click', function() {
-                            picPreviewContainer.removeChild(pictureWrapper);
-                            deletedPictures.push(id);
-                            deletedPicturesInput.value = JSON.stringify(deletedPictures);
-                        });
-                        pictureWrapper.appendChild(removeBtn);
-                    }
-
-                    picPreviewContainer.appendChild(pictureWrapper);
-                }
-
-                pictures.addEventListener('change', function(e) {
-                    const picPreviewContainer = document.querySelector('.pic-preview-container')
-                    picPreviewContainer.innerHTML = ''
-
-                    const files = Array.from(e.target.files);
-
-                    // Memproses setiap file yang dipilih
-                    files.forEach(file => {
-                        const oFReader = new FileReader();
-                        oFReader.readAsDataURL(file);
-
-                        oFReader.onload = function(oFREvent) {
-                            displayPicture(oFREvent.target.result, null, '.pic-preview-container');
-                        }
-                    }) //end forEach
-                })
-
                 $('.product-form form').on('click', '.remove-detail-product', function() {
                     $(this).closest('.detail-product-item').remove()
                 });
@@ -411,26 +429,6 @@
                     },
                     theme: 'snow'
                 })
-
-                @isset($data) //jika mode edit
-                    const currentPictures = @json($data->product_pictures);
-
-                    currentPictures.forEach(picture => {
-                        const path = '{{ Storage::url('') }}' + picture.path
-                        displayPicture(path, picture.id,
-                            '.pic-preview-container-on-edit'); // Pastikan properti 'path' dan 'id' benar
-                    });
-
-                    const detailProducts = @json($data->detail_value);
-
-                    const detailCont = $('#detail-product-container');
-                    detailCont.empty();
-                    detailProducts.forEach(productDetail => {
-                        detailCont.append(itemDetail(productDetail.detail.detail, productDetail.value));
-                    });
-
-                    // VARIANTS
-                @endisset
             })
         </script>
     @endpush

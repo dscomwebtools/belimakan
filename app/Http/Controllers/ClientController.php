@@ -28,7 +28,11 @@ class ClientController extends Controller
         $hero_data = Setting::where('section_name', 'hero')->first();
         $hero = [
             'data' => $hero_data,
-            'product_pictures' => Product::with(['product_pictures'])->limit($hero_data->show_items)->latest()->get()
+            'product_pictures' => Product::with([
+                'product_pictures' => function ($query) {
+                    $query->orderBy('position', 'asc');
+                },
+            ])->limit($hero_data->show_items)->latest()->get()
         ];
 
         $promo_data = Setting::where('section_name', 'promo')->first();
@@ -79,7 +83,9 @@ class ClientController extends Controller
         $products = [
             'data' => $product_data,
             'items' => Product::with([
-                'product_pictures',
+                'product_pictures' => function ($query) {
+                    $query->orderBy('position', 'asc');
+                },
                 'promo',
                 'auction',
                 'product_variant' => function ($query) {
