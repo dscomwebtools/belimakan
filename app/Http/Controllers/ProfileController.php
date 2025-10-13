@@ -20,6 +20,14 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
+    protected string $base;
+    protected string $key;
+
+    public function __construct()
+    {
+        $this->base = config('services.biteship_api.base');
+        $this->key  = config('services.biteship_api.key');
+    }
     function index(Request $request): View
     {
         $orders = Order::where('user_id', auth()->user()->id)->get();
@@ -143,10 +151,10 @@ class ProfileController extends Controller
 
         $area = Http::withHeaders([
             // 'authorization' => 'biteship_live.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiZHNjIiwidXNlcklkIjoiNjZjN2VlYTc5ZWE1NWYwMDEyZDcyYzIzIiwiaWF0IjoxNzI0NDcxMTYxfQ.J892b7nG4MRPAsHVv7Hz2AqGg-Nsaw1Eof2wAZX9w4w',
-            'authorization' => 'biteship_test.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidGVzIiwidXNlcklkIjoiNjZjN2VlYTc5ZWE1NWYwMDEyZDcyYzIzIiwiaWF0IjoxNzI0NDY4OTY4fQ.tvttczzzVKaAvNUKFxkH2tBG68FdSLhiw7_7IoBikZE',
+            'authorization' => $this->key,
             'content-type' => 'application/json',
 
-        ])->get('https://api.biteship.com/v1/maps/areas/' . $request->area_id)->json();
+        ])->get($this->base . '/v1/maps/areas/' . $request->area_id)->json();
 
         if (!$area['success']) {
             return redirect()->back()->withErrors(['message' => 'Gagal fetching data area!'])->withInput();
@@ -200,10 +208,10 @@ class ProfileController extends Controller
 
         $area = Http::withHeaders([
             // 'authorization' => 'biteship_live.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiZHNjIiwidXNlcklkIjoiNjZjN2VlYTc5ZWE1NWYwMDEyZDcyYzIzIiwiaWF0IjoxNzI0NDcxMTYxfQ.J892b7nG4MRPAsHVv7Hz2AqGg-Nsaw1Eof2wAZX9w4w',
-            'authorization' => 'biteship_test.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidGVzIiwidXNlcklkIjoiNjZjN2VlYTc5ZWE1NWYwMDEyZDcyYzIzIiwiaWF0IjoxNzI0NDY4OTY4fQ.tvttczzzVKaAvNUKFxkH2tBG68FdSLhiw7_7IoBikZE',
+            'authorization' => $this->key,
             'content-type' => 'application/json',
 
-        ])->get('https://api.biteship.com/v1/maps/areas/' . $request->area_id)->json();
+        ])->get($this->base . '/v1/maps/areas/' . $request->area_id)->json();
 
         if (!$area['success']) {
             return redirect()->back()->withErrors(['message' => 'Gagal fetching data area!'])->withInput();
@@ -280,9 +288,9 @@ class ProfileController extends Controller
 
         // 🔹 Ambil data area dari Biteship API
         $area = Http::withHeaders([
-            'authorization' => 'biteship_test.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidGVzIiwidXNlcklkIjoiNjZjN2VlYTc5ZWE1NWYwMDEyZDcyYzIzIiwiaWF0IjoxNzI0NDY4OTY4fQ.tvttczzzVKaAvNUKFxkH2tBG68FdSLhiw7_7IoBikZE',
+            'authorization' => $this->key,
             'content-type'  => 'application/json',
-        ])->get('https://api.biteship.com/v1/maps/areas/' . $request->area_id)->json();
+        ])->get($this->base . '/v1/maps/areas/' . $request->area_id)->json();
 
         if (empty($area['success']) || !$area['success']) {
             return back()->withErrors(['message' => 'Gagal fetching data area!'])->withInput();
