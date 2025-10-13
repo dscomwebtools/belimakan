@@ -304,7 +304,12 @@ class ProductController extends Controller
 
     function edit(Product $product)
     {
-        $data = $product->load('detail_value.detail');
+        $data = $product->load([
+            'detail_value.detail',
+            'product_pictures' => function ($query) {
+                $query->orderBy('position', 'asc');
+            },
+        ]);
         $variants = Variant::limit(2)->get();
         $categories = Category::orderBy('name', 'asc')->get();
         $brands = Brand::orderBy('name', 'asc')->get();
@@ -537,7 +542,7 @@ class ProductController extends Controller
 
             // PICTURES
             if (isset($validated["product_pictures"])) {
-                foreach ($validated["product_pictures"] as $product_picture) {
+                foreach ($validated["product_pictures"] as $pos => $product_picture) {
                     $filename = $product->slug . '-' . uniqid() . '.webp';
                     $path = $this->picture_folder . $filename;
                     Storage::put($path, file_get_contents($product_picture));
@@ -545,6 +550,7 @@ class ProductController extends Controller
                     $newPicture = new ProductPicture();
                     $newPicture->product_id = $product->id;
                     $newPicture->path = $path;
+                    $newPicture->position = $pos + 1; // ✅ keep consistent ordering
                     $newPicture->save();
                 }
             }
@@ -553,6 +559,15 @@ class ProductController extends Controller
                 $deletedPictures = json_decode($validated['deleted_pictures'], true);
                 if (!empty($deletedPictures)) {
                     ProductPicture::destroy($deletedPictures);
+                }
+            }
+
+            // ✅ Update existing picture positions
+            if (!empty($validated['picture_positions'])) {
+                $positions = json_decode($validated['picture_positions'], true);
+
+                foreach ($positions as $index => $id) {
+                    ProductPicture::where('id', $id)->update(['position' => $index + 1]);
                 }
             }
 
@@ -660,7 +675,9 @@ class ProductController extends Controller
 
         $product_data = Setting::where('section_name', 'product')->first();
         $products = Product::with([
-            'product_pictures',
+            'product_pictures' => function ($query) {
+                $query->orderBy('position', 'asc');
+            },
             'promo',
             'auction',
             'product_variant' => function ($query) {
@@ -685,10 +702,18 @@ class ProductController extends Controller
 
     function product($slug): View
     {
-        $product = Product::with(['product_variant' => function ($query) {
-            $query->where('active', 1)
-                ->with(['product_detail.variant_value.variant']);
-        }])->where('slug', $slug)->firstOrFail();
+        $product = Product::with([
+            'product_pictures' => function ($query) {
+                $query->orderBy('position', 'asc');
+            },
+            'product_variant' => function ($query) {
+                $query->where('active', 1)
+                    ->orderBy('id', 'asc')
+                    ->with([
+                        'product_detail.variant_value.variant'
+                    ]);
+            },
+        ])->where('slug', $slug)->firstOrFail();
 
         return view('client.product.detail', compact('product'));
     }
@@ -697,7 +722,9 @@ class ProductController extends Controller
     {
         $perPage = 10;
         $products = Product::with([
-            'product_pictures',
+            'product_pictures' => function ($query) {
+                $query->orderBy('position', 'asc');
+            },
             'promo',
             'auction',
             'product_variant' => function ($query) {
@@ -726,7 +753,13 @@ class ProductController extends Controller
     function productsBySearch(Request $request): View
     {
         $keyword = $request->query('n');
-        $products = Product::with(['product_pictures', 'promo', 'auction'])
+        $products = Product::with([
+            'product_pictures' => function ($query) {
+                $query->orderBy('position', 'asc');
+            },
+            'promo',
+            'auction'
+        ])
             ->where('name', 'like', '%' . $keyword . '%')
             ->where('active', 1)
             // ->limit() // nanti dilimit setelah sudah bisa load more
