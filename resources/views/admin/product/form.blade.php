@@ -255,19 +255,21 @@
                             <div class="flex flex-wrap gap-2 mb-4" id="new-image-preview"></div>
 
                             {{-- 🔹 Existing pictures (edit mode) --}}
-                            <div class="flex flex-wrap gap-2" id="image-preview">
-                                @foreach ($data->product_pictures as $pic)
-                                    <div class="relative w-32 h-32 cursor-move" data-id="{{ $pic->id }}">
-                                        <img src="{{ Storage::url($pic->path) }}" alt="Image {{ $loop->iteration }}"
-                                            class="object-cover w-full h-full rounded-lg border border-gray-300">
-                                        <button type="button"
-                                            class="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 text-xs delete-picture w-[20px] h-[20px] flex items-center justify-center"
-                                            data-id="{{ $pic->id }}">
-                                            ✕
-                                        </button>
-                                    </div>
-                                @endforeach
-                            </div>
+                            @isset($data)
+                                <div class="flex flex-wrap gap-2" id="image-preview">
+                                    @foreach ($data->product_pictures as $pic)
+                                        <div class="relative w-32 h-32 cursor-move" data-id="{{ $pic->id }}">
+                                            <img src="{{ Storage::url($pic->path) }}" alt="Image {{ $loop->iteration }}"
+                                                class="object-cover w-full h-full rounded-lg border border-gray-300">
+                                            <button type="button"
+                                                class="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 text-xs delete-picture w-[20px] h-[20px] flex items-center justify-center"
+                                                data-id="{{ $pic->id }}">
+                                                ✕
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endisset
 
                             {{-- Hidden input for deleted pictures --}}
                             <input type="hidden" name="deleted_pictures" id="deleted_pictures">
