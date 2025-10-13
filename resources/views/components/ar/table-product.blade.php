@@ -71,6 +71,18 @@
     </div>
 
     <div class="overflow-x-auto">
+        <div x-data="{ show: false, message: '', type: 'success' }"
+            @flash.window="show = true; message = $event.detail.message; type = $event.detail.type; setTimeout(() => show = false, 3000)"
+            x-show="show" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 transform translate-y-2"
+            x-transition:enter-end="opacity-100 transform translate-y-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 transform translate-y-0"
+            x-transition:leave-end="opacity-0 transform translate-y-2"
+            class="fixed top-5 right-5 z-50 p-4 rounded-lg shadow-xl text-white transition-all duration-300"
+            :class="{ 'bg-green-500': type === 'success', 'bg-red-500': type === 'error' }" style="display: none;">
+            <span x-text="message"></span>
+        </div>
         <table class="table bg-base-200">
             <thead>
                 <tr class="bg-base-300">
@@ -89,50 +101,102 @@
                                 @continue
                             @endif
 
-                            {{-- ✅ Inline Edit Harga per Varian --}}
+                            {{-- Inline Edit Harga per Varian --}}
                             @if ($k === 'price')
-                                <td class="text-left">
+                                <td class="text-left py-2 px-4">
                                     @foreach ($cell as $variant)
-                                        <div x-data="{ editing: false, value: {{ $variant['price'] }}, saving: false }" class="mb-1 text-left">
-                                            <span class="font-semibold">{{ $variant['name'] }}:</span>
+                                        <div x-data="{
+                                            editing: false,
+                                            initialValue: {{ $variant['price'] }},
+                                            value: {{ $variant['price'] }},
+                                            saving: false,
+                                            variantId: {{ $variant['id'] }},
+                                            savePrice() {
+                                                this.saving = true;
+                                                fetch('{{ route('product.update-price', $row['id']) }}', {
+                                                        method: 'POST',
+                                                        headers: {
+                                                            'Content-Type': 'application/json',
+                                                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                                        },
+                                                        body: JSON.stringify({
+                                                            variant_id: this.variantId,
+                                                            price: this.value
+                                                        })
+                                                    })
+                                                    .then(res => res.json())
+                                                    .then(data => {
+                                                        if (data.success) {
+                                                            this.initialValue = this.value; // Update initial value on success
+                                                            window.dispatchEvent(new CustomEvent('flash', { detail: { message: '✅ Harga varian berhasil diubah', type: 'success' } }));
+                                                        } else {
+                                                            this.value = this.initialValue; // Revert on failure
+                                                            window.dispatchEvent(new CustomEvent('flash', { detail: { message: '❌ ' + (data.message || 'Gagal menyimpan harga varian!'), type: 'error' } }));
+                                                        }
+                                                    })
+                                                    .catch(() => {
+                                                        this.value = this.initialValue; // Revert on error
+                                                        window.dispatchEvent(new CustomEvent('flash', { detail: { message: '❌ Terjadi kesalahan saat menyimpan data', type: 'error' } }));
+                                                    })
+                                                    .finally(() => {
+                                                        this.saving = false;
+                                                        this.editing = false;
+                                                    });
+                                            }
+                                        }"
+                                            class="flex items-center space-x-2 mb-2 p-1 rounded transition-colors duration-150">
+                                            <span
+                                                class="font-semibold text-sm text-gray-700">{{ $variant['name'] }}:</span>
+
+                                            {{-- Display Mode --}}
                                             <template x-if="!editing">
-                                                <span @click="editing = true" class="cursor-pointer hover:underline"
-                                                    x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value)">
-                                                </span>
+                                                <div class="flex items-center">
+                                                    <span
+                                                        x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(initialValue)"
+                                                        class="text-sm font-medium">
+                                                    </span>
+                                                    <button type="button"
+                                                        @click="editing = true; $nextTick(() => $el.parentNode.querySelector('input').focus())"
+                                                        class="ml-2 text-gray-400 hover:text-indigo-600 transition-colors duration-150 p-1 rounded-full hover:bg-indigo-100"
+                                                        :disabled="saving">
+                                                        <i class="fa-solid fa-pencil"></i>
+                                                    </button>
+                                                </div>
                                             </template>
+
+                                            {{-- Edit Mode --}}
                                             <template x-if="editing">
-                                                <input type="number" x-model="value"
-                                                    @keydown.enter.prevent="
-                                            saving = true;
-                                            fetch('{{ route('product.update-price', $row['id']) }}', {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Content-Type': 'application/json',
-                                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                                },
-                                                body: JSON.stringify({
-                                                    variant_id: {{ $variant['id'] }},
-                                                    price: value
-                                                })
-                                            })
-                                            .then(res => res.json())
-                                            .then(data => {
-                                                saving = false;
-                                                if (data.success) {
-                                                    alert('✅ Harga varian berhasil diubah');
-                                                } else {
-                                                    alert('❌ ' + (data.message || 'Gagal menyimpan harga varian!'));
-                                                }
-                                            })
-                                            .catch(() => {
-                                                saving = false;
-                                                alert('❌ Terjadi kesalahan saat menyimpan data');
-                                            })
-                                            .finally(() => editing = false);
-                                        "
-                                                    @blur="editing = false"
-                                                    class="border border-gray-300 rounded w-24 px-1 py-0.5 text-left focus:outline-none"
-                                                    autofocus>
+                                                <div class="flex items-center space-x-1">
+                                                    <input type="number" x-model.number="value"
+                                                        @keydown.enter.prevent="savePrice()"
+                                                        @keydown.escape.prevent="editing = false; value = initialValue"
+                                                        @blur.away="editing = false; value = initialValue"
+                                                        :disabled="saving"
+                                                        class="border border-indigo-300 rounded-lg w-32 px-2 py-1 text-sm text-right focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-150">
+
+                                                    <button type="button" @click="savePrice()"
+                                                        class="bg-indigo-500 text-white p-1 rounded-full hover:bg-indigo-600 disabled:opacity-50 transition-colors"
+                                                        :disabled="saving">
+                                                        {{-- Save Icon --}}
+                                                        <svg x-show="!saving" xmlns="http://www.w3.org/2000/svg"
+                                                            class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fill-rule="evenodd"
+                                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                clip-rule="evenodd" />
+                                                        </svg>
+                                                        {{-- Loading Spinner (Replace with your preferred spinner if needed) --}}
+                                                        <svg x-show="saving" class="animate-spin h-4 w-4 text-white"
+                                                            xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                            viewBox="0 0 24 24">
+                                                            <circle class="opacity-25" cx="12" cy="12"
+                                                                r="10" stroke="currentColor" stroke-width="4">
+                                                            </circle>
+                                                            <path class="opacity-75" fill="currentColor"
+                                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                            </path>
+                                                        </svg>
+                                                    </button>
+                                                </div>
                                             </template>
                                         </div>
                                     @endforeach
@@ -140,49 +204,101 @@
                                 @continue
                             @endif
 
-                            {{-- ✅ Inline Edit Stok per Varian --}}
+                            {{-- Inline Edit Stok per Varian --}}
                             @if ($k === 'stock')
-                                <td class="text-left">
+                                <td class="text-left py-2 px-4">
                                     @foreach ($cell as $variant)
-                                        <div x-data="{ editing: false, value: {{ $variant['stock'] }}, saving: false }" class="mb-1 text-left">
-                                            <span class="font-semibold">{{ $variant['name'] }}:</span>
+                                        <div x-data="{
+                                            editing: false,
+                                            initialValue: {{ $variant['stock'] }},
+                                            value: {{ $variant['stock'] }},
+                                            saving: false,
+                                            variantId: {{ $variant['id'] }},
+                                            saveStock() {
+                                                this.saving = true;
+                                                fetch('{{ route('product.update-stock', $row['id']) }}', {
+                                                        method: 'POST',
+                                                        headers: {
+                                                            'Content-Type': 'application/json',
+                                                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                                        },
+                                                        body: JSON.stringify({
+                                                            variant_id: this.variantId,
+                                                            stock: this.value
+                                                        })
+                                                    })
+                                                    .then(res => res.json())
+                                                    .then(data => {
+                                                        if (data.success) {
+                                                            this.initialValue = this.value; // Update initial value on success
+                                                            window.dispatchEvent(new CustomEvent('flash', { detail: { message: '✅ Stok varian berhasil diubah', type: 'success' } }));
+                                                        } else {
+                                                            this.value = this.initialValue; // Revert on failure
+                                                            window.dispatchEvent(new CustomEvent('flash', { detail: { message: '❌ ' + (data.message || 'Gagal menyimpan stok varian!'), type: 'error' } }));
+                                                        }
+                                                    })
+                                                    .catch(() => {
+                                                        this.value = this.initialValue; // Revert on error
+                                                        window.dispatchEvent(new CustomEvent('flash', { detail: { message: '❌ Terjadi kesalahan saat menyimpan data', type: 'error' } }));
+                                                    })
+                                                    .finally(() => {
+                                                        this.saving = false;
+                                                        this.editing = false;
+                                                    });
+                                            }
+                                        }"
+                                            class="flex items-center space-x-2 mb-2 p-1 rounded transition-colors duration-150">
+                                            <span
+                                                class="font-semibold text-sm text-gray-700">{{ $variant['name'] }}:</span>
+
+                                            {{-- Display Mode --}}
                                             <template x-if="!editing">
-                                                <span @click="editing = true" class="cursor-pointer hover:underline"
-                                                    x-text="value"></span>
+                                                <div class="flex items-center">
+                                                    <span x-text="initialValue"
+                                                        class="text-sm font-medium text-gray-800">
+                                                    </span>
+                                                    <button type="button"
+                                                        @click="editing = true; $nextTick(() => $el.parentNode.querySelector('input').focus())"
+                                                        class="ml-2 text-gray-400 hover:text-indigo-600 transition-colors duration-150 p-1 rounded-full hover:bg-indigo-100"
+                                                        :disabled="saving">
+                                                        <i class="fa-solid fa-pencil"></i>
+                                                    </button>
+                                                </div>
                                             </template>
+
+                                            {{-- Edit Mode --}}
                                             <template x-if="editing">
-                                                <input type="number" x-model="value"
-                                                    @keydown.enter.prevent="
-                                            saving = true;
-                                            fetch('{{ route('product.update-stock', $row['id']) }}', {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Content-Type': 'application/json',
-                                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                                },
-                                                body: JSON.stringify({
-                                                    variant_id: {{ $variant['id'] }},
-                                                    stock: value
-                                                })
-                                            })
-                                            .then(res => res.json())
-                                            .then(data => {
-                                                saving = false;
-                                                if (data.success) {
-                                                    alert('✅ Stok varian berhasil diubah');
-                                                } else {
-                                                    alert('❌ ' + (data.message || 'Gagal menyimpan stok varian!'));
-                                                }
-                                            })
-                                            .catch(() => {
-                                                saving = false;
-                                                alert('❌ Terjadi kesalahan saat menyimpan data');
-                                            })
-                                            .finally(() => editing = false);
-                                        "
-                                                    @blur="editing = false"
-                                                    class="border border-gray-300 rounded w-20 px-1 py-0.5 text-left focus:outline-none"
-                                                    autofocus>
+                                                <div class="flex items-center space-x-1">
+                                                    <input type="number" x-model.number="value"
+                                                        @keydown.enter.prevent="saveStock()"
+                                                        @keydown.escape.prevent="editing = false; value = initialValue"
+                                                        @blur.away="editing = false; value = initialValue"
+                                                        :disabled="saving"
+                                                        class="border border-indigo-300 rounded-lg w-24 px-2 py-1 text-sm text-right focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-150">
+
+                                                    <button type="button" @click="saveStock()"
+                                                        class="bg-indigo-500 text-white p-1 rounded-full hover:bg-indigo-600 disabled:opacity-50 transition-colors"
+                                                        :disabled="saving">
+                                                        {{-- Save Icon --}}
+                                                        <svg x-show="!saving" xmlns="http://www.w3.org/2000/svg"
+                                                            class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fill-rule="evenodd"
+                                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                clip-rule="evenodd" />
+                                                        </svg>
+                                                        {{-- Loading Spinner --}}
+                                                        <svg x-show="saving" class="animate-spin h-4 w-4 text-white"
+                                                            xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                            viewBox="0 0 24 24">
+                                                            <circle class="opacity-25" cx="12" cy="12"
+                                                                r="10" stroke="currentColor" stroke-width="4">
+                                                            </circle>
+                                                            <path class="opacity-75" fill="currentColor"
+                                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                            </path>
+                                                        </svg>
+                                                    </button>
+                                                </div>
                                             </template>
                                         </div>
                                     @endforeach
@@ -231,7 +347,7 @@
                         @endforeach
 
                         {{-- Aksi --}}
-                        <td class="flex justify-evenly gap-2">
+                        <td class="flex items-center justify-evenly gap-2">
                             @if (Route::has($routeName . '.destroy'))
                                 <div class="tooltip" data-tip="Delete">
                                     <form action="{{ route($routeName . '.destroy', $row['id']) }}" method="post"

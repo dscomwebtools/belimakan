@@ -38,13 +38,19 @@
                     value="{{ __('Daerah (Kecamatan/Kota/Kabupaten/Provinsi)') }}" />
                 <select name="area_id" class="area_id w-full" required>
                     @if (old('area_id') || isset($data->area_id))
-                        <option value="{{ old('area_id', $data->area_id ?? '') }}" selected>
+                        <option value="{{ old('area_id', $data->area_id ?? '') }}">
                             {{ old('area_name', $data->area_name ?? 'Pilih daerah') }}
                         </option>
                     @endif
                 </select>
                 <x-input-error :messages="$errors->address_update->get('area_id')" class="mt-2" />
             </div>
+
+            {{-- <div class="flex flex-col my-4">
+                <x-input-label for="area_id" class="mb-2"
+                    value="{{ __('Daerah (Kecamatan/Kota/Kabupaten/Provinsi)') }}" />
+                <select name="area_id" class="area_id" required></select>
+            </div> --}}
 
             {{-- Catatan Kurir --}}
             {{-- <div class="mt-6">
@@ -128,30 +134,88 @@
         </form>
     </div>
 
-    <script>
-        function getMyLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        document.querySelector('input[name=latitude]').value = position.coords.latitude.toFixed(
-                            6);
-                        document.querySelector('input[name=longitude]').value = position.coords.longitude
-                            .toFixed(6);
-                    },
-                    function(error) {
-                        alert("Gagal mendapatkan lokasi: " + error.message);
-                    }
-                );
-            } else {
-                alert("Browser Anda tidak mendukung geolokasi.");
-            }
-        }
+    @push('scripts')
+        {{-- JQUERY --}}
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+        {{-- SELECT2 --}}
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-        function openMapModal() {
-            window.dispatchEvent(new CustomEvent('open-modal', {
-                detail: 'modal-map-admin-update'
-            }));
-        }
-    </script>
+        <script>
+            function getMyLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            document.querySelector('input[name=latitude]').value = position.coords.latitude.toFixed(
+                                6);
+                            document.querySelector('input[name=longitude]').value = position.coords.longitude
+                                .toFixed(6);
+                        },
+                        function(error) {
+                            alert("Gagal mendapatkan lokasi: " + error.message);
+                        }
+                    );
+                } else {
+                    alert("Browser Anda tidak mendukung geolokasi.");
+                }
+            }
+
+            function openMapModal() {
+                window.dispatchEvent(new CustomEvent('open-modal', {
+                    detail: 'modal-map-admin-update'
+                }));
+            }
+
+            $('.area_id').select2({
+                ajax: {
+                    url: '{{ route('get-areas-single') }}',
+                    data: function(params) {
+                        var query = {
+                            input: params.term,
+                        }
+
+                        // Query parameters will be ?input=[term]
+                        return query;
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: $.map(data.areas, function(item) {
+                                return {
+                                    id: item.id,
+                                    text: item.name
+                                };
+                            })
+                        };
+                    },
+                    cache: true
+                },
+                placeholder: 'Ketikan nama kecamatan/kota/kabupaten/provinsi',
+            });
+        </script>
+    @endpush
+
+    @push('styles')
+        {{-- SELECT2 --}}
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <style>
+            .select2 {
+                width: 100% !important;
+            }
+
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+
+            .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+                scroll-snap-type: x mandatory;
+            }
+
+            .no-scrollbar>* {
+                scroll-snap-align: start;
+            }
+        </style>
+    @endpush
 </x-app-layout>
 @include('admin.profile.modal-map-admin-update')

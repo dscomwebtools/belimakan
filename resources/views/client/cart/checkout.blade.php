@@ -351,9 +351,9 @@
                                         <span> berhasil digunakan!</span>
                                         <div class="text-green-600 text-xs mt-1 sm:mt-0">
                                             <span x-text="$store.checkout.voucherDescription"></span>
-                                            <span
+                                            {{-- <span
                                                 x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format($store.checkout.voucherDiscount)">
-                                            </span>
+                                            </span> --}}
                                         </div>
                                     </div>
                                 </div>
