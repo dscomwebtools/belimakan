@@ -247,8 +247,8 @@
                             </label>
 
                             <div id="image-preview"
-                                class="grid grid-cols-[12rem_repeat(5,8rem)] gap-3 overflow-x-auto pb-2">
-                                @for ($i = 0; $i < 6; $i++)
+                                class="grid grid-cols-[12rem_repeat(6,8rem)] gap-3 overflow-x-auto pb-2">
+                                @for ($i = 0; $i < 7; $i++)
                                     @php
                                         $pic = $data->product_pictures[$i] ?? null;
                                     @endphp
