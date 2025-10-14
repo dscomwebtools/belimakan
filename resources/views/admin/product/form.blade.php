@@ -241,40 +241,53 @@
                             </select>
                         </div>
 
-                        {{-- 📸 PRODUCT PICTURES --}}
                         <div class="flex flex-col flex-1 mb-6">
-                            <label for="product_pictures" class="font-semibold mb-2 text-base-content">
+                            <label class="font-semibold mb-2 text-base-content">
                                 Foto Produk
                             </label>
 
-                            {{-- Upload input --}}
-                            <input type="file" name="product_pictures[]" id="product_pictures" multiple
-                                class="mb-4 border rounded p-2" />
+                            <div id="image-preview"
+                                class="grid grid-cols-[12rem_repeat(5,8rem)] gap-3 overflow-x-auto pb-2">
+                                @for ($i = 0; $i < 6; $i++)
+                                    @php
+                                        $pic = $data->product_pictures[$i] ?? null;
+                                    @endphp
+                                    <div class="relative flex items-center justify-center border-2 border-dashed rounded-lg cursor-move
+                {{ $i === 0 ? 'w-48 h-48' : 'w-32 h-32' }}
+                bg-gray-50 hover:bg-gray-100 transition-all"
+                                        data-index="{{ $i }}" data-id="{{ $pic->id ?? '' }}">
 
-                            {{-- 🔹 Preview for NEW uploads (before save) --}}
-                            <div class="flex flex-wrap gap-2 mb-4" id="new-image-preview"></div>
-
-                            {{-- 🔹 Existing pictures (edit mode) --}}
-                            @isset($data)
-                                <div class="flex flex-wrap gap-2" id="image-preview">
-                                    @foreach ($data->product_pictures as $pic)
-                                        <div class="relative w-32 h-32 cursor-move" data-id="{{ $pic->id }}">
-                                            <img src="{{ Storage::url($pic->path) }}" alt="Image {{ $loop->iteration }}"
-                                                class="object-cover w-full h-full rounded-lg border border-gray-300">
+                                        @if ($pic)
+                                            <img src="{{ Storage::url($pic->path) }}"
+                                                alt="Image {{ $i + 1 }}"
+                                                class="object-cover w-full h-full rounded-lg preview-img">
                                             <button type="button"
                                                 class="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 text-xs delete-picture w-[20px] h-[20px] flex items-center justify-center"
-                                                data-id="{{ $pic->id }}">
-                                                ✕
-                                            </button>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @endisset
+                                                data-id="{{ $pic->id }}">✕</button>
+                                        @endif
 
-                            {{-- Hidden input for deleted pictures --}}
+                                        {{-- Input tetap ada walau ada preview --}}
+                                        <label for="product_pictures{{ $i }}"
+                                            class="flex flex-col items-center justify-center w-full h-full text-gray-400 cursor-pointer upload-label {{ $pic ? 'hidden' : '' }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 mb-1"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 4v16m8-8H4" />
+                                            </svg>
+                                            <span class="text-xs">Upload</span>
+                                        </label>
+                                        <input type="file" accept="image/*" name="product_pictures[]"
+                                            id="product_pictures{{ $i }}" class="hidden file-input" />
+
+                                        @if ($i === 0)
+                                            <span
+                                                class="thumb-label absolute bottom-1 left-1 bg-blue-600 text-white text-xs px-1 rounded">Thumbnail</span>
+                                        @endif
+                                    </div>
+                                @endfor
+                            </div>
+
                             <input type="hidden" name="deleted_pictures" id="deleted_pictures">
-
-                            {{-- Hidden input for image positions (sorted order) --}}
                             <input type="hidden" name="picture_positions" id="picture_positions">
                         </div>
 
@@ -282,47 +295,92 @@
                             <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
                             <script>
                                 document.addEventListener('DOMContentLoaded', () => {
-                                    const imagePreview = document.getElementById('image-preview');
-                                    const newImagePreview = document.getElementById('new-image-preview');
+                                    const grid = document.getElementById('image-preview');
                                     const deletedPicturesInput = document.getElementById('deleted_pictures');
                                     const picturePositionsInput = document.getElementById('picture_positions');
                                     const deletedPictures = [];
 
-                                    // ✅ Handle sorting of existing images
-                                    new Sortable(imagePreview, {
+                                    // Enable drag sort
+                                    new Sortable(grid, {
                                         animation: 150,
-                                        onSort: function() {
-                                            const orderedIds = Array.from(imagePreview.children).map(div => div.dataset.id);
-                                            picturePositionsInput.value = JSON.stringify(orderedIds);
-                                        }
+                                        onSort: updateOrder
                                     });
 
-                                    // ✅ Handle deletion
-                                    imagePreview.addEventListener('click', (e) => {
-                                        if (e.target.closest('.delete-picture')) {
-                                            const btn = e.target.closest('.delete-picture');
-                                            const id = btn.dataset.id;
+                                    // DELETE PICTURE
+                                    grid.addEventListener('click', e => {
+                                        const btn = e.target.closest('.delete-picture');
+                                        if (!btn) return;
+                                        const parent = btn.closest('[data-index]');
+                                        const id = btn.dataset.id;
+
+                                        if (id) {
                                             deletedPictures.push(id);
                                             deletedPicturesInput.value = JSON.stringify(deletedPictures);
-                                            btn.parentElement.remove();
                                         }
+
+                                        // Reset slot ke upload mode (tidak hapus input)
+                                        parent.querySelector('.preview-img')?.remove();
+                                        btn.remove();
+                                        parent.querySelector('.upload-label').classList.remove('hidden');
+                                        parent.querySelector('.file-input').value = '';
+                                        updateOrder();
                                     });
 
-                                    // ✅ Preview new uploaded images
-                                    document.getElementById('product_pictures').addEventListener('change', (e) => {
-                                        newImagePreview.innerHTML = '';
-                                        Array.from(e.target.files).forEach(file => {
-                                            const reader = new FileReader();
-                                            reader.onload = ev => {
-                                                const img = document.createElement('img');
-                                                img.src = ev.target.result;
-                                                img.classList.add('object-cover', 'w-32', 'h-32', 'rounded-lg',
-                                                    'border', 'border-dashed');
-                                                newImagePreview.appendChild(img);
-                                            };
-                                            reader.readAsDataURL(file);
-                                        });
+                                    // FILE UPLOAD PREVIEW
+                                    grid.addEventListener('change', e => {
+                                        const fileInput = e.target.closest('.file-input');
+                                        if (!fileInput || !fileInput.files.length) return;
+
+                                        const parent = fileInput.closest('[data-index]');
+                                        const reader = new FileReader();
+                                        reader.onload = ev => {
+                                            let preview = parent.querySelector('.preview-img');
+                                            if (!preview) {
+                                                preview = document.createElement('img');
+                                                preview.className = 'object-cover w-full h-full rounded-lg preview-img';
+                                                parent.appendChild(preview);
+                                            }
+                                            preview.src = ev.target.result;
+
+                                            let delBtn = parent.querySelector('.delete-picture');
+                                            if (!delBtn) {
+                                                delBtn = document.createElement('button');
+                                                delBtn.type = 'button';
+                                                delBtn.className =
+                                                    'absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 text-xs delete-picture w-[20px] h-[20px] flex items-center justify-center';
+                                                delBtn.textContent = '✕';
+                                                parent.appendChild(delBtn);
+                                            }
+
+                                            parent.querySelector('.upload-label').classList.add('hidden');
+                                            updateOrder();
+                                        };
+                                        reader.readAsDataURL(fileInput.files[0]);
                                     });
+
+                                    // Update posisi gambar & label thumbnail
+                                    function updateOrder() {
+                                        const items = Array.from(grid.children);
+                                        picturePositionsInput.value = JSON.stringify(items.map(i => i.dataset.id || null));
+
+                                        items.forEach((div, i) => {
+                                            div.classList.remove('w-48', 'h-48', 'ring-2', 'ring-blue-500');
+                                            div.classList.add('w-32', 'h-32');
+                                            div.querySelector('.thumb-label')?.remove();
+
+                                            if (i === 0) {
+                                                div.classList.remove('w-32', 'h-32');
+                                                div.classList.add('w-48', 'h-48', 'ring-2', 'ring-blue-500');
+                                                const label = document.createElement('span');
+                                                label.className =
+                                                    'thumb-label absolute bottom-1 left-1 bg-blue-600 text-white text-xs px-1 rounded';
+                                                label.textContent = 'Thumbnail';
+                                                div.appendChild(label);
+                                            }
+                                        });
+                                    }
+
+                                    updateOrder();
                                 });
                             </script>
                         @endpush
