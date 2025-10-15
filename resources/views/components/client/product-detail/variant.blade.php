@@ -12,6 +12,7 @@
             let discount = {{ $product->promo->discount ?? 0 }};
             let discountedPrice = originalPrice - (originalPrice * discount / 100);
             let stock = selectedOption.getAttribute('data-stock');
+            $dispatch('variant-changed', selectedOption.value)
 
             if ($refs.priceEl) {
                 $refs.priceEl.innerHTML = 'Rp. ' + new Intl.NumberFormat('id-ID', { style: 'decimal', minimumFractionDigits: 0 }).format(originalPrice);
@@ -32,6 +33,7 @@
         let discount = {{ $product->promo->discount ?? 0 }};
         let discountedPrice = originalPrice - (originalPrice * discount / 100);
         let stock = selectedOption.getAttribute('data-stock');
+        $dispatch('variant-changed', selectedOption.value)
         
         if ($refs.priceEl) {
             $refs.priceEl.innerHTML = 'Rp. ' + new Intl.NumberFormat('id-ID', { style: 'decimal', minimumFractionDigits: 0 }).format(originalPrice);

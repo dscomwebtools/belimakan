@@ -51,6 +51,7 @@
                             <th x-text="key" class="text-center"></th>
                         </template>
                         {{-- <th class="text-center">Varian</th> --}}
+                        <th>Foto</th>
                         <th>Stok</th>
                         <th>Harga</th>
                         <th>Berat <span class="text-sm">(g)</span></th>
@@ -61,45 +62,84 @@
                 <tbody>
                     <template x-for="(combination, index) in variantCombinations" :key="combination.join('-')">
                         <tr class="text-center">
-                            <!-- Tampilkan nilai kombinasi dengan key -->
+                            <!-- kombinasi varian -->
                             <template x-for="value in combination" :key="value">
                                 <td x-text="value" class="whitespace-nowrap px-2"></td>
                             </template>
-                            <!-- Kolom tambahan untuk stok, harga, berat, SKU, dan status -->
+
+                            <td>
+                                <div
+                                    class="relative flex flex-col items-center justify-center w-24 h-24 border-2 border-dashed rounded-lg bg-gray-50 hover:bg-gray-100 transition">
+                                    <template x-if="productVariants[index]?.picture">
+                                        <div class="relative w-full h-full">
+                                            <img :src="productVariants[index].picture"
+                                                class="object-cover w-full h-full rounded-lg" />
+                                            <button type="button"
+                                                class="absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                                                @click="removeVariantPicture(index)">
+                                                ✕
+                                            </button>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="!productVariants[index]?.picture">
+                                        <label
+                                            class="flex flex-col items-center justify-center w-full h-full cursor-pointer text-gray-400"
+                                            :for="'variant_picture_' + index">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-1" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 4v16m8-8H4" />
+                                            </svg>
+                                            <span class="text-xs">Upload</span>
+                                        </label>
+                                    </template>
+
+                                    <input type="file" accept="image/*"
+                                        :name="'variant_pictures[' + productVariants[index].id + ']'"
+                                        :id="'variant_picture_' + index" class="hidden"
+                                        @change="previewVariantPicture($event, index)" />
+                                </div>
+                            </td>
+
+                            <!-- Kolom stok -->
                             <td>
                                 <input type="number"
                                     @isset($data) :value="productVariants[index].stock" @endisset
                                     name="stock_variant[]" min="0" class="my-input bg-primary/5 rounded w-24">
                             </td>
+
+                            <!-- 💰 Kolom harga -->
                             <td>
                                 <input type="number"
                                     @isset($data) :value="productVariants[index].price" @endisset
                                     name="price_variant[]" min="0" class="my-input bg-primary/5 rounded w-40">
                             </td>
+
+                            <!-- ⚖️ Kolom berat -->
                             <td>
                                 <input type="number"
                                     @isset($data) :value="productVariants[index].weight" @endisset
                                     name="weight_variant[]" min="0" class="my-input bg-primary/5 rounded">
                             </td>
+
+                            <!-- 🏷️ Kolom SKU -->
                             <td>
                                 <input type="text"
                                     @isset($data) :value="productVariants[index].sku" @endisset
                                     name="sku_variant[]" class="my-input bg-primary/5 rounded">
                             </td>
+
+                            <!-- ⚙️ Kolom status -->
                             <td>
                                 <select name="active_variant[]" class="my-input">
-                                    <option value="1"  @isset($data) :selected="productVariants[index].active === 1" @else selected @endisset >Aktif</option>
-                                    <option value="0"  @isset($data) :selected="productVariants[index].active === 0" @endisset >Tidak Aktif</option>
+                                    <option value="1"
+                                        @isset($data) :selected="productVariants[index].active === 1" @else selected @endisset>
+                                        Aktif</option>
+                                    <option value="0"
+                                        @isset($data) :selected="productVariants[index].active === 0" @endisset>
+                                        Tidak Aktif</option>
                                 </select>
-                                {{-- <input id="active" type="hidden" value="0" name="active_variant[]" />
-                                <input id="active" type="checkbox" value="1" name="active_variant[]"
-                                @isset($data) :checked="productVariants[index].active ? true : false" @endisset
-                                     /> --}}
-
-                                {{-- @include(
-                                    'components_custom.toggle-active-product',
-                                    ['name' => 'active_variant[]']
-                                ) --}}
                             </td>
                         </tr>
                     </template>
@@ -109,6 +149,9 @@
             <input type="hidden" name="variantData" :value="JSON.stringify(variants)">
             <input type="hidden" name="variantCombinationsData" :value="JSON.stringify(variantCombinations)">
 
+            <template x-for="(path, idx) in deletedVariantPictures" :key="idx">
+                <input type="hidden" name="deleted_variant_pictures[]" :value="path">
+            </template>
         </div>
     </div>
 </template>
