@@ -45,6 +45,10 @@ class UpdateProductRequest extends FormRequest
             'detail-value' => ['nullable'],
             'variantData' => ['nullable'],
             'variantCombinationsData' => ['nullable'],
+            'variant_pictures' => ['nullable', 'array'],
+            'variant_pictures.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'deleted_variant_pictures' => ['nullable', 'array'],
+            'deleted_variant_pictures.*' => ['string'],
             'stock_variant' => 'nullable',
             'price_variant' => 'nullable',
             'weight_variant' => 'nullable',
@@ -55,7 +59,8 @@ class UpdateProductRequest extends FormRequest
         ];
     }
 
-    function messages() {
+    function messages()
+    {
         return [
             'name.unique' => 'Nama produk ini sudah ada.'
         ];

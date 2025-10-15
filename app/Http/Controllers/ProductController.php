@@ -302,51 +302,44 @@ class ProductController extends Controller
         return view('admin.product.show', compact('data'));
     }
 
-    function edit(Product $product)
+    public function edit(Product $product)
     {
         $data = $product->load([
             'detail_value.detail',
             'product_pictures' => function ($query) {
-                $query->orderBy('position', 'asc');
+                $query->whereNull('variant_id')->orderBy('position', 'asc');
             },
+            // tambahkan relasi ini supaya bisa ambil gambar tiap varian
+            'product_variant.product_pictures',
+            'product_variant.product_detail.variant_value.variant',
         ]);
+
         $variants = Variant::limit(2)->get();
         $categories = Category::orderBy('name', 'asc')->get();
         $brands = Brand::orderBy('name', 'asc')->get();
 
-        // $existingVariants = $product->product_variant;
-        // dd($existingVariants);
+        // ==============================
+        // 🔹 Existing Variants (Warna, Ukuran, dst)
+        // ==============================
         $existingVariants = [];
-
         foreach ($product->product_variant as $variant) {
             foreach ($variant->product_detail as $detail) {
                 $variantName = $detail->variant_value->variant->variant;
                 $variantValue = $detail->variant_value->value;
 
-                // Tambahkan nilai ke dalam array varian yang sesuai
                 if (!isset($existingVariants[$variantName])) {
                     $existingVariants[$variantName] = [];
                 }
 
-                // Pastikan nilai tidak duplikat
                 if (!in_array($variantValue, $existingVariants[$variantName])) {
                     $existingVariants[$variantName][] = $variantValue;
                 }
             }
         }
 
-        // dd(response()->json($existingVariants));
-
-
-        //     $existingVariants = $product->product_variant->mapWithKeys(function($variant) {
-        //     return [$variant->product_detail->first()->variant_value->variant->variant => 
-        //             $variant->product_detail->pluck('variant_value.value')->toArray()];
-        // })->toArray();  // Convert to array for JSON encoding
-
-        // $existingVariantCombinations = $product->product_variant->map(function($variant) {
-        //     return $variant->product_detail->pluck('variant_value.value')->toArray();
-        // })->toArray();  // Convert to array for JSON encoding
-
+        // ==============================
+        // 🔹 Variant Combinations + Pictures
+        // ==============================
         $productVariants = $product->product_variant->map(function ($variant) {
             return [
                 'id' => $variant->id,
@@ -355,23 +348,54 @@ class ProductController extends Controller
                 'weight' => $variant->weight,
                 'sku' => $variant->sku,
                 'active' => $variant->active,
+                'picture' => $variant->product_pictures->first()
+                    ? Storage::url($variant->product_pictures->first()->path)
+                    : null,
                 'details' => $variant->product_detail->map(function ($detail) {
                     return [
                         'variant' => $detail->variant_value->variant->variant,
                         'value' => $detail->variant_value->value,
                     ];
-                })->toArray()
+                }),
             ];
-        })->toArray();
+        });
 
-        // $productVariantsJson = json_encode($productVariants);
+        // dd($productVariants);
 
-        return view('admin.product.form', compact('data', 'variants', 'categories', 'brands', 'existingVariants', 'productVariants'));
+        // ==============================
+        // 🔹 Build picture map keyed by combination string
+        // (so frontend can show existing variant pictures)
+        // ==============================
+        $variantPictureMap = [];
+        foreach ($productVariants as $v) {
+            $comb = collect($v['details'])
+                ->map(fn($d) => $d['variant'] . ': ' . $d['value'])
+                ->implode('-');
+            $variantPictureMap[$comb] = $v['picture'];
+        }
+
+        // 👉 Optional: Debugging
+        // dd($variants, $existingVariants, $productVariants, $variantPictureMap);
+
+        $productVariantsJson = $productVariants->toJson();
+
+        return view('admin.product.form', compact(
+            'data',
+            'variants',
+            'categories',
+            'brands',
+            'existingVariants',
+            'productVariants',
+            'variantPictureMap',
+            'productVariantsJson',
+        ));
     }
 
     public function update(UpdateProductRequest $request, Product $product)
     {
         $validated = $request->validated();
+
+        // dd($validated);
 
         $product->name = $validated["name"];
         $product->slug = Str::of($validated["name"])->slug('-')->value;
@@ -381,10 +405,17 @@ class ProductController extends Controller
 
         DB::transaction(function () use ($product, $validated) {
             $product->save();
+            $variantIdMap = [];
+
+            $oldVariantPictures = ProductPicture::where('product_id', $product->id)
+                ->whereNotNull('variant_id')
+                ->get()
+                ->keyBy('variant_id');
 
             if (isset($validated["variantData"])) {
+
                 // =========================
-                // 1. Build old variant map
+                // 1️⃣ Build old variant map
                 // =========================
                 $oldVariantMap = [];
                 foreach ($product->product_variant as $variant) {
@@ -396,41 +427,54 @@ class ProductController extends Controller
                     $oldVariantMap[$valuesKey] = $variant->id;
                 }
 
-                // HAPUS DULU DATA VARIANT LAMA
+                // =========================
+                // 2️⃣ Backup gambar lama dulu
+                // =========================
+                $oldVariantPictures = ProductPicture::where('product_id', $product->id)
+                    ->whereNotNull('variant_id')
+                    ->get()
+                    ->groupBy('variant_id'); // grup by variant lama
+
+                // =========================
+                // 3️⃣ Hapus varian lama
+                // =========================
                 $variants_id = [];
                 $variant_values_id = [];
+
                 foreach ($product->product_variant as $variant) {
                     foreach ($variant->product_detail as $detail) {
                         $variant_values_id[] = $detail->variant_value->id;
                         $variants_id[] = $detail->variant_value->variant_id;
                     }
                 }
+
+                // hapus semua variant (otomatis cascade ke product_pictures)
                 foreach ($product->product_variant as $variant) {
                     $variant->delete();
                 }
 
+                // bersihkan variant_values dan variant yang sudah tidak terpakai
                 $variant_values = array_unique($variant_values_id);
                 foreach ($variant_values as $value_id) {
-                    $is_exists_in_product_detail = ProductDetail::where('variant_value_id', $value_id)->exists();
-                    if (!$is_exists_in_product_detail) {
+                    if (!ProductDetail::where('variant_value_id', $value_id)->exists()) {
                         VariantValue::destroy($value_id);
                     }
                 }
 
                 foreach ($variants_id as $variant_id) {
-                    $is_exists_in_variant_value = VariantValue::where('variant_id', $variant_id)->exists();
-                    if (!$is_exists_in_variant_value) {
+                    if (!VariantValue::where('variant_id', $variant_id)->exists()) {
                         Variant::destroy($variant_id);
                     }
                 }
 
-                // SIMPAN DATA VARIANT BARU
+                // =========================
+                // 4️⃣ Simpan data variant baru
+                // =========================
                 $variants = json_decode($validated['variantData'], true);
                 $variantCombinations = json_decode($validated['variantCombinationsData'], true);
 
                 foreach ($variants as $variantName => $values) {
                     $variant = Variant::firstOrCreate(['variant' => $variantName]);
-
                     foreach ($values as $value) {
                         VariantValue::firstOrCreate([
                             'variant_id' => $variant->id,
@@ -440,6 +484,7 @@ class ProductController extends Controller
                 }
 
                 // Simpan kombinasi varian ke tabel product_variants dan product_details
+                $variantIdMap = []; // mapping oldID -> newID
                 foreach ($variantCombinations as $i => $combination) {
                     $productVariant = new ProductVariant([
                         'product_id' => $product->id,
@@ -470,20 +515,86 @@ class ProductController extends Controller
                         $valuesForKey[] = $variantName . ':' . $variantValue;
                     }
 
-                    // =========================
-                    // 2. Remap cart references
-                    // =========================
                     $valuesKey = collect($valuesForKey)->sort()->implode('|');
+
+                    // Mapping old variant ID ke new variant ID
                     if (isset($oldVariantMap[$valuesKey])) {
                         $oldId = $oldVariantMap[$valuesKey];
                         $newId = $productVariant->id;
+                        $variantIdMap[$oldId] = $newId;
 
+                        // Remap cart
                         Cart::where('product_variant_id', $oldId)
                             ->update(['product_variant_id' => $newId]);
+                    } else {
+                        $variantIdMap[$i] = $productVariant->id;
+                    }
+                }
 
-                        // (Optional) also for orders
-                        // OrderItem::where('product_variant_id', $oldId)
-                        //     ->update(['product_variant_id' => $newId]);
+                // =========================
+                // 5️⃣ Reinsert gambar lama (pakai variantId baru)
+                // =========================
+                $lastPosition = ProductPicture::where('product_id', $product->id)->max('position') ?? 0;
+
+                foreach ($oldVariantPictures as $oldVariantId => $pictures) {
+                    $newVariantId = $variantIdMap[$oldVariantId] ?? null;
+                    if ($newVariantId) {
+                        foreach ($pictures as $picture) {
+                            $newPic = $picture->replicate(); // clone semua field
+                            $newPic->variant_id = $newVariantId;
+                            $newPic->position = ++$lastPosition;
+                            $newPic->save();
+                        }
+                    }
+                }
+
+                // =========================
+                // 6️⃣ Upload gambar baru (jika ada)
+                // =========================
+                if (isset($validated['variant_pictures'])) {
+                    foreach ($validated['variant_pictures'] as $variantId => $file) {
+                        if ($file instanceof \Illuminate\Http\UploadedFile) {
+                            $newVariantId = $variantIdMap[$variantId] ?? $variantId;
+
+                            $filename = $product->slug . '-variant-' . $newVariantId . '-' . uniqid() . '.webp';
+                            $path = $this->picture_folder . $filename;
+                            Storage::put($path, file_get_contents($file));
+
+                            $newPicture = new ProductPicture();
+                            $newPicture->product_id = $product->id;
+                            $newPicture->variant_id = $newVariantId;
+                            $newPicture->path = $path;
+                            $newPicture->position = ++$lastPosition;
+                            $newPicture->save();
+                        }
+                    }
+                }
+
+                // =========================
+                // 7️⃣ Hapus gambar yang dihapus user
+                // =========================
+                if (!empty($validated['deleted_variant_pictures'])) {
+                    // Pastikan tipe-nya array (bisa string JSON dari frontend)
+                    $deletedPics = $validated['deleted_variant_pictures'];
+                    if (is_string($deletedPics)) {
+                        $decoded = json_decode($deletedPics, true);
+                        if (json_last_error() === JSON_ERROR_NONE) {
+                            $deletedPics = $decoded;
+                        } else {
+                            $deletedPics = [];
+                        }
+                    }
+
+                    foreach ($deletedPics as $deletedItem) {
+                        // Bisa berupa ID atau path URL
+                        $picture = is_numeric($deletedItem)
+                            ? ProductPicture::find($deletedItem)
+                            : ProductPicture::where('path', 'like', '%' . basename($deletedItem) . '%')->first();
+
+                        if ($picture) {
+                            Storage::delete($picture->path);
+                            $picture->delete();
+                        }
                     }
                 }
             } else {

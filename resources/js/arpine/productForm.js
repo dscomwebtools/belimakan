@@ -2,6 +2,9 @@
 export default () => ({
     variantMode: false,
     variants: {}, // Mulai dengan objek kosong untuk varian dinamis
+    variantPictures: [], // Simpan URL preview
+    deletedVariantPictures: [],
+    variantPictureFiles: [], // Simpan file mentahan untuk dikirim ke backend
     variantCombinations: [], // Array untuk menyimpan kombinasi varian
     productVariants: [], // Data untuk menyimpan varian produk lengkap dengan stok, harga, berat, SKU, dll. (edit mode)
     isSubmitting: false,
@@ -91,15 +94,29 @@ export default () => ({
 
         })
     },
+    previewVariantPicture(event, index) {
+        const file = event.target.files[0];
+        if (file) {
+            this.productVariants[index].picture = URL.createObjectURL(file);
+        }
+    },
+    removeVariantPicture(index) {
+        const pic = this.productVariants[index]?.picture;
+        if (pic) {
+            this.deletedVariantPictures.push(pic);
+        }
+        // hapus preview di UI
+        this.productVariants[index].picture = null;
+    },
     submit() {
-        if(this.variantMode){
+        if (this.variantMode) {
             let keys = Object.keys(this.variants);
             if (keys.length === 0) { //JIKA TIDAK ADA VARIANT
                 alert('Jika Anda mengaktifkan mode varian, maka tambahkan minimal 1 data varian !')
                 return;
             }
         }
-        
+
         this.isSubmitting = true;
         // set deskripsi editor ke hidden input agar ikut tersubmit form
         const editorContent = document.querySelector('#description-editor .ql-editor').innerHTML;
