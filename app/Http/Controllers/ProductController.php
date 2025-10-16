@@ -413,7 +413,6 @@ class ProductController extends Controller
                 ->keyBy('variant_id');
 
             if (isset($validated["variantData"])) {
-
                 $oldVariantMap = [];
                 foreach ($product->product_variant as $variant) {
                     $valuesKey = $variant->product_detail
@@ -427,7 +426,7 @@ class ProductController extends Controller
                 $oldVariantPictures = ProductPicture::where('product_id', $product->id)
                     ->whereNotNull('variant_id')
                     ->get()
-                    ->groupBy('variant_id'); // grup by variant lama
+                    ->groupBy('variant_id');
 
                 $variants_id = [];
                 $variant_values_id = [];
@@ -502,13 +501,11 @@ class ProductController extends Controller
 
                     $valuesKey = collect($valuesForKey)->sort()->implode('|');
 
-                    // Mapping old variant ID ke new variant ID
                     if (isset($oldVariantMap[$valuesKey])) {
                         $oldId = $oldVariantMap[$valuesKey];
                         $newId = $productVariant->id;
                         $variantIdMap[$oldId] = $newId;
 
-                        // Remap cart
                         Cart::where('product_variant_id', $oldId)
                             ->update(['product_variant_id' => $newId]);
                     } else {
@@ -518,16 +515,14 @@ class ProductController extends Controller
 
                 $lastPosition = ProductPicture::where('product_id', $product->id)->max('position') ?? 0;
 
-                if (!empty($oldVariantPictures)) {
-                    foreach ($oldVariantPictures as $oldVariantId => $pictures) {
-                        $newVariantId = $variantIdMap[$oldVariantId] ?? null;
-                        if ($newVariantId) {
-                            foreach ($pictures as $picture) {
-                                $newPic = $picture->replicate();
-                                $newPic->variant_id = $newVariantId;
-                                $newPic->position = ++$lastPosition;
-                                $newPic->save();
-                            }
+                foreach ($oldVariantPictures as $oldVariantId => $pictures) {
+                    $newVariantId = $variantIdMap[$oldVariantId] ?? null;
+                    if ($newVariantId) {
+                        foreach ($pictures as $picture) {
+                            $newPic = $picture->replicate();
+                            $newPic->variant_id = $newVariantId;
+                            $newPic->position = ++$lastPosition;
+                            $newPic->save();
                         }
                     }
                 }
@@ -537,8 +532,6 @@ class ProductController extends Controller
                         if ($file instanceof \Illuminate\Http\UploadedFile) {
                             $newVariantId = $variantIdMap[$variantId] ?? $variantId;
 
-                            $currentLastPosition = ProductPicture::where('product_id', $product->id)->max('position') ?? 0;
-
                             $filename = $product->slug . '-variant-' . $newVariantId . '-' . uniqid() . '.webp';
                             $path = $this->picture_folder . $filename;
                             Storage::put($path, file_get_contents($file));
@@ -547,7 +540,7 @@ class ProductController extends Controller
                             $newPicture->product_id = $product->id;
                             $newPicture->variant_id = $newVariantId;
                             $newPicture->path = $path;
-                            $newPicture->position = $currentLastPosition + 1;
+                            $newPicture->position = ++$lastPosition;
                             $newPicture->save();
                         }
                     }
@@ -565,7 +558,6 @@ class ProductController extends Controller
                     }
 
                     foreach ($deletedPics as $deletedItem) {
-                        // Bisa berupa ID atau path URL
                         $picture = is_numeric($deletedItem)
                             ? ProductPicture::find($deletedItem)
                             : ProductPicture::where('path', 'like', '%' . basename($deletedItem) . '%')->first();
@@ -670,6 +662,15 @@ class ProductController extends Controller
                 $deletedPictures = json_decode($validated['deleted_pictures'], true);
                 if (!empty($deletedPictures)) {
                     ProductPicture::destroy($deletedPictures);
+                }
+            }
+
+            // ✅ Update existing picture positions
+            if (!empty($validated['picture_positions'])) {
+                $positions = json_decode($validated['picture_positions'], true);
+
+                foreach ($positions as $index => $id) {
+                    ProductPicture::where('id', $id)->update(['position' => $index + 1]);
                 }
             }
 
