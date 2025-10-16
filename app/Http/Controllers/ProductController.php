@@ -617,22 +617,17 @@ class ProductController extends Controller
                 $newProductVariant->save();
             }
 
-            // Normalisasi posisi agar tertata rapi 1..N
-            $pictures = ProductPicture::where('product_id', $product->id)
-                ->whereNull('variant_id')->orderBy('id', 'asc')
-                ->get();
+            $lastMainPos = ProductPicture::where('product_id', $product->id)
+                ->whereNull('variant_id')
+                ->orderBy('position', 'desc')
+                ->value('position') ?? 0;
 
-            $pos = 1;
-            foreach ($pictures as $pic) {
-                if ($pic->position != $pos) {
-                    $pic->position = $pos;
-                    $pic->save();
-                }
-                $pos++;
-            }
+            $pos = $lastMainPos + 1;
 
             $pictures = ProductPicture::where('product_id', $product->id)
-                ->whereNotNull('variant_id')->orderBy('variant_id', 'asc')
+                ->whereNotNull('variant_id')
+                ->orderBy('variant_id', 'asc')
+                ->orderBy('id', 'asc')
                 ->get();
 
             foreach ($pictures as $pic) {
