@@ -11,6 +11,12 @@ const heroSwiper = new Swiper('.heroSwiper', {
   loop: true,
 });
 
+const productSwiper = new Swiper('.productSwiper', {
+  autoplay: { delay: 3000 },
+  loop: false,
+  slidesPerView: 3,
+});
+
 var lelangSwiper = new Swiper(".lelangSwiper", {
   effect: "cube",
   grabCursor: true,
