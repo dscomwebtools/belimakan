@@ -414,9 +414,6 @@ class ProductController extends Controller
 
             if (isset($validated["variantData"])) {
 
-                // =========================
-                // 1️⃣ Build old variant map
-                // =========================
                 $oldVariantMap = [];
                 foreach ($product->product_variant as $variant) {
                     $valuesKey = $variant->product_detail
@@ -427,17 +424,11 @@ class ProductController extends Controller
                     $oldVariantMap[$valuesKey] = $variant->id;
                 }
 
-                // =========================
-                // 2️⃣ Backup gambar lama dulu
-                // =========================
                 $oldVariantPictures = ProductPicture::where('product_id', $product->id)
                     ->whereNotNull('variant_id')
                     ->get()
                     ->groupBy('variant_id'); // grup by variant lama
 
-                // =========================
-                // 3️⃣ Hapus varian lama
-                // =========================
                 $variants_id = [];
                 $variant_values_id = [];
 
@@ -448,12 +439,10 @@ class ProductController extends Controller
                     }
                 }
 
-                // hapus semua variant (otomatis cascade ke product_pictures)
                 foreach ($product->product_variant as $variant) {
                     $variant->delete();
                 }
 
-                // bersihkan variant_values dan variant yang sudah tidak terpakai
                 $variant_values = array_unique($variant_values_id);
                 foreach ($variant_values as $value_id) {
                     if (!ProductDetail::where('variant_value_id', $value_id)->exists()) {
@@ -467,9 +456,6 @@ class ProductController extends Controller
                     }
                 }
 
-                // =========================
-                // 4️⃣ Simpan data variant baru
-                // =========================
                 $variants = json_decode($validated['variantData'], true);
                 $variantCombinations = json_decode($validated['variantCombinationsData'], true);
 
@@ -483,7 +469,6 @@ class ProductController extends Controller
                     }
                 }
 
-                // Simpan kombinasi varian ke tabel product_variants dan product_details
                 $variantIdMap = []; // mapping oldID -> newID
                 foreach ($variantCombinations as $i => $combination) {
                     $productVariant = new ProductVariant([
@@ -531,30 +516,28 @@ class ProductController extends Controller
                     }
                 }
 
-                // =========================
-                // 5️⃣ Reinsert gambar lama (pakai variantId baru)
-                // =========================
                 $lastPosition = ProductPicture::where('product_id', $product->id)->max('position') ?? 0;
 
-                foreach ($oldVariantPictures as $oldVariantId => $pictures) {
-                    $newVariantId = $variantIdMap[$oldVariantId] ?? null;
-                    if ($newVariantId) {
-                        foreach ($pictures as $picture) {
-                            $newPic = $picture->replicate(); // clone semua field
-                            $newPic->variant_id = $newVariantId;
-                            $newPic->position = ++$lastPosition;
-                            $newPic->save();
+                if (!empty($oldVariantPictures)) {
+                    foreach ($oldVariantPictures as $oldVariantId => $pictures) {
+                        $newVariantId = $variantIdMap[$oldVariantId] ?? null;
+                        if ($newVariantId) {
+                            foreach ($pictures as $picture) {
+                                $newPic = $picture->replicate();
+                                $newPic->variant_id = $newVariantId;
+                                $newPic->position = ++$lastPosition;
+                                $newPic->save();
+                            }
                         }
                     }
                 }
 
-                // =========================
-                // 6️⃣ Upload gambar baru (jika ada)
-                // =========================
                 if (isset($validated['variant_pictures'])) {
                     foreach ($validated['variant_pictures'] as $variantId => $file) {
                         if ($file instanceof \Illuminate\Http\UploadedFile) {
                             $newVariantId = $variantIdMap[$variantId] ?? $variantId;
+
+                            $currentLastPosition = ProductPicture::where('product_id', $product->id)->max('position') ?? 0;
 
                             $filename = $product->slug . '-variant-' . $newVariantId . '-' . uniqid() . '.webp';
                             $path = $this->picture_folder . $filename;
@@ -564,17 +547,13 @@ class ProductController extends Controller
                             $newPicture->product_id = $product->id;
                             $newPicture->variant_id = $newVariantId;
                             $newPicture->path = $path;
-                            $newPicture->position = ++$lastPosition;
+                            $newPicture->position = $currentLastPosition + 1;
                             $newPicture->save();
                         }
                     }
                 }
 
-                // =========================
-                // 7️⃣ Hapus gambar yang dihapus user
-                // =========================
                 if (!empty($validated['deleted_variant_pictures'])) {
-                    // Pastikan tipe-nya array (bisa string JSON dari frontend)
                     $deletedPics = $validated['deleted_variant_pictures'];
                     if (is_string($deletedPics)) {
                         $decoded = json_decode($deletedPics, true);
@@ -638,6 +617,32 @@ class ProductController extends Controller
                 $newProductVariant->save();
             }
 
+            // Normalisasi posisi agar tertata rapi 1..N
+            $pictures = ProductPicture::where('product_id', $product->id)
+                ->whereNull('variant_id')->orderBy('id', 'asc')
+                ->get();
+
+            $pos = 1;
+            foreach ($pictures as $pic) {
+                if ($pic->position != $pos) {
+                    $pic->position = $pos;
+                    $pic->save();
+                }
+                $pos++;
+            }
+
+            $pictures = ProductPicture::where('product_id', $product->id)
+                ->whereNotNull('variant_id')->orderBy('variant_id', 'asc')
+                ->get();
+
+            foreach ($pictures as $pic) {
+                if ($pic->position != $pos) {
+                    $pic->position = $pos;
+                    $pic->save();
+                }
+                $pos++;
+            }
+
             // CATEGORIES
             if (isset($validated["categories"])) {
                 $categoryIds = [];
@@ -670,15 +675,6 @@ class ProductController extends Controller
                 $deletedPictures = json_decode($validated['deleted_pictures'], true);
                 if (!empty($deletedPictures)) {
                     ProductPicture::destroy($deletedPictures);
-                }
-            }
-
-            // ✅ Update existing picture positions
-            if (!empty($validated['picture_positions'])) {
-                $positions = json_decode($validated['picture_positions'], true);
-
-                foreach ($positions as $index => $id) {
-                    ProductPicture::where('id', $id)->update(['position' => $index + 1]);
                 }
             }
 
@@ -760,7 +756,9 @@ class ProductController extends Controller
 
         if ($keyword) {
             $products = Product::with([
-                'product_pictures',
+                'product_pictures' => function ($query) {
+                    $query->orderBy('position', 'asc');
+                },
                 'promo',
                 'auction',
                 'product_variant' => function ($query) {

@@ -21,11 +21,13 @@
     </div>
 
     {{-- Thumbnail (semua gambar tampil, klik akan ganti activeMainUrl) --}}
-    <div class="swiper mySwiper mt-2">
+    <div class="swiper productSwiper mt-2">
         <div class="swiper-wrapper">
             <template x-for="pic in pictures" :key="pic.url">
                 <div class="swiper-slide">
-                    <img :src="pic.url" class="rounded-md cursor-pointer" @click="setMain(pic.url)" />
+                    <img :src="pic.url" class="object-contain cursor-pointer border-4"
+                        :class="activeMainUrl === pic.url ? 'border-green-600' : 'border-transparent'"
+                        @click="setMain(pic.url)" />
                 </div>
             </template>
         </div>
@@ -50,8 +52,8 @@
                 class="w-full md:w-28 flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-y-auto max-h-[85vh] pr-4">
                 <template x-for="pic in pictures" :key="pic.url">
                     <img :src="pic.url" @click="setMain(pic.url); imgSrc = pic.url"
-                        class="w-20 h-20 object-cover cursor-pointer rounded-md border-2"
-                        :class="imgSrc === pic.url ? 'border-blue-500' : activeMainUrl === pic.url ? 'border-gray-400' :
+                        class="w-20 h-20 object-cover cursor-pointer border-4"
+                        :class="imgSrc === pic.url ? 'border-green-600' : activeMainUrl === pic.url ? 'border-gray-400' :
                             'border-transparent'">
                 </template>
             </div>
@@ -158,3 +160,11 @@
         // nothing here — Alpine akan memanggil init() bila kamu menambahkan x-init di markup
     });
 </script>
+<style>
+    /* Hapus efek gray/inactive dari swiper thumbnail */
+    .mySwiper .swiper-slide {
+        opacity: 1 !important;
+        filter: none !important;
+        transition: none !important;
+    }
+</style>
