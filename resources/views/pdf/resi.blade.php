@@ -320,7 +320,7 @@
                 <div><strong>Quantity:</strong> {{ $order->order_detail->sum('quantity') }}</div>
             </div>
             <div class="right">
-                <div><strong>Weight:</strong> 0.65 Kg</div>
+                <div><strong>Weight:</strong> {{ $totalWeightKg ?? 1 }} Kg</div>
             </div>
         </div>
 

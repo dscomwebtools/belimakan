@@ -64,6 +64,7 @@ class ProductController extends Controller
             'Nama',
             'Stok',
             'Harga',
+            'Aktif',
             'Promo',
             'Lelang',
             'Aksi'
@@ -76,6 +77,7 @@ class ProductController extends Controller
                     'id' => $pv->id,
                     'name' => $variantName,
                     'price' => $pv->price ?? 0,
+                    'active' => $pv->active ?? false,
                     'stock' => $pv->stock ?? 0,
                 ];
             });
@@ -88,6 +90,7 @@ class ProductController extends Controller
                 'name' => $item->name,
                 'stock' => $variantData,
                 'price' => $variantData,
+                'active' => $variantData,
                 'promo' => $item->promo->active ?? null,
                 'auction' => $auction,
                 'id' => $item->id,
@@ -880,38 +883,30 @@ class ProductController extends Controller
         return redirect()->back()->with('success', 'Berhasil import data product excel !');
     }
 
-    public function updatePriceSingle(Request $request, Product $product)
+    public function updateProductSingle(Request $request, Product $product)
     {
         $validated = $request->validate([
-            'price' => 'required|numeric|min:0',
-            'variant_id' => 'required|exists:product_variants,id',
+            'field' => 'required|in:price,stock,active',
+            'value' => 'required',
+            'variant_id' => 'nullable|exists:product_variants,id',
         ]);
 
-        $variant = $product->product_variant()->find($validated['variant_id']);
+        $field = $validated['field'];
+        $value = $validated['value'];
 
-        if (!$variant) {
-            return response()->json(['success' => false, 'message' => 'Varian tidak ditemukan'], 404);
+        if (in_array($field, ['price', 'stock', 'active'])) {
+            if (empty($validated['variant_id'])) {
+                return response()->json(['success' => false, 'message' => 'Variant ID diperlukan untuk update varian'], 422);
+            }
+
+            $variant = $product->product_variant()->find($validated['variant_id']);
+
+            if (!$variant) {
+                return response()->json(['success' => false, 'message' => 'Varian tidak ditemukan'], 404);
+            }
+
+            $variant->update([$field => $value]);
         }
-
-        $variant->update(['price' => $validated['price']]);
-
-        return response()->json(['success' => true]);
-    }
-
-    public function updateStockSingle(Request $request, Product $product)
-    {
-        $validated = $request->validate([
-            'stock' => 'required|numeric|min:0',
-            'variant_id' => 'required|exists:product_variants,id',
-        ]);
-
-        $variant = $product->product_variant()->find($validated['variant_id']);
-
-        if (!$variant) {
-            return response()->json(['success' => false, 'message' => 'Varian tidak ditemukan'], 404);
-        }
-
-        $variant->update(['stock' => $validated['stock']]);
 
         return response()->json(['success' => true]);
     }

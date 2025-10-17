@@ -71,11 +71,8 @@ Route::prefix('admin')
         Route::resource('product', ProductController::class);
         Route::resource('bank-account', BankAccountController::class);
 
-        Route::post('products/{product}/update-price', [ProductController::class, 'updatePriceSingle'])
-            ->name('product.update-price');
-
-        Route::post('products/{product}/update-stock', [ProductController::class, 'updateStockSingle'])
-            ->name('product.update-stock');
+        Route::post('products/{product}/update-single', [ProductController::class, 'updateProductSingle'])
+            ->name('product.update-single');
 
         Route::post('product-import', [ProductController::class, 'import'])->name('product.import');
 

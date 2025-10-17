@@ -14,7 +14,7 @@ class Product extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $fillable = ['name', 'slug', 'stock', 'price'];
+    protected $fillable = ['name', 'slug', 'stock', 'price', 'active'];
 
     public function product_variant(): HasMany
     {
