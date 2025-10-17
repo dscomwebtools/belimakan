@@ -1,4 +1,4 @@
-<div class="mx-2 md:mx-4 text-base-content rounded">
+<div class="text-base-content rounded">
     <!-- Filter -->
     <div class="flex mb-6">
         <form class="flex [&_option]:bg-secondary" id="form_search">

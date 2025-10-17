@@ -4,7 +4,7 @@
 
 <div class="variant text-center">
     <select name="variant"
-        class="block w-full px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        class="block w-full px-4 py-2 text-sm text-gray-700 bg-white border-2 border-green-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600"
         x-ref="variant_id_selected"
         @change="
             let selectedOption = $refs.variant_id_selected.options[$refs.variant_id_selected.selectedIndex];
