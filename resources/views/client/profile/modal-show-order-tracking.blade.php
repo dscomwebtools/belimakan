@@ -88,7 +88,7 @@
                 <h2 class="text-lg font-semibold mb-4">Riwayat Pelacakan</h2>
                 <template x-if="$store.cart.trackingDetail.history && $store.cart.trackingDetail.history.length">
                     <ul class="space-y-4">
-                        <template x-for="(event, index) in $store.cart.trackingDetail.history" :key="event.eventDate">
+                        <template x-for="(event, index) in $store.cart.trackingDetail.history" :key="event.updated_at">
                             <li class="border-l-4 pl-4"
                                 :class="{
                                     'border-green-500': index === $store.cart.trackingDetail.history.length - 1,
@@ -98,8 +98,8 @@
                                         .trackingDetail.history.length - 1
                                 }">
                                 <p class="text-sm text-gray-600"
-                                    x-text="new Date(event.eventDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric'}) + ', ' + 
-                                        new Date(event.eventDate).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB'">
+                                    x-text="new Date(event.updated_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric'}) + ', ' + 
+                                        new Date(event.updated_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB'">
                                 </p>
                                 <p class="font-medium"
                                     x-text="$store.statusMap[event.status] || event.status.replaceAll('_',' ')">

@@ -222,19 +222,25 @@
         @php
             $voucherAmount = 0;
             $voucherCode = null;
+            $ongkir = $order->shipping_method->price ?? 0;
 
             if ($order && $order->coupon_discount > 0) {
                 $voucherAmount = $order->coupon_discount;
                 $voucherCode = $order->coupon_code;
             }
 
-            $grandTotal = max($totalBayar - $voucherAmount, 0);
+            $grandTotal = max($totalBayar - $voucherAmount + $ongkir, 0);
         @endphp
 
         <table class="totals">
             <tr>
                 <td>Total Harga</td>
                 <td style="text-align: right;">Rp {{ number_format($totalBayar, 0, ',', '.') }}</td>
+            </tr>
+
+            <tr>
+                <td>Ongkir</td>
+                <td style="text-align: right;">Rp {{ number_format($ongkir, 0, ',', '.') }}</td>
             </tr>
 
             @if ($voucherAmount > 0)
