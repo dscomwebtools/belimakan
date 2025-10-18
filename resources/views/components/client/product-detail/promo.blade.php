@@ -121,7 +121,7 @@
                 class="fa fa-heart-circle-plus"></i></button> --}}
         @can('is-member')
             <button class="btn btn-primary btn-sm btn-circle"
-                @click="$store.cart.addToCart('{{ $product->id }}', $refs.variant_id_selected ? $refs.variant_id_selected.value : null, $refs.quantity.value)">
+                @click="$store.cart.addToCart('{{ $product->id }}', $refs.variant_id_selected ? $refs.variant_id_selected.value : {{ $product->product_variant[0]->id }}, $refs.quantity.value)">
                 <i class="fa fa-cart-shopping"></i>
             </button>
         @endcan
