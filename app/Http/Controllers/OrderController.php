@@ -408,7 +408,7 @@ class OrderController extends Controller
             'date_to'            => ['nullable', 'date'],
         ]);
 
-        $data = Order::with(['order_address', 'delivery_state', 'shipping_method', 'user', 'bank_account'])->latest();
+        $data = Order::with(['order_address', 'delivery_state', 'shipping_method', 'user', 'bank_account', 'order_detail.product.product_pictures'])->latest();
 
         // 🔎 filter invoice
         if (($validated['search_by'] ?? null) === 'invoice' && !empty($validated['invoice'])) {

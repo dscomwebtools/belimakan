@@ -60,12 +60,13 @@
             <thead>
                 <tr class="bg-base-300">
                     <th class="text-center">No</th>
+                    <th class="text-center">Gambar</th>
                     <th class="text-center">Member</th>
                     <th class="text-center">Invoice</th>
                     <th class="text-center text-nowrap">Dikirim Ke</th>
                     <th class="text-center">Kurir</th>
                     <th class="text-center">Pembayaran</th>
-                    <th class="text-center">Bank Transfer</th>
+                    {{-- <th class="text-center">Bank Transfer</th> --}}
                     <th class="text-center">Total Bayar</th>
                     <th class="text-center">Sudah Dibayar</th>
                     <th class="text-center">Status</th>
@@ -77,6 +78,9 @@
                 @foreach ($data as $order)
                     <tr class="odd:bg-primary/5">
                         <td class="text-center">{{ ++$indexNumber }}</td>
+                        <td class="text-center" x-data="{ picture: '{{ Storage::url($order->order_detail->first()?->product?->product_pictures->first()?->path ?? '') }}' }">
+                            <img :src="picture" class="w-[200px] h-20 object-contain mx-auto rounded-lg" lazy>
+                        </td>
                         <td class="text-center">{{ $order->user->name }}</td>
                         <td class="text-center">{{ $order->invoice }}</td>
                         <td class="text-center">{{ $order->order_address->name }}</td>
@@ -88,7 +92,7 @@
                             @endisset
                         </td>
                         <td class="text-center">{{ $order->payment_method }}</td>
-                        <td class="text-center">{{ $order->bank_account->bank_name ?? '-' }}</td>
+                        {{-- <td class="text-center">{{ $order->bank_account->bank_name ?? '-' }}</td> --}}
                         <td class="text-center">
                             <x-client.format-rp value="{{ $order->total }}" />
                         </td>
