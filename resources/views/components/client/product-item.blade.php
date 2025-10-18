@@ -1,5 +1,6 @@
 <div class="card sm:w-72 bg-base-200 shadow-xl mb-8 h-fit" x-data="{
     selectedVariant: [],
+    selectedVariantIndex: 0,
     variants: {{ $product->product_variant->toJson() }},
     promo: {{ isset($product->promo) && $product->promo->active ? $product->promo->discount : 0 }},
     pictures: {{ $product->product_pictures->map(
@@ -9,13 +10,23 @@
         ],
     ) }},
     filteredPicture() {
+        if (this.selectedVariantIndex === 0) {
+            return this.pictures.find(p => !p.variant_id)?.url ?? '/assets/images/image-not-found.webp';
+        }
+
         const variantPic = this.pictures.find(p => p.variant_id && p.variant_id == this.selectedVariant);
         return variantPic ? variantPic.url : (this.pictures.find(p => !p.variant_id)?.url ?? '/assets/images/image-not-found.webp');
     }
-}">
+}" x-init="selectedVariant = variants.length > 0 ? variants[0].id : null">
     <figure class="sm:px-5 sm:pt-5 relative">
         <a href="{{ route('client.product', $product['slug']) }}">
-            <img :src="filteredPicture()" alt="{{ $product->name }}" class="rounded-xl" />
+            {{-- <img :src="filteredPicture()" alt="{{ $product->name }}" class="rounded-xl" /> --}}
+            @if ($product->product_pictures->isNotEmpty())
+                <img src="{{ Storage::url($product->product_pictures->first()->path) }}" alt="{{ $product->name }}"
+                    class="rounded-xl" />
+            @else
+                <img src="{{ '/assets/images/image-not-found.webp' }}" alt="{{ $product->name }}" class="rounded-xl" />
+            @endif
         </a>
         @if (isset($product->auction) && $product->auction->active)
             <x-client.logo-lelang :endtime="$product->auction->endtime" />
@@ -40,7 +51,7 @@
                 <div class="w-full flex flex-col items-center gap-2">
                     @if ($product->product_variant->count() > 1)
                         <select name="variant" class="my-input w-full text-sm md:text-base mb-2"
-                            x-model="selectedVariant">
+                            @change="selectedVariantIndex = $event.target.selectedIndex;" x-model="selectedVariant">
                             <template x-for="variant in variants" :key="variant.id">
                                 <option :value="variant.id"
                                     x-text="variant.product_detail.map(d => d.variant_value.value).join(', ')">
