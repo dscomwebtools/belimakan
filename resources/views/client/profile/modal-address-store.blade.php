@@ -44,6 +44,9 @@
         <p class="mt-4 text-xs text-gray-600 dark:text-gray-400 italic">
             {{ __('Layanan pengantaran Gojek / Grab hanya tersedia jika titik lokasi (latitude dan longitude) sudah diisi.') }}
         </p>
+        <p class="mt-4 text-xs text-red-600 dark:text-red-400 italic">
+            {{ __('Pastikan alamat pada map sama dengan alamat yang diisi') }}
+        </p>
 
         <div x-data
             x-on:set-location.window="
