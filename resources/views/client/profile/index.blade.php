@@ -65,8 +65,26 @@
         </div>
 
         {{-- RIGHT SIDE --}}
-        <div x-data="{ activeTab: parseInt(localStorage.getItem('activeTab')) || 1 }" @load.window="activeTab = parseInt(localStorage.getItem('activeTab')) || 1"
-            class="flex-1 bg-base-200 shadow-xl card w-full">
+        <div x-data="{
+            activeTab: parseInt(localStorage.getItem('activeTab')) || 1,
+            init() {
+                const params = new URLSearchParams(window.location.search);
+                if (params.get('open') === 'order') {
+                    this.activeTab = 2;
+                    localStorage.setItem('activeTab', 2);
+        
+                    // kasih jeda sedikit biar Alpine siap dulu
+                    this.$nextTick(() => {
+                        const orderId = params.get('order_id');
+                        if (orderId) {
+                            // trigger modal upload bukti bayar
+                            this.$dispatch('open-modal', 'modal-upload-bukti-bayar');
+                            this.$store.cart.getOrderDetail(orderId);
+                        }
+                    });
+                }
+            }
+        }" x-init="init()" class="flex-1 bg-base-200 shadow-xl card w-full">
             <div>
                 <!-- TAB TITLES -->
                 <div class="relative w-full">

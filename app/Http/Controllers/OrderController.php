@@ -13,6 +13,7 @@ use App\Models\OrderReceipt;
 use App\Models\ProductVariant;
 use App\Models\SettingAddress;
 use App\Models\ShippingMethod;
+use App\Notifications\OrderInfoNotification;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -475,6 +476,10 @@ class OrderController extends Controller
             $order->is_paid = true;
         }
         $order->save();
+
+        if ($order->delivery_state_id == 2) {
+            $order->user->notify(new OrderInfoNotification($order));
+        }
 
         return redirect()->back()->with('success', 'Berhasil update status menjadi ' . $order->delivery_state->name);
     }
