@@ -637,7 +637,9 @@ class OrderController extends Controller
 
         $order->cancel_status = $request->status;
 
+        // Hanya jika pembatalan disetujui
         if ($request->status === 'approved') {
+            // Default payload pembatalan
             $payload = [
                 'cancellation_reason_code' => $order->cancel_code ?? 'others',
             ];
@@ -646,20 +648,49 @@ class OrderController extends Controller
                 $payload['cancellation_reason'] = $order->cancel_reason;
             }
 
-            $order->delivery_state_id = 12;
+            try {
+                // --- CASE 1: Pesanan belum dikirim ke Biteship (is_biteship_status == 0)
+                if ($order->delivery_state && $order->delivery_state->is_biteship_status == 0) {
+                    if ($order->biteship_draft_order_id) {
+                        // draft order dihapus dari biteship
+                        $response = Http::withHeaders([
+                            'authorization' => $this->key,
+                            'content-type'  => 'application/json',
+                        ])->delete("{$this->base}/v1/draft_orders/{$order->biteship_draft_order_id}");
 
-            $order->save();
+                        if (!$response->successful()) {
+                            return response()->json([
+                                'status' => false,
+                                'message' => 'Gagal menghapus draft order di Biteship.',
+                                'api_response' => $response->json(),
+                            ], 500);
+                        }
+                    }
+                }
+                // --- CASE 2: Pesanan sudah dikirim ke Biteship (is_biteship_status != 0)
+                else {
+                    $response = Http::withHeaders([
+                        'authorization' => $this->key,
+                        'content-type'  => 'application/json',
+                    ])->post("{$this->base}/v1/orders/{$order->biteship_order_id}/cancel", $payload);
 
-            $response = Http::withHeaders([
-                'authorization' => $this->key,
-                'content-type'  => 'application/json',
-            ])->post("{$this->base}/v1/orders/{$order->biteship_order_id}/cancel", $payload);
+                    if (!$response->successful()) {
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'Gagal membatalkan pesanan di Biteship.',
+                            'api_response' => $response->json(),
+                        ], 500);
+                    }
+                }
 
-            if (!$response->successful()) {
+                // Update status lokal
+                $order->delivery_state_id = 13; // "Dibatalkan"
+                $order->save();
+            } catch (\Throwable $e) {
                 return response()->json([
-                    'status'  => false,
-                    'message' => 'Gagal membatalkan pesanan di Biteship.',
-                    'api_response' => $response->json(),
+                    'status' => false,
+                    'message' => 'Terjadi kesalahan saat membatalkan pesanan.',
+                    'error' => $e->getMessage(),
                 ], 500);
             }
         }

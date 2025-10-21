@@ -96,6 +96,11 @@ export default () => ({
     },
     previewVariantPicture(event, index) {
         const file = event.target.files[0];
+
+        if (!this.productVariants[index]) {
+            this.productVariants[index] = { picture: null };
+        }
+
         if (file) {
             this.productVariants[index].picture = URL.createObjectURL(file);
         }

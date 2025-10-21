@@ -96,7 +96,8 @@
                                     </template>
 
                                     <input type="file" accept="image/*"
-                                        :name="'variant_pictures[' + productVariants[index].id + ']'"
+                                        :name="'variant_pictures[' + ((productVariants[index] && productVariants[index].id) ?
+                                            productVariants[index].id : index) + ']'"
                                         :id="'variant_picture_' + index" class="hidden"
                                         @change="previewVariantPicture($event, index)" />
                                 </div>

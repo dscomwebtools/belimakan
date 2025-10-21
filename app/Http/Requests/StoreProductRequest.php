@@ -43,6 +43,8 @@ class StoreProductRequest extends FormRequest
             'detail-value' => ['nullable'],
             'variantData' => ['nullable'],
             'variantCombinationsData' => ['nullable'],
+            'variant_pictures' => ['nullable', 'array'],
+            'variant_pictures.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'stock_variant' => 'nullable',
             'price_variant' => 'nullable',
             'weight_variant' => 'nullable',

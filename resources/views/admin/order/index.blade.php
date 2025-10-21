@@ -103,7 +103,7 @@
                             <div class="flex gap-3 justify-center">
 
                                 {{-- Tombol Batalkan --}}
-                                @if ($order->delivery_state->name !== 'Dibatalkan')
+                                {{-- @if ($order->delivery_state->name !== 'Dibatalkan')
                                     <div class="tooltip" data-tip="Batalkan">
                                         <form action="{{ route('admin-order.cancel', $order->id) }}" method="POST"
                                             onsubmit="return confirm('Yakin ingin membatalkan order ini?');">
@@ -114,7 +114,7 @@
                                             </button>
                                         </form>
                                     </div>
-                                @endif
+                                @endif --}}
 
                                 {{-- Tombol Lihat --}}
                                 <div class="tooltip" data-tip="Lihat">
