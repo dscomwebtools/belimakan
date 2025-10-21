@@ -365,6 +365,22 @@
                                         <ul tabindex="0"
                                             class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-56">
 
+                                            {{-- Batalkan Pesanan --}}
+                                            @if ($data->delivery_state_id < 8 && $data->delivery_state && $data->delivery_state->is_biteship_status == 0)
+                                                <li>
+                                                    <form action="{{ route('admin-order.order_cancel', $data->id) }}"
+                                                        method="POST" id="cancelForm_{{ $data->id }}">
+                                                        @csrf
+                                                        <input type="hidden" name="status" value="approved">
+                                                        <button type="button"
+                                                            onclick="confirmCancel({{ $data->id }})"
+                                                            class="flex items-center gap-2 text-left text-red-600">
+                                                            <i class="fa fa-ban"></i> Batalkan Pesanan
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            @endif
+
                                             {{-- Lihat / Upload Resi --}}
                                             @if (
                                                 ($data->delivery_state_id >= 4 && $data->delivery_state_id != 7) ||
@@ -389,17 +405,20 @@
                                                 $data->delivery_state_id >= 1 &&
                                                     $data->delivery_state_id != 6 &&
                                                     !$data->biteship_waybill &&
-                                                    $data->delivery_state_id != 3)
+                                                    $data->delivery_state_id != 3 && !$data->cancel_status)
                                                 <li>
                                                     <form action="{{ route('admin-order.next-state', $data->id) }}"
-                                                        method="POST" class="inline">
+                                                        method="POST" id="nextStateForm_{{ $data->id }}"
+                                                        class="inline">
                                                         @csrf
                                                         @method('PATCH')
-                                                        <button type="submit"
+                                                        <button type="button"
+                                                            onclick="confirmNextStatus({{ $data->id }})"
                                                             class="flex items-center gap-2 text-left">
                                                             <i class="fas fa-receipt"></i>
                                                             Update Status Selanjutnya
                                                         </button>
+
                                                     </form>
                                                 </li>
                                             @endif
@@ -464,8 +483,48 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Modal Konfirmasi -->
+            <dialog id="confirmModal" class="modal">
+                <div class="modal-box">
+                    <h3 class="font-bold text-lg" id="confirmTitle">Konfirmasi</h3>
+                    <p class="py-4" id="confirmMessage">Apakah kamu yakin?</p>
+                    <div class="modal-action">
+                        <button class="btn btn-sm" onclick="confirmModal.close()">Batal</button>
+                        <button class="btn btn-sm btn-primary" id="confirmYesBtn">Ya, Lanjutkan</button>
+                    </div>
+                </div>
+            </dialog>
+
         </div>
     </div>
+
+    @push('scripts')
+        <script>
+            let currentAction = null;
+
+            function confirmCancel(orderId) {
+                currentAction = () => document.getElementById(`cancelForm_${orderId}`).submit();
+                document.getElementById('confirmTitle').innerText = 'Konfirmasi Pembatalan';
+                document.getElementById('confirmMessage').innerText =
+                    'Yakin ingin membatalkan pesanan ini? Tindakan ini tidak dapat dibatalkan.';
+                confirmModal.showModal();
+            }
+
+            function confirmNextStatus(orderId) {
+                currentAction = () => document.getElementById(`nextStateForm_${orderId}`).submit();
+                document.getElementById('confirmTitle').innerText = 'Konfirmasi Update Status';
+                document.getElementById('confirmMessage').innerText =
+                    'Apakah kamu yakin ingin memperbarui status pesanan ke tahap selanjutnya?';
+                confirmModal.showModal();
+            }
+
+            document.getElementById('confirmYesBtn').addEventListener('click', () => {
+                if (currentAction) currentAction();
+                confirmModal.close();
+            });
+        </script>
+    @endpush
 
     @include('client.profile.modal-show-order-tracking')
 </x-app-layout>

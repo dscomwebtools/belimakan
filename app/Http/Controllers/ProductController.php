@@ -156,6 +156,8 @@ class ProductController extends Controller
                 }
 
                 // Simpan kombinasi varian ke tabel product_variants dan product_details
+                // Simpan kombinasi varian ke tabel product_variants dan product_details
+                $variantIdMap = []; // 🔹 buat mapping untuk koneksi id varian ke index array
                 foreach ($variantCombinations as $i => $combination) {
                     $productVariant = new ProductVariant([
                         'product_id' => $new_product->id,
@@ -167,25 +169,45 @@ class ProductController extends Controller
                     ]);
                     $productVariant->save();
 
+                    // simpan id mapping biar nanti bisa pakai saat upload gambar
+                    $variantIdMap[$i] = $productVariant->id;
+
                     foreach ($combination as $value) {
-                        // Misal $value adalah 'Warna: Merah'
                         [$variantName, $variantValue] = explode(': ', $value);
-
-                        // Cari variant_id berdasarkan nama varian
                         $variant = Variant::where('variant', $variantName)->first();
-
-                        // Cari atau buat VariantValue berdasarkan variant_id dan nilai
                         $variantValueObj = VariantValue::firstOrCreate([
                             'variant_id' => $variant->id,
                             'value' => $variantValue,
                         ]);
 
-                        // Simpan ke tabel product_details
                         ProductDetail::create([
                             'product_variant_id' => $productVariant->id,
-                            'variant_value_id' => $variantValueObj->id, // Gunakan ID di sini
-                            'isMain' => false, // Atur logika isMain sesuai kebutuhan
+                            'variant_value_id' => $variantValueObj->id,
+                            'isMain' => false,
                         ]);
+                    }
+                }
+
+                // 🔹 Variant Pictures
+                if (isset($validated['variant_pictures'])) {
+                    $lastPosition = 0;
+                    foreach ($validated['variant_pictures'] as $index => $file) {
+                        if ($file instanceof \Illuminate\Http\UploadedFile) {
+                            $variantId = $variantIdMap[$index] ?? null;
+                            if (!$variantId) continue;
+
+                            $filename = $new_product->slug . '-variant-' . $variantId . '-' . uniqid() . '.webp';
+                            $path = $this->picture_folder . $filename;
+
+                            Storage::put($path, file_get_contents($file));
+
+                            $newPicture = new ProductPicture();
+                            $newPicture->product_id = $new_product->id;
+                            $newPicture->variant_id = $variantId;
+                            $newPicture->path = $path;
+                            $newPicture->position = ++$lastPosition;
+                            $newPicture->save();
+                        }
                     }
                 }
             } else {
