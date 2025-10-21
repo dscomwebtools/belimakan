@@ -392,7 +392,7 @@
                                                     </a>
                                                 </li>
                                             @endif
-                                            @if ($data->payment_method === 'Transfer' && $data->delivery_state_id > 2)
+                                            @if ($data->bukti_pembayaran)
                                                 <li>
                                                     <a href="{{ Storage::url($data->bukti_pembayaran) }}"
                                                         download="Bukti_Transfer_{{ $data->invoice }}.jpg">
