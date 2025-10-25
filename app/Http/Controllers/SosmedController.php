@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 
 class SosmedController extends Controller
 {
-    public function index(Request $request):View
+    public function index(Request $request): View
     {
         $validated = $request->validate([
             'name' => ['string', 'nullable'],
@@ -75,10 +75,12 @@ class SosmedController extends Controller
 
         $sosmed->name = $validated["name"];
         $sosmed->url = $validated["url"];
+        $sosmed->is_footer = $request->boolean('is_footer');
+        $sosmed->is_link = $request->boolean('is_link');
 
         if (isset($validated["logo"])) {
             // remove old logo
-            if(isset($sosmed->logo)){
+            if (isset($sosmed->logo)) {
                 Storage::delete($sosmed->logo);
             }
 
@@ -88,9 +90,9 @@ class SosmedController extends Controller
 
             $sosmed->logo = $path;
         }
-        
+
         $sosmed->save();
-        
+
         return redirect()->route('sosmed.index')
             ->with('success', 'Berhasil diubah!');
     }
@@ -106,5 +108,4 @@ class SosmedController extends Controller
         return redirect()->route('sosmed.index')
             ->with('success', 'Berhasil dihapus !!');
     }
-
 }
