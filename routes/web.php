@@ -16,6 +16,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\HomepageClientController;
+use App\Http\Controllers\LinkController;
 use App\Http\Controllers\NoticeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
@@ -25,6 +26,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [ClientController::class, 'home'])->name('client.home');
+Route::get('/link', [LinkController::class, 'index'])->name('client.link');
 Route::get('/product/{slug}', [ProductController::class, 'product'])->name('client.product');
 Route::get('/products', [ProductController::class, 'allProducts'])->name('client.products');
 Route::get('/products/category/{category}', [ProductController::class, 'productsByCategory'])->name('client.productsByCategory');

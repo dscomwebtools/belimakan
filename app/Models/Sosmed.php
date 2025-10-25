@@ -9,5 +9,5 @@ class Sosmed extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'logo', 'url'];
+    protected $fillable = ['name', 'logo', 'url', 'is_footer', 'is_link'];
 }

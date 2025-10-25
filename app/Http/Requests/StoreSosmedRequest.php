@@ -27,7 +27,9 @@ class StoreSosmedRequest extends FormRequest
         return [
             'name' => ['required', Rule::unique(Sosmed::class)],
             'logo' => ['nullable'],
-            'url' => ['nullable']
+            'url' => ['nullable'],
+            'is_footer' => ['nullable'],
+            'is_link' => ['nullable']
         ];
     }
 }
