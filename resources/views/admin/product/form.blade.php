@@ -413,6 +413,29 @@
                         @include('admin.product.form.variant-fields')
                         {{-- MODE VARIANT END --}}
 
+                        <div class="flex flex-col gap-2">
+                            <div class="flex flex-col mb-4 flex-1">
+                                <label for="seo_title" class="font-semibold mb-2">SEO Title
+                                    <x-ar.required-label />
+                                </label>
+                                <input type="text" id="seo_title" name="seo_title"
+                                    class="my-input bg-primary/5 rounded"
+                                    value="{{ old('seo_title', isset($data) ? $data->seo_title : '') }}" required autofocus>
+                            </div>
+                            <div class="flex flex-col mb-4 flex-1">
+                                <label for="seo_description" class="font-semibold mb-2">SEO Deskripsi</label>
+                                <input type="text" id="seo_description" name="seo_description"
+                                    class="my-input bg-primary/5 rounded"
+                                    value="{{ old('seo_description', isset($data) ? $data->seo_description : '') }}">
+                            </div>
+                            <div class="flex flex-col mb-4 flex-1">
+                                <label for="seo_keywords" class="font-semibold mb-2">SEO Keywords</label>
+                                <input type="text" id="seo_keywords" name="seo_keywords"
+                                    class="my-input bg-primary/5 rounded"
+                                    value="{{ old('seo_keywords', isset($data) ? $data->seo_keywords : '') }}">
+                            </div>
+                        </div>
+
                         {{-- BUTTON SUBMIT AND BACK CONTAINER --}}
                         <div class="grid grid-cols-2 gap-2 mt-6">
                             <a href="{{ route('product.index') }}"

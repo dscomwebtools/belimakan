@@ -25,13 +25,15 @@ use App\Http\Controllers\TestimonialController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [ClientController::class, 'home'])->name('client.home');
-Route::get('/link', [LinkController::class, 'index'])->name('client.link');
-Route::get('/product/{slug}', [ProductController::class, 'product'])->name('client.product');
-Route::get('/products', [ProductController::class, 'allProducts'])->name('client.products');
-Route::get('/products/category/{category}', [ProductController::class, 'productsByCategory'])->name('client.productsByCategory');
+Route::middleware(['track-visitor'])->group(function () {
+    Route::get('/', [ClientController::class, 'home'])->name('client.home');
+    Route::get('/link', [LinkController::class, 'index'])->name('client.link');
+    Route::get('/product/{slug}', [ProductController::class, 'product'])->name('client.product');
+    Route::get('/products', [ProductController::class, 'allProducts'])->name('client.products');
+    Route::get('/products/category/{category}', [ProductController::class, 'productsByCategory'])->name('client.productsByCategory');
+});
 
-Route::middleware(['auth', 'check-banned', 'verified'])->group(function () {
+Route::middleware(['auth', 'check-banned', 'verified', 'track-visitor'])->group(function () {
     Route::get('/promo', [ClientController::class, 'promo'])->name('client.promo');
     Route::get('/lelang', [ClientController::class, 'lelang'])->name('client.lelang');
     Route::post('/bid', [AuctionController::class, 'bid'])->name('bid.store');
@@ -41,7 +43,7 @@ Route::middleware(['auth', 'check-banned', 'verified'])->group(function () {
 });
 
 // MEMBER ROUTES
-Route::middleware(['auth', 'check-banned', 'verified', 'can:is-member'])->group(function () {
+Route::middleware(['auth', 'check-banned', 'verified', 'can:is-member', 'track-visitor'])->group(function () {
     Route::get('/cart', [CartController::class, 'index'])->name('client.cart');
     Route::get('/checkout', [CartController::class, 'checkout'])->name('client.checkout');
     Route::patch('/update-qty/{cart}', [CartController::class, 'update_qty'])->name('client.update_qty');
