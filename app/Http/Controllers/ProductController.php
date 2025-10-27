@@ -427,6 +427,9 @@ class ProductController extends Controller
         $product->description = $validated["description"];
         $product->brand_id = $validated["brand_id"] ?? null;
         $product->youtube = $this->extractYoutubeId($validated["youtube"]) ?? null;
+        $product->seo_title = $validated["seo_title"];
+        $product->seo_description = $validated["seo_description"];
+        $product->seo_keywords = $validated["seo_keywords"];
 
         DB::transaction(function () use ($product, $validated) {
             $product->save();

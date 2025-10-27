@@ -56,6 +56,9 @@ class UpdateProductRequest extends FormRequest
             'active_variant' => 'nullable',
             'brand_id' => 'nullable|exists:brands,id',
             'youtube' => 'nullable',
+            'seo_title' => 'nullable',
+            'seo_description' => 'nullable',
+            'seo_keywords' => 'nullable',
         ];
     }
 

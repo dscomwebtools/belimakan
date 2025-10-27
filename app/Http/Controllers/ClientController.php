@@ -24,18 +24,6 @@ class ClientController extends Controller
 {
     function home()
     {
-        $visitor = Visitor::firstOrCreate(['id' => 1], ['count' => 0]);
-
-        $now = Carbon::now();
-        $lastVisit = Session::get('last_visitor_counted_at');
-
-        // Cek: belum pernah dihitung atau sudah lebih dari 6 jam
-        if (!$lastVisit || Carbon::parse($lastVisit)->diffInHours($now) >= 6) {
-            $visitor->increment('count');
-            $visitor->update(['last_increment_at' => $now]);
-            Session::put('last_visitor_counted_at', $now);
-        }
-
         $notice = Notice::latest()->first();
         $categories = Category::all();
 

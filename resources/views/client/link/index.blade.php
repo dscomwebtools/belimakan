@@ -16,9 +16,9 @@
             <a href="/">
                 <img src="{{ asset('assets/images/logo.webp') }}" alt="logo" width="100px">
             </a>
-            <h1 class="text-2xl font-bold mb-2 tracking-wide mt-4">DSCOMPUTER SOLUTION</h1>
+            <h1 class="text-2xl font-bold mb-2 tracking-wide mt-4">{{ $profile_name }}</h1>
             <p class="text-sm leading-relaxed">
-                Produk original 💻 | Harga bersaing 💰 | Layanan cepat ⚡
+                {{ $bio }}
             </p>
         </div>
 

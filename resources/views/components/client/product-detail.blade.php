@@ -1,11 +1,11 @@
 @props(['product'])
 
 <x-slot name="title">
-    {{ $product->name }}
+    {{ $product->seo_title }}
 </x-slot>
 
 @section('meta')
-    <x-meta title="{{ $product->name }}" description="{{ Str::limit(strip_tags($product->description), 150) }}"
+    <x-meta title="{{ $product->name }}" seoTitle="{{ $product->seo_title }}" seoDescription="{{ $product->seo_description }}" seoKeywords="{{ $product->seo_keywords }}" description="{{ Str::limit(strip_tags($product->description), 150) }}"
         image="{{ url(Storage::url($product->product_pictures->first()->path ?? 'default.jpg')) }}" type="product" />
 @endsection
 

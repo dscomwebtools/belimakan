@@ -8,12 +8,14 @@ use Illuminate\View\Component;
 
 class ClientLayout extends Component
 {
+    public $seo;
+
     /**
      * Create a new component instance.
      */
-    public function __construct()
+    public function __construct($seo = null)
     {
-        //
+        $this->seo = $seo;
     }
 
     /**
@@ -21,6 +23,8 @@ class ClientLayout extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('layouts.client.app');
+        return view('layouts.client.app', [
+            'seo' => $this->seo,
+        ]);
     }
 }

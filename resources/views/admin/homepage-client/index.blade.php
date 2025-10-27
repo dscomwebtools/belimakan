@@ -7,5 +7,6 @@
         <x-ar.homepage-client :section="$testimonial" />
         <x-ar.homepage-client :section="$faq" />
         <x-ar.homepage-client :section="$brand" />
+        <x-ar.homepage-client :section="$link" />
     </div>
 </x-app-layout>

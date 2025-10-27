@@ -31,6 +31,8 @@ class HomepageClientController extends Controller
 
         $brand = Setting::firstWhere('section_name', 'brand');
 
+        $link = Setting::firstWhere('section_name', 'link');
+
         return view('admin.homepage-client.index', compact(
             'hero',
             'promo',
@@ -39,6 +41,7 @@ class HomepageClientController extends Controller
             'testimonial',
             'faq',
             'brand',
+            'link',
         ));
     }
 
