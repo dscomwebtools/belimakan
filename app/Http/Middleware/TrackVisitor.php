@@ -13,28 +13,40 @@ class TrackVisitor
 {
     /**
      * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
         $sessionId = Session::getId();
+        $ip = $request->ip();
+        $ua = $request->userAgent();
         $now = Carbon::now();
 
-        $visitor = Visitor::where('session_id', $sessionId)->first();
+        $isBot = preg_match('/bot|crawl|spider|slurp|facebook|curl|wget/i', $ua);
+
+        $visitor = Visitor::where('ip_address', $ip)->first();
 
         if (!$visitor) {
             Visitor::create([
-                'session_id' => $sessionId,
-                'count' => 1,
+                'session_id'       => $sessionId,
+                'ip_address'       => $ip,
+                'user_agent'       => $ua,
+                'is_bot'           => $isBot,
+                'count'            => 1,
                 'last_increment_at' => $now,
             ]);
         } else {
-            $lastVisit = $visitor->last_increment_at;
-            if (!$lastVisit || $now->diffInHours($lastVisit) >= 2) {
-                $visitor->increment('count');
-                $visitor->update(['last_increment_at' => $now]);
+            if (!$isBot) {
+                $lastVisit = $visitor->last_increment_at;
+                if (!$lastVisit || $now->diffInHours($lastVisit) >= 2) {
+                    $visitor->increment('count');
+                    $visitor->update(['last_increment_at' => $now]);
+                }
             }
+
+            $visitor->update([
+                'user_agent' => $ua,
+                'is_bot'     => $isBot,
+            ]);
         }
 
         return $next($request);
