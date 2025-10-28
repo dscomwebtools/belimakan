@@ -35,12 +35,10 @@ class TrackVisitor
                 'last_increment_at' => $now,
             ]);
         } else {
-            if (!$isBot) {
-                $lastVisit = $visitor->last_increment_at;
-                if (!$lastVisit || $now->diffInHours($lastVisit) >= 2) {
-                    $visitor->increment('count');
-                    $visitor->update(['last_increment_at' => $now]);
-                }
+            $lastVisit = carbon::parse($visitor->last_increment_at);
+            if (!$lastVisit || $lastVisit->diffInMinutes($now) >= 120) {
+                $visitor->increment('count');
+                $visitor->update(['last_increment_at' => $now]);
             }
 
             $visitor->update([
