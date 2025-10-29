@@ -2,14 +2,114 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Contracts\View\View;
+use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
-    function index(): View
+    public function index()
     {
-        return view('client.notification.index');
+        $notifications = Notification::latest()->get();
+        return view('admin.notification.index', compact('notifications'));
+    }
+
+    public function create()
+    {
+        $users = User::select('id', 'name', 'email')->get();
+        return view('admin.notification.form', compact('users'));
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'user_id' => 'nullable|exists:users,id',
+            'title' => 'required|string|max:255',
+            'message' => 'required|string',
+            'type' => 'nullable|string|max:50',
+            'link' => 'nullable|string|max:255',
+            'is_broadcast' => 'nullable|boolean',
+            'scheduled_at' => 'nullable|date',
+        ]);
+
+        $data['is_broadcast'] = $request->filled('user_id') ? false : true;
+
+        $notification = Notification::create($data);
+
+        if ($data['is_broadcast']) {
+            $users = User::pluck('id');
+        } else {
+            $users = collect([$data['user_id']]);
+        }
+
+        $notification->users()->attach($users);
+
+        return redirect()
+            ->route('notification.index')
+            ->with('success', 'Notification created successfully.');
+    }
+
+    public function edit(Notification $notification)
+    {
+        $users = User::select('id', 'name', 'email')->get();
+        return view('admin.notification.form', ['data' => $notification, 'users' => $users]);
+    }
+
+    public function update(Request $request, Notification $notification)
+    {
+        $data = $request->validate([
+            'user_id' => 'nullable|exists:users,id',
+            'title' => 'required|string|max:255',
+            'message' => 'required|string',
+            'type' => 'nullable|string|max:50',
+            'link' => 'nullable|string|max:255',
+            'is_broadcast' => 'nullable|boolean',
+            'scheduled_at' => 'nullable|date',
+            'is_active' => 'nullable|boolean',
+        ]);
+
+        $data['is_broadcast'] = $request->filled('user_id') ? false : true;
+        $data['is_active'] = $request->has('is_active');
+
+        $notification->update($data);
+
+        return redirect()
+            ->route('notification.index')
+            ->with('success', 'Notifikasi berhasil diperbarui.');
+    }
+
+    public function destroy(Notification $notification)
+    {
+        $notification->delete();
+
+        return redirect()
+            ->route('notification.index')
+            ->with('success', 'Notifikasi berhasil dihapus.');
+    }
+
+    public function userNotifications()
+    {
+        $user = Auth::user();
+
+        $notifications = $user->notifications()
+            ->withPivot('is_read', 'read_at')
+            ->orderByDesc('notifications.created_at')
+            ->get();
+
+        return response()->json($notifications);
+    }
+
+    public function markAsRead($id)
+    {
+        $user = Auth::user();
+        $notification = Notification::findOrFail($id);
+
+        $user->notifications()->updateExistingPivot($notification->id, [
+            'is_read' => true,
+            'read_at' => now(),
+        ]);
+
+        return response()->json(['message' => 'Marked as read.']);
     }
 }
