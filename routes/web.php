@@ -56,6 +56,7 @@ Route::middleware(['auth', 'check-banned', 'verified', 'can:is-member', 'track-v
     Route::patch('/order/{order}', [OrderController::class, 'upload_bukti_bayar']);
     Route::get('/profile', [ProfileController::class, 'index'])->name('client.profile')->middleware('auth', 'can:is-member');
     Route::post('/coupon', [CouponController::class, 'check_coupon']);
+    Route::post('/notification/read/{id}', [NotificationController::class, 'markAsRead']);
 });
 
 // ADMIN ROUTES
@@ -66,6 +67,7 @@ Route::prefix('admin')
 
         Route::resource('notice', NoticeController::class)->only('index', 'update');
         Route::resource('coupon', CouponController::class);
+        Route::resource('notification', NotificationController::class);
         Route::resource('faq', FaqController::class)->except('show');
         Route::resource('brand', BrandController::class);
         Route::resource('feature', FeatureController::class);

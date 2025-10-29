@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\SettingAddress;
 use App\Models\Testimonial;
 use App\Http\Requests\UpdateTestimonialRequest;
+use App\Models\Notification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -40,6 +41,23 @@ class ProfileController extends Controller
 
         $testimonial = Testimonial::where('user_id', auth()->id())->first();
 
+        $user = auth()->user();
+
+        $notifications = Notification::where(function ($q) use ($user) {
+            // ambil notifikasi pribadi (langsung ke user_id)
+            $q->where('user_id', $user->id)
+                // atau notifikasi yang dikaitkan lewat pivot
+                ->orWhereHas('users', function ($q) use ($user) {
+                    $q->where('users.id', $user->id);
+                });
+        })
+            ->with(['users' => function ($q) use ($user) {
+                $q->where('users.id', $user->id)
+                    ->select('users.id');
+            }])
+            ->latest()
+            ->get();
+
         if (isset($validated["name"])) {
             $data = $data->where('name', 'like', '%' . $validated["name"] . '%');
         }
@@ -52,7 +70,7 @@ class ProfileController extends Controller
         $data = $data->paginate($numb_per_page)->appends(array_merge($validated, ['numb_per_page' => $numb_per_page]));
         $indexNumber = (request()->input('page', 1) - 1) * $numb_per_page;
 
-        return view('client.profile.index', compact('data', 'indexNumber', 'validated', 'numb_per_page', 'testimonial', 'bank_accounts'));
+        return view('client.profile.index', compact('data', 'indexNumber', 'validated', 'numb_per_page', 'testimonial', 'bank_accounts', 'notifications'));
         // return view('client.profile.index', compact('orders'));
     }
 

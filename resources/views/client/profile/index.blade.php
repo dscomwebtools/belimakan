@@ -92,7 +92,7 @@
                     <div class="overflow-x-auto no-scrollbar">
                         <div class="flex gap-2 p-1 min-w-max">
                             <template
-                                x-for="(tab, i) in ['Biodata','Data Order','Daftar Alamat','Testimonial','Keamanan']"
+                                x-for="(tab, i) in ['Biodata','Data Order','Daftar Alamat','Testimonial','Keamanan', 'Kotak Masuk']"
                                 :key="i">
                                 <button
                                     class="px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-300 transform hover:scale-105"
@@ -550,6 +550,48 @@
                         </form>
                     </section>
                 </div>
+                <div x-show="activeTab === 6" x-data="inboxData(@js($notifications))" class="flex flex-col sm:flex-row gap-4">
+
+                    <!-- LEFT SIDE: Notification List -->
+                    <div
+                        class="w-full sm:w-1/3 bg-base-100 rounded-xl shadow-md overflow-y-auto max-h-[600px] border border-base-300">
+                        <template x-for="(notif, index) in notifications" :key="notif.id">
+                            <div class="p-4 border-b border-base-200 cursor-pointer hover:bg-base-200 transition"
+                                :class="selected?.id === notif.id ? 'bg-primary/10 border-l-4 border-primary' : ''"
+                                @click="selected = notif; markAsRead(notif)">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="font-semibold text-base-content line-clamp-1" x-text="notif.title">
+                                    </h3>
+                                    <span class="text-xs opacity-70" x-text="notif.date"></span>
+                                </div>
+                                <p class="text-sm opacity-80 mt-1 line-clamp-2" x-text="notif.preview"></p>
+                                <span class="badge badge-xs mt-2 py-2"
+                                    :class="notif.users[0].pivot.is_read ? 'badge-outline' : 'badge-primary'">
+                                    <span x-text="notif.users[0].pivot.is_read ? 'Dibaca' : 'Baru'"></span>
+                                </span>
+                            </div>
+                        </template>
+
+                        <div x-show="notifications.length === 0" class="p-6 text-center opacity-60">
+                            Tidak ada notifikasi.
+                        </div>
+                    </div>
+
+                    <!-- RIGHT SIDE: Notification Detail -->
+                    <div class="flex-1 bg-base-100 rounded-xl shadow-md border border-base-300 p-6 min-h-[300px]">
+                        <template x-if="selected">
+                            <div>
+                                <h2 class="text-xl font-bold mb-2 text-base-content" x-text="selected.title"></h2>
+                                <p class="text-xs text-gray-500 mb-4" x-text="selected.date"></p>
+                                <p class="text-sm leading-relaxed" x-html="selected.message"></p>
+                            </div>
+                        </template>
+
+                        <div x-show="!selected" class="flex justify-center items-center h-full opacity-50">
+                            <p>Pilih salah satu notifikasi untuk melihat detailnya.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -741,6 +783,53 @@
                             this.isEditingStatus = false;
                             this.tempStatus = this.user.status;
                         }
+                    }
+                }
+
+                function inboxData(data) {
+                    return {
+                        notifications: data,
+                        selected: null,
+
+                        async markAsRead(notification) {
+                            if (notification.users[0].pivot.is_read) return;
+                            try {
+                                const res = await fetch(`/notification/read/${notification.id}`, {
+                                    method: 'POST', // atau 'PUT' tergantung routemu
+                                    headers: {
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                        'Accept': 'application/json',
+                                    },
+                                });
+
+                                if (res.ok) {
+                                    // update status di frontend biar langsung berubah
+                                    this.notifications = this.notifications.map(n =>
+                                        n.id === notification.id ?
+                                        {
+                                            ...n,
+                                            users: n.users.map((u, idx) =>
+                                                idx === 0 ?
+                                                {
+                                                    ...u,
+                                                    pivot: {
+                                                        ...u.pivot,
+                                                        is_read: true,
+                                                        read_at: new Date().toISOString()
+                                                    }
+                                                } :
+                                                u
+                                            )
+                                        } :
+                                        n
+                                    );
+                                } else {
+                                    console.error('Failed to mark as read');
+                                }
+                            } catch (error) {
+                                console.error('Error marking notification as read:', error);
+                            }
+                        },
                     }
                 }
 

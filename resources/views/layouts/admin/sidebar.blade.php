@@ -98,6 +98,14 @@
          ])>
              Testimonial
          </a>
+         <a href="{{ route('notification.index') }}" @class([
+             'block px-4 py-3 mt-0 text-sm',
+             'bg-primary text-primary-content' =>
+                 Request::RouteIs('notification.index') ||
+                 Request::is('admin/notification/*'),
+         ])>
+             Notification
+         </a>
 
          {{-- MENU DENGAN SUBMENU --}}
          <div class="relative">
