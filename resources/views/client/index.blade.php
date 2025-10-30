@@ -38,7 +38,7 @@
     @endif
 
     {{-- NOTICE --}}
-    <div class="notice mb-6" x-data="{
+    {{-- <div class="notice mb-6" x-data="{
         noticeMessage: '{{ $notice->message }}',
         noticeKey: 'noticeDismissed_{{ $notice->updated_at }}',
         previousNoticeKey: localStorage.getItem('currentNoticeKey'),
@@ -74,7 +74,7 @@
                     @click="dismissNotice"><i class="fa fa-xmark"></i></button>
             </div>
         </div>
-    </div>
+    </div> --}}
 
     {{-- HERO --}}
     @if ($hero['data']->is_show)
@@ -306,13 +306,51 @@
     {{-- WA ICON --}}
     <div x-data="{ open: false }" x-cloak class="fixed bottom-[100px] sm:bottom-[150px] lg:bottom-20 right-5 z-[9999]">
         <!-- Main button -->
-        <button @click="open = !open"
-            class="bg-green-500 rounded-full p-3 h-[50px] w-[50px] flex items-center justify-center shadow-lg text-white hover:scale-110 transition">
-            <i class="fa fa-whatsapp text-3xl"></i>
-        </button>
+        <style>
+            @keyframes pulse-ring {
+                0% {
+                    transform: scale(1);
+                    opacity: 0.6;
+                }
+
+                70% {
+                    transform: scale(3);
+                    opacity: 0;
+                }
+
+                100% {
+                    transform: scale(3);
+                    opacity: 0;
+                }
+            }
+
+            .pulse-bg::before,
+            .pulse-bg::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: 9999px;
+                /* full circle */
+                background-color: rgb(34 197 94 / 0.4);
+                /* hijau dengan transparansi */
+                animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+                z-index: 0;
+            }
+
+            .pulse-bg::after {
+                animation-delay: 1s;
+            }
+        </style>
+        <div class="relative inline-block">
+            <button @click="open = !open"
+                class="pulse-bg relative z-10 bg-green-500 rounded-full p-3 h-[50px] w-[50px] flex items-center justify-center shadow-lg text-white hover:scale-110 transition">
+                <i class="fa fa-whatsapp text-3xl"></i>
+            </button>
+        </div>
 
         <!-- Expanded options -->
-        <div x-show="open" x-transition @click.outside="open = false" class="flex flex-col gap-3 absolute bottom-16 right-0">
+        <div x-show="open" x-transition @click.outside="open = false"
+            class="flex flex-col gap-3 absolute bottom-16 right-0 z-10">
             @foreach ($wa as $contact)
                 <a href="https://wa.me/{{ $contact['hp'] }}" target="_blank"
                     class="bg-white shadow-md rounded-full p-2 flex items-center gap-2 hover:bg-gray-100">
