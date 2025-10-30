@@ -21,17 +21,52 @@
                 @method('PUT')
             @endisset
 
+            {{-- Title --}}
             <div>
                 <label for="title" class="font-semibold mb-2 block">Judul</label>
                 <input type="text" id="title" name="title" class="my-input bg-primary/5 rounded w-full"
                     value="{{ old('title', $data->title ?? '') }}" required autofocus>
             </div>
 
+            {{-- Message --}}
             <div>
-                <label for="message" class="font-semibold mb-2 block">Pesan</label>
-                <textarea id="message" name="message" rows="4" class="my-input bg-primary/5 rounded w-full" required>{{ old('message', $data->message ?? '') }}</textarea>
+                <label class="font-semibold mb-2 block">Pesan</label>
+
+                <div class="form-content">
+                    <div id="toolbar">
+                        <button class="ql-bold"></button>
+                        <button class="ql-italic"></button>
+                        <button class="ql-underline"></button>
+                        <button class="ql-strike"></button>
+                        <button class="ql-link"></button>
+                        <button class="ql-image"></button>
+                        <button class="ql-video"></button>
+                        <select class="ql-color"></select>
+                        <select class="ql-background"></select>
+                        <button class="ql-script" value="sub"></button>
+                        <button class="ql-script" value="super"></button>
+                        <button class="ql-blockquote"></button>
+                        <button class="ql-code-block"></button>
+                        <button class="ql-list" value="ordered"></button>
+                        <button class="ql-list" value="bullet"></button>
+                        <button class="ql-indent" value="-1"></button>
+                        <button class="ql-indent" value="+1"></button>
+                        <button class="ql-direction" value="rtl"></button>
+                        <select class="ql-align"></select>
+                        <button class="ql-clean"></button>
+                    </div>
+
+                    <div id="editor" class="bg-white text-black [&>.ql-editor]:min-h-52">
+                        {!! old('message', $data->message ?? '') !!}
+                    </div>
+
+                    {{-- Hidden field to submit message --}}
+                    <input type="hidden" id="message" name="message"
+                        value="{{ old('message', $data->message ?? '') }}">
+                </div>
             </div>
 
+            {{-- User selection --}}
             <div>
                 <label for="user_id" class="font-semibold mb-2 block">Tujuan</label>
                 <select id="user_id" name="user_id" class="my-input bg-primary/5 rounded w-full">
@@ -44,16 +79,7 @@
                 </select>
             </div>
 
-            {{-- <div class="flex flex-col items-start">
-                <label for="is_active" class="font-semibold mb-2">Active</label>
-                <div class="flex">
-                    @include('components_custom.toggle-active-product', [
-                        'name' => 'is_active',
-                        'checked' => isset($data) ? ($data->is_active ? 'checked' : '') : 'checked',
-                    ])
-                </div>
-            </div> --}}
-
+            {{-- Buttons --}}
             <div class="flex gap-2">
                 <a href="{{ route('notification.index') }}"
                     class="py-2 px-4 bg-gray-500 text-gray-50 text-center rounded">Back</a>
@@ -62,15 +88,52 @@
         </form>
     </div>
 
+    @push('styles')
+        <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+        <style>
+            .ql-toolbar {
+                background-color: ghostwhite
+            }
+        </style>
+    @endpush
+
     @push('scripts')
+        <script src="https://cdn.quilljs.com/1.2.2/quill.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/kensnyder/quill-image-resize-module@3411c9a7/image-resize.min.js"></script>
         <script>
             (function() {
-                const form = document.querySelector('form#main')
-                const submitBtn = document.querySelector('button[type="submit"]')
+                const form = document.querySelector('form#main');
+                const hiddenInput = document.querySelector('#message');
+
+                // Initialize Quill
+                const editor = new Quill('#editor', {
+                    modules: {
+                        toolbar: '#toolbar',
+                        imageResize: {
+                            displaySize: true
+                        }
+                    },
+                    theme: 'snow'
+                });
+
+                // Set initial content (important for edit)
+                const existingContent = hiddenInput.value;
+                if (existingContent) {
+                    editor.root.innerHTML = existingContent;
+                }
+
+                // Sync to hidden input on change
+                editor.on('text-change', function() {
+                    hiddenInput.value = editor.root.innerHTML;
+                });
+
+                // Disable button after submit
                 form.addEventListener('submit', function() {
-                    submitBtn.setAttribute('disabled', true)
-                })
-            })()
+                    const content = editor.root.innerHTML.replace(/\n/g, '<br>');
+                    hiddenInput.value = content;
+                    document.querySelector('button[type="submit"]').setAttribute('disabled', true);
+                });
+            })();
         </script>
     @endpush
 </x-app-layout>

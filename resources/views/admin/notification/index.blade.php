@@ -3,7 +3,7 @@
         <div class="flex flex-col md:flex-row">
             <a href="{{ route('notification.create') }}"
                 class="bg-primary text-primary-content w-fit h-fit rounded px-4 py-2 mb-4 inline-block">
-                <i class="fa fa-plus"></i> Add Notification
+                <i class="fa fa-plus"></i> Tambah Notifikasi
             </a>
         </div>
 

@@ -57,6 +57,7 @@ Route::middleware(['auth', 'check-banned', 'verified', 'can:is-member', 'track-v
     Route::get('/profile', [ProfileController::class, 'index'])->name('client.profile')->middleware('auth', 'can:is-member');
     Route::post('/coupon', [CouponController::class, 'check_coupon']);
     Route::post('/notification/read/{id}', [NotificationController::class, 'markAsRead']);
+    Route::get('/notification', [NotificationController::class, 'userNotificationsCount']);
 });
 
 // ADMIN ROUTES

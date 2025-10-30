@@ -66,9 +66,11 @@
         </div> -->
 
         {{-- cart --}}
-        @cannot('is-admin')
-            @include('layouts.client.cart')
-        @endcan
+        @auth
+            @cannot('is-admin')
+                @include('layouts.client.cart')
+            @endcan
+        @endauth
 
         {{-- user icon --}}
         {{-- user section --}}
@@ -121,6 +123,20 @@
                         @can('is-admin')
                             <a href="{{ route('admin-profile.index') }}"><span class="fa fa-user"></span> Profil</a>
                         @endcan
+                    </li>
+                    <div class="divider my-0"></div>
+                    <li class="mx-auto" x-data>
+                        <a href="{{ route('client.profile') }}?open=notif">
+                            <button class="relative flex items-center">
+                                <span class="fa fa-envelope mr-2 text-xl"></span>
+                                <span>Pesan</span>
+
+                                <!-- 🔔 Badge jumlah notifikasi -->
+                                <span x-show="$store.notification.unreadCount > 0" x-text="$store.notification.unreadCount"
+                                    class="absolute bg-red-600 text-white text-[8px] w-[16px] h-[16px] flex items-center justify-center font-semibold rounded-full px-1.5 py-0.5" style="left: 10px; top: -5px">
+                                </span>
+                            </button>
+                        </a>
                     </li>
                     <div class="lg:hidden divider my-0"></div>
                     <li class="lg:hidden mx-auto">
