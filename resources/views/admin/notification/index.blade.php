@@ -34,7 +34,7 @@
                                     <span class="text-gray-500">No</span>
                                 @endif
                             </td>
-                            <td>{{ $item->created_at->format('d M Y H:i') }}</td>
+                            <td>{{ $item->created_at->isoFormat('D MMMM Y HH:mm') }}</td>
                             <td class="flex justify-evenly">
                                 <form action="{{ route('notification.destroy', $item->id) }}" method="POST">
                                     @csrf
