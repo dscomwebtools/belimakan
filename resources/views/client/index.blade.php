@@ -341,7 +341,13 @@
                 animation-delay: 1s;
             }
         </style>
-        <div class="relative inline-block">
+        <div class="relative inline-flex items-center gap-3">
+            <!-- Teks di samping tombol -->
+            <div class="flex flex-col items-end bg-green-500 text-white p-2 rounded-xl z-10 shadow-md">
+                <span class="text-sm font-semibold">Hubungi Kami</span>
+            </div>
+
+            <!-- Tombol WhatsApp dengan efek pulse -->
             <button @click="open = !open"
                 class="pulse-bg relative z-10 bg-green-500 rounded-full p-3 h-[50px] w-[50px] flex items-center justify-center shadow-lg text-white hover:scale-110 transition">
                 <i class="fa fa-whatsapp text-3xl"></i>

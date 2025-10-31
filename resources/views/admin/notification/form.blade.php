@@ -66,11 +66,22 @@
                 </div>
             </div>
 
+            <div>
+                <label for="type" class="font-semibold mb-2 block">Tipe Notifikasi</label>
+                <select id="type" name="type" class="my-input bg-primary/5 rounded w-full" required>
+                    <option value="">-- Pilih Tipe --</option>
+                    <option value="Sistem" {{ old('type', $data->type ?? '') == 'Sistem' ? 'selected' : '' }}>Sistem
+                    </option>
+                    <option value="Pemberitahuan"
+                        {{ old('type', $data->type ?? '') == 'Pemberitahuan' ? 'selected' : '' }}>Pemberitahuan</option>
+                </select>
+            </div>
+
             {{-- User selection --}}
             <div>
                 <label for="user_id" class="font-semibold mb-2 block">Tujuan</label>
                 <select id="user_id" name="user_id" class="my-input bg-primary/5 rounded w-full">
-                    <option value="">Broadcast (All Users)</option>
+                    <option value="broadcast">Broadcast (All Users)</option>
                     @foreach ($users as $user)
                         <option value="{{ $user->id }}" @selected(old('user_id', $data->user_id ?? '') == $user->id)>
                             {{ $user->name }} ({{ $user->email }})
@@ -79,11 +90,48 @@
                 </select>
             </div>
 
+            @push('styles')
+                <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+            @endpush
+
+            @push('scripts')
+                <!-- jQuery MUST be loaded before Select2 -->
+                <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="" crossorigin="anonymous"></script>
+                <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // jika kamu pakai turbolinks / alpine yang render ulang,
+                        // pastikan inisialisasi dijalankan juga saat elemen muncul kembali.
+                        const initSelect2 = () => {
+                            if (typeof $ === 'undefined' || !$.fn.select2) {
+                                console.error('jQuery atau Select2 belum dimuat');
+                                return;
+                            }
+
+                            $('#user_id').select2({
+                                placeholder: 'Pilih user atau broadcast ke semua',
+                                allowClear: true,
+                                width: '100%'
+                            });
+                        };
+
+                        initSelect2();
+
+                        // Jika kamu menggunakan Alpine dan form mungkin muncul di modal,
+                        // panggil initSelect2 lagi saat modal dibuka.
+                        document.addEventListener('alpine:init', () => {
+                            initSelect2();
+                        });
+                    });
+                </script>
+            @endpush
+
             {{-- Buttons --}}
             <div class="flex gap-2">
                 <a href="{{ route('notification.index') }}"
-                    class="py-2 px-4 bg-gray-500 text-gray-50 text-center rounded">Back</a>
-                <button type="submit" class="py-2 px-4 bg-primary text-primary-content rounded">Save</button>
+                    class="py-2 px-4 bg-gray-500 text-gray-50 text-center rounded">Kembali</a>
+                <button type="submit" class="py-2 px-4 bg-primary text-primary-content rounded">Simpan</button>
             </div>
         </form>
     </div>

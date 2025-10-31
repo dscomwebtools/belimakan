@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Notification;
 use App\Models\User;
+use App\Notifications\CustomNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification as FacadeNotification;
+use Illuminate\Validation\Rule;
 
 class NotificationController extends Controller
 {
@@ -24,7 +27,10 @@ class NotificationController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'user_id' => 'nullable|exists:users,id',
+            'user_id' => [
+                'nullable',
+                Rule::in(array_merge(['broadcast'], User::pluck('id')->toArray())),
+            ],
             'title' => 'required|string|max:255',
             'message' => 'required|string',
             'type' => 'nullable|string|max:50',
@@ -33,7 +39,8 @@ class NotificationController extends Controller
             'scheduled_at' => 'nullable|date',
         ]);
 
-        $data['is_broadcast'] = $request->filled('user_id') ? false : true;
+        $data['is_broadcast'] = $request->user_id === 'broadcast';
+        $data['user_id'] = $request->user_id === 'broadcast' ? null : $request->user_id;
 
         $notification = Notification::create($data);
 
@@ -44,6 +51,13 @@ class NotificationController extends Controller
         }
 
         $notification->users()->attach($users);
+
+        $recipients = User::whereIn('id', $users)->get();
+
+        FacadeNotification::send($recipients, new CustomNotification([
+            'title' => $data['title'],
+            'message' => $data['message'],
+        ]));
 
         return redirect()
             ->route('notification.index')
@@ -59,7 +73,10 @@ class NotificationController extends Controller
     public function update(Request $request, Notification $notification)
     {
         $data = $request->validate([
-            'user_id' => 'nullable|exists:users,id',
+            'user_id' => [
+                'nullable',
+                Rule::in(array_merge(['broadcast'], User::pluck('id')->toArray())),
+            ],
             'title' => 'required|string|max:255',
             'message' => 'required|string',
             'type' => 'nullable|string|max:50',
@@ -69,7 +86,8 @@ class NotificationController extends Controller
             'is_active' => 'nullable|boolean',
         ]);
 
-        $data['is_broadcast'] = $request->filled('user_id') ? false : true;
+        $data['is_broadcast'] = $request->user_id === 'broadcast';
+        $data['user_id'] = $request->user_id === 'broadcast' ? null : $request->user_id;
         $data['is_active'] = $request->has('is_active');
 
         $notification->update($data);

@@ -62,6 +62,14 @@ export default {
     init() {
         this.getDataCart();
 
+        if (!window.location.pathname.startsWith('/checkout')) {
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('checkoutSelected_')) {
+                    localStorage.removeItem(key);
+                }
+            });
+        }
+
         let checkoutId = sessionStorage.getItem('checkoutId');
         this.checkoutId = checkoutId;
         this.selectedIds = this.getCheckoutSelected();
@@ -77,7 +85,7 @@ export default {
         };
 
         this.profileHasLocation = !!(latitude && longitude);
-        this.setCourierSelected({}, '');
+        this.setCourierSelected({}, '', true);
     },
 
     courierCategories(type = 'regular') {
@@ -237,8 +245,8 @@ export default {
 
 
     courierSelected: {},
-    setCourierSelected(courier, source) {
-        if (courier && Object.keys(courier).length > 0) {
+    setCourierSelected(courier, source, clear = false) {
+        if ((courier && Object.keys(courier).length > 0) || clear) {
             this.courierSelected = courier;
             this.courierSource = source;
             if (source !== "manual") {

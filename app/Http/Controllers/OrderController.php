@@ -6,6 +6,7 @@ use App\Models\Address;
 use App\Models\Cart;
 use App\Models\Coupon;
 use App\Models\DeliveryState;
+use App\Models\Notification;
 use App\Models\Order;
 use App\Models\OrderAddress;
 use App\Models\OrderDetail;
@@ -78,7 +79,7 @@ class OrderController extends Controller
             // SHIPPINGMETHOD
             $shipping_method_manual = null;
 
-            $shippingMethodData = collect($request->shippingMethod)->except(['currency', 'tax_lines'])->toArray();
+            $shippingMethodData = collect($request->shippingMethod)->except(['currency', 'tax_lines', 'shipping_fee_discount', 'shipping_fee_surcharge', 'insurance_fee', 'cash_on_delivery_fee'])->toArray();
             $shipping_method_id = ShippingMethod::firstOrCreate($shippingMethodData)->id;
 
             // ADA PERUBAHAN COLUMN2 DARI BITESHIP NYA, NANTI KALO ADA ERROR KARENA KOLOM SHIPPING METHOD NYA GA COCOK PAKE KODE DIBAWAH INI AJA BUAT GANTI KODE "// SHIPPINGMETHOD" DI ATAS
@@ -468,7 +469,7 @@ class OrderController extends Controller
         return view('admin.order.show', compact('data'));
     }
 
-    function next_state(Order $order)
+    public function next_state(Order $order)
     {
         $order->delivery_state_id += 1;
 
@@ -478,6 +479,24 @@ class OrderController extends Controller
         $order->save();
 
         if ($order->delivery_state_id == 2) {
+            $paymentUrl = route('client.profile', [
+                'open' => 'order',
+                'order_id' => $order->id,
+            ]);
+
+            $notification = Notification::create([
+                'user_id' => $order->user_id,
+                'is_broadcast' => false,
+                'title' => 'Pesanan Telah Dikonfirmasi',
+                'message' => '<p>Halo <strong>' . e($order->user->name) . '</strong>,</p><p>Pesanan Anda telah kami <strong>konfirmasi</strong> dan menunggu proses pembayaran.</p><p>Silakan lakukan pembayaran sesuai pesanan Anda melalui tautan berikut:</p><p>👉 <a href="' . $paymentUrl . '" target="_blank" style="color: rgb(0, 102, 204); font-weight: bold;">Buka Halaman Pembayaran</a></p><p><br></p><p>Mohon segera menyelesaikan pembayaran agar pesanan dapat diproses lebih lanjut.</p>',
+                'type' => 'Sistem',
+                'link' => null,
+                'scheduled_at' => now(),
+            ]);
+
+            $users = [$order->user_id];
+            $notification->users()->attach($users);
+
             $order->user->notify(new OrderInfoNotification($order));
         }
 
