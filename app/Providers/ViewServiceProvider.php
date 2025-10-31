@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\CategoryLabel;
 use App\Models\Feature;
 use App\Models\Sosmed;
+use App\Models\User;
 use App\Models\Visitor;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -42,7 +43,10 @@ class ViewServiceProvider extends ServiceProvider
         View::composer('layouts.client.footer', function ($view) {
             $sosmed = Sosmed::where('is_footer', true)->get();
             $visitorCount = Visitor::sum('count');
-            $view->with('sosmed', $sosmed)->with('visitorCount', $visitorCount);
+            $wa = User::where('level_id', 1)
+                ->where('is_sales', 1)
+                ->get();
+            $view->with('sosmed', $sosmed)->with('visitorCount', $visitorCount)->with('wa', $wa);
         });
 
         View::composer('components.client.features', function ($view) {
