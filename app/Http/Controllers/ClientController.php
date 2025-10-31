@@ -120,10 +120,6 @@ class ClientController extends Controller
             'items' => Brand::limit($brand_data->show_items)->latest()->get()
         ];
 
-        $wa = User::where('level_id', 1)
-            ->where('is_sales', 1)
-            ->get();
-
         return view('client.index', compact(
             'notice',
             'categories',
@@ -134,7 +130,6 @@ class ClientController extends Controller
             'testimonial',
             'faq',
             'brand',
-            'wa'
         ));
     }
 
