@@ -27,6 +27,7 @@ class CustomNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
+            ->greeting('Halo, ' . $notifiable->name . ' 👋')
             ->subject($this->data['title'])
             ->line(new HtmlString($this->data['message']));
     }
