@@ -7,12 +7,14 @@
             @foreach ($bank_accounts as $bank)
                 <div
                     class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white border border-gray-200 rounded-2xl p-4">
-                    <div class="w-full flex items-center justify-between">
-                        <div class="flex items-center gap-4">
+                    <div class="w-full flex flex-col md:flex-row gap-4">
+                        <div class="flex gap-4">
                             @if ($bank->logo)
                                 <img src="{{ asset('storage/' . $bank->logo) }}" alt="{{ $bank->bank_name }}"
                                     class="w-[120px] h-[40px] object-contain" />
                             @endif
+                        </div>
+                        <div x-data="{ copied: false }">
                             <div>
                                 <div class="font-semibold text-gray-800 text-base">{{ $bank->bank_name }}</div>
                                 <div class="text-gray-600 text-sm">
@@ -21,8 +23,6 @@
                                         class="font-mono tracking-wide text-gray-700">{{ $bank->account_number }}</span>
                                 </div>
                             </div>
-                        </div>
-                        <div x-data="{ copied: false }">
                             <button type="button"
                                 @click="
                                     navigator.clipboard.writeText('{{ $bank->account_number }}');

@@ -125,54 +125,84 @@
 
             <div class="space-y-3">
                 <template x-for="(orderDetail, key) in $store.cart.orderDetail.order_detail" :key="key">
-                    <div class="border rounded-xl p-3 bg-white dark:bg-gray-800">
-                        <div class="text-base font-semibold text-gray-900 dark:text-gray-50">
-                            <span x-text="orderDetail.product.name"></span>
-                        </div>
+                    <div
+                        class="border rounded-xl p-3 bg-white dark:bg-gray-800 flex flex-col sm:flex-row gap-3 items-start">
+                        <div class="w-full sm:w-24 flex-shrink-0 flex gap-2 items-start">
+                            <img :src="orderDetail.product.product_pictures?.length > 0 ?
+                                '/storage/' + orderDetail.product.product_pictures[0].path :
+                                '/placeholder.png'"
+                                :alt="orderDetail.product.name" loading="lazy"
+                                class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg border border-gray-200 dark:border-gray-700">
 
-                        <template
-                            x-if="orderDetail.product_variant && orderDetail.product_variant.product_detail.length > 0">
-                            <div class="text-xs text-gray-500 mt-1">
-                                Varian:
-                                <template x-for="(detail, index) in orderDetail.product_variant.product_detail">
-                                    <span>
-                                        <span x-text="detail.variant_value.value"></span><span
-                                            x-text="index < orderDetail.product_variant.product_detail.length - 1 ? ', ' : ''"></span>
-                                    </span>
+                            <div class="flex-1 block sm:hidden text-sm">
+                                <div class="font-semibold text-gray-900 dark:text-gray-50 text-base sm:text-lg"
+                                    x-text="orderDetail.product.name"></div>
+
+                                <template
+                                    x-if="orderDetail.product_variant && orderDetail.product_variant.product_detail.length > 0">
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        Varian:
+                                        <template x-for="(detail, index) in orderDetail.product_variant.product_detail">
+                                            <span>
+                                                <span x-text="detail.variant_value.value"></span><span
+                                                    x-text="index < orderDetail.product_variant.product_detail.length - 1 ? ', ' : ''"></span>
+                                            </span>
+                                        </template>
+                                    </div>
                                 </template>
                             </div>
-                        </template>
-
-                        <div class="grid grid-cols-3 gap-2 mt-3 text-sm">
-                            <div>
-                                <div class="text-gray-400">Harga</div>
-                                <div class="font-medium"
-                                    x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })
-                            .format(orderDetail.price)">
-                                </div>
-                            </div>
-
-                            <div>
-                                <div class="text-gray-400">Qty</div>
-                                <div class="font-medium" x-text="orderDetail.quantity">
-                                </div>
-                            </div>
-
-                            <div x-show="orderDetail.discount > 0">
-                                <div class="text-gray-400">Diskon</div>
-                                <div class="font-medium"
-                                    x-text="orderDetail.discount > 0 
-                            ? '(' + orderDetail.discount + '%) ' + new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })
-                                .format(orderDetail.price * (orderDetail.discount / 100))
-                            : '-'">
-                                </div>
-                            </div>
                         </div>
-                        <div>
-                            <div class="text-gray-400">Subtotal</div>
-                            <div class="font-semibold text-green-600 dark:text-green-400"
-                                x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })
-                            .format((orderDetail.price - (orderDetail.price * (orderDetail.discount / 100))) * orderDetail.quantity)">
+
+                        <div class="flex-1 text-sm w-full">
+                            <div class="hidden sm:block">
+                                <div class="font-semibold text-gray-900 dark:text-gray-50 text-base sm:text-lg"
+                                    x-text="orderDetail.product.name"></div>
+
+                                <template
+                                    x-if="orderDetail.product_variant && orderDetail.product_variant.product_detail.length > 0">
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        Varian:
+                                        <template x-for="(detail, index) in orderDetail.product_variant.product_detail">
+                                            <span>
+                                                <span x-text="detail.variant_value.value"></span><span
+                                                    x-text="index < orderDetail.product_variant.product_detail.length - 1 ? ', ' : ''"></span>
+                                            </span>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-2 mt-3 text-xs sm:text-sm">
+                                <div>
+                                    <div class="text-gray-400">Harga</div>
+                                    <div class="font-medium"
+                                        x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })
+                        .format(orderDetail.price)">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="text-gray-400">Qty</div>
+                                    <div class="font-medium" x-text="orderDetail.quantity"></div>
+                                </div>
+
+                                <div x-show="orderDetail.discount > 0">
+                                    <div class="text-gray-400">Diskon</div>
+                                    <div class="font-medium"
+                                        x-text="orderDetail.discount > 0 
+                        ? '(' + orderDetail.discount + '%) ' + new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })
+                            .format(orderDetail.price * (orderDetail.discount / 100))
+                        : '-'">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-3">
+                                <div class="text-gray-400">Subtotal</div>
+                                <div class="font-semibold text-green-600 dark:text-green-400"
+                                    x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })
+                    .format((orderDetail.price - (orderDetail.price * (orderDetail.discount / 100))) * orderDetail.quantity)">
+                                </div>
                             </div>
                         </div>
                     </div>

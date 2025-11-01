@@ -49,7 +49,8 @@
         </div>
     </nav>
     {{-- WA ICON --}}
-    <div x-data="{ open: false }" x-cloak class="fixed bottom-[120px] sm:bottom-[160px] lg:bottom-[100px] right-5 z-[9999]">
+    <div x-data="{ open: false }" x-cloak
+        class="fixed bottom-[120px] sm:bottom-[160px] lg:bottom-[100px] right-5 z-[10]">
         <!-- Main button -->
         <style>
             @keyframes pulse-ring {
@@ -79,7 +80,7 @@
                 background-color: rgb(34 197 94 / 0.4);
                 /* hijau dengan transparansi */
                 animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-                z-index: 0;
+                z-index: -1;
             }
 
             .pulse-bg::after {
@@ -93,10 +94,14 @@
             </div>
 
             <!-- Tombol WhatsApp dengan efek pulse -->
-            <button @click="open = !open"
-                class="pulse-bg relative z-10 bg-green-500 rounded-full p-3 h-[50px] w-[50px] flex items-center justify-center shadow-lg text-white hover:scale-110 transition">
-                <i class="fa fa-whatsapp text-3xl"></i>
-            </button>
+            <div class="relative flex items-center justify-center">
+                <div class="pulse-bg absolute inset-0 flex items-center justify-center pointer-events-none"></div>
+
+                <button @click="open = !open"
+                    class="relative z-10 bg-green-500 rounded-full p-3 h-[50px] w-[50px] flex items-center justify-center shadow-lg text-white hover:scale-110 transition">
+                    <i class="fa fa-whatsapp text-3xl"></i>
+                </button>
+            </div>
         </div>
 
         <!-- Expanded options -->
@@ -106,7 +111,7 @@
                 <a href="https://wa.me/{{ $contact['hp'] }}" target="_blank"
                     class="bg-white shadow-md rounded-full p-2 flex items-center gap-2 hover:bg-gray-100">
                     <i class="fa fa-whatsapp text-green-500 text-xl"></i>
-                    <span class="text-sm">{{ $contact['name'] }}</span>
+                    <span class="text-sm text-black">{{ $contact['name'] }}</span>
                 </a>
             @endforeach
         </div>
