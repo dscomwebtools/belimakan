@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::table('products', function (Blueprint $table) {
             $table->string('seo_title')->nullable()->after('active');
             $table->text('seo_description')->nullable()->after('seo_title');
-            $table->text('seo_keywords')->nullable()->after('seo_description');
         });
     }
 
@@ -24,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->dropColumn(['seo_title', 'seo_description', 'seo_keywords']);
+            $table->dropColumn(['seo_title', 'seo_description']);
         });
     }
 };

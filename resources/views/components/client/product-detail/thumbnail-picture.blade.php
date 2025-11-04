@@ -13,7 +13,7 @@
         <div x-data="imageZoom(activeMainUrl)" class="relative overflow-hidden w-full cursor-zoom-in h-[250px] md:h-[350px]"
             @mousemove="move($event)" @mouseenter="show = true" @mouseleave="show = false"
             @click="$dispatch('open-fullscreen', activeMainUrl)">
-            <img :src="activeMainUrl" class="object-contain w-full h-full transition-transform duration-200"
+            <img loading="lazy" :src="activeMainUrl" class="object-contain w-full h-full transition-transform duration-200"
                 :style="show ?
                     `transform: scale(${zoom}); transform-origin: ${originX}% ${originY}%;` :
                     'transform: scale(1);'">
@@ -25,7 +25,7 @@
         <div class="swiper-wrapper">
             <template x-for="pic in pictures" :key="pic.url">
                 <div class="swiper-slide">
-                    <img :src="pic.url" class="object-contain cursor-pointer border-4"
+                    <img loading="lazy" :src="pic.url" class="object-contain cursor-pointer border-4"
                         :class="activeMainUrl === pic.url ? 'border-green-600' : 'border-transparent'"
                         @click="setMain(pic.url)" />
                 </div>
@@ -44,14 +44,14 @@
                 aria-label="Close">&times;</button>
 
             <div class="flex-1 flex items-center justify-center">
-                <img :src="imgSrc" class="max-h-[60vh] md:max-h-[85vh] object-contain rounded-xl"
+                <img loading="lazy" :src="imgSrc" class="max-h-[60vh] md:max-h-[85vh] object-contain rounded-xl"
                     alt="Product image">
             </div>
 
             <div
                 class="w-full md:w-28 flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-y-auto max-h-[85vh] pr-4">
                 <template x-for="pic in pictures" :key="pic.url">
-                    <img :src="pic.url" @click="setMain(pic.url); imgSrc = pic.url"
+                    <img loading="lazy" :src="pic.url" @click="setMain(pic.url); imgSrc = pic.url"
                         class="w-20 h-20 object-cover cursor-pointer border-4"
                         :class="imgSrc === pic.url ? 'border-green-600' : activeMainUrl === pic.url ? 'border-gray-400' :
                             'border-transparent'">

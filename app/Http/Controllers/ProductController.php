@@ -429,7 +429,6 @@ class ProductController extends Controller
         $product->youtube = $this->extractYoutubeId($validated["youtube"]) ?? null;
         $product->seo_title = $validated["seo_title"];
         $product->seo_description = $validated["seo_description"];
-        $product->seo_keywords = $validated["seo_keywords"];
 
         DB::transaction(function () use ($product, $validated) {
             $product->save();
@@ -836,6 +835,7 @@ class ProductController extends Controller
     function product($slug): View
     {
         $product = Product::with([
+            'brand',
             'product_pictures' => function ($query) {
                 $query->orderBy('position', 'asc');
             },
