@@ -428,12 +428,6 @@
                                     class="my-input bg-primary/5 rounded"
                                     value="{{ old('seo_description', isset($data) ? $data->seo_description : '') }}">
                             </div>
-                            <div class="flex flex-col mb-4 flex-1">
-                                <label for="seo_keywords" class="font-semibold mb-2">SEO Keywords</label>
-                                <input type="text" id="seo_keywords" name="seo_keywords"
-                                    class="my-input bg-primary/5 rounded"
-                                    value="{{ old('seo_keywords', isset($data) ? $data->seo_keywords : '') }}">
-                            </div>
                         </div>
 
                         {{-- BUTTON SUBMIT AND BACK CONTAINER --}}

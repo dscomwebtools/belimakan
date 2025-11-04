@@ -1,12 +1,10 @@
 @props(['product'])
 
-<x-slot name="title">
-    {{ $product->seo_title }}
-</x-slot>
-
 @section('meta')
-    <x-meta title="{{ $product->name }}" seoTitle="{{ $product->seo_title }}" seoDescription="{{ $product->seo_description }}" seoKeywords="{{ $product->seo_keywords }}" description="{{ Str::limit(strip_tags($product->description), 150) }}"
-        image="{{ url(Storage::url($product->product_pictures->first()->path ?? 'default.jpg')) }}" type="product" />
+    <x-meta title="{{ $product->name }}" seoTitle="{{ $product->seo_title }}" seoDescription="{{ $product->seo_description }}"
+        description="{{ Str::limit(strip_tags($product->description), 150) }}"
+        image="{{ url(Storage::url($product->product_pictures->first()->path ?? 'default.jpg')) }}"
+        brand="{{ $product->brand->name ?? '' }}" type="product" />
 @endsection
 
 <div class="flex flex-wrap gap-2 mb-4" x-data>

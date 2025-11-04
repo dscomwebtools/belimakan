@@ -58,7 +58,6 @@ class UpdateProductRequest extends FormRequest
             'youtube' => 'nullable',
             'seo_title' => 'nullable',
             'seo_description' => 'nullable',
-            'seo_keywords' => 'nullable',
         ];
     }
 
