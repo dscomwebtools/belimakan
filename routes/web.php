@@ -81,6 +81,8 @@ Route::prefix('admin')
         Route::post('products/{product}/update-single', [ProductController::class, 'updateProductSingle'])
             ->name('product.update-single');
 
+        Route::get('/product/{product}/copy', [ProductController::class, 'copy'])->name('product.copy');
+
         Route::post('product-import', [ProductController::class, 'import'])->name('product.import');
 
         Route::get('profile', [ProfileController::class, 'indexAdmin'])->name('admin-profile.index');
