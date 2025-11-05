@@ -6,16 +6,57 @@ use App\Models\Notification;
 use App\Models\User;
 use App\Notifications\CustomNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification as FacadeNotification;
 use Illuminate\Validation\Rule;
 
 class NotificationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $notifications = Notification::latest()->get();
+        $type = $request->get('type', 'pemberitahuan');
+
+        $notifications = Notification::where('type', ucfirst($type))
+            ->latest()
+            ->get()
+            ->map(function ($item) {
+                $item->message = strip_tags($item->message);
+                $item->formatted_date = $item->created_at->translatedFormat('d F Y H:i');
+                return $item;
+            });
+
+        // Kalau request-nya AJAX (fetch)
+        if ($request->ajax()) {
+            return response()->json($notifications);
+        }
+
+        // Kalau normal load (halaman pertama)
         return view('admin.notification.index', compact('notifications'));
+    }
+
+    public function fetch(Request $request)
+    {
+        $type = $request->get('type', 'Pemberitahuan');
+
+        $notifications = Notification::query()
+            ->whereRaw('LOWER(type) = ?', [strtolower($type)])
+            ->latest()
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'title' => $item->title,
+                    'message' => strip_tags($item->message),
+                    'type' => $item->type,
+                    'is_broadcast' => $item->is_broadcast,
+                    'created_at' => Carbon::parse($item->created_at)
+                        ->locale('id')
+                        ->translatedFormat('d F Y H:i'),
+                ];
+            });
+
+        return response()->json($notifications);
     }
 
     public function create()
