@@ -813,6 +813,7 @@ class ProductController extends Controller
             foreach ($product->product_variant as $variant) {
                 $newVariant = $variant->replicate();
                 $newVariant->product_id = $newProduct->id;
+                $newVariant->active = 0;
                 $newVariant->save();
 
                 $variantMap[$variant->id] = $newVariant->id;
