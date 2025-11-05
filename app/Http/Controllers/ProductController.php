@@ -136,6 +136,8 @@ class ProductController extends Controller
         $new_product->description = $validated["description"];
         $new_product->brand_id = $validated["brand_id"] ?? null;
         $new_product->youtube = $this->extractYoutubeId($validated["youtube"]) ?? null;
+        $new_product->seo_title = $validated["seo_title"];
+        $new_product->seo_description = $validated["seo_description"];
 
         DB::transaction(function () use ($new_product, $validated) {
             $new_product->save();
@@ -754,6 +756,107 @@ class ProductController extends Controller
 
         return redirect()->route('product.index')
             ->with('success', 'Berhasil diubah!');
+    }
+
+    public function copy(Product $product)
+    {
+        $newId = "";
+        DB::transaction(function () use ($product, &$newId) {
+
+            // ==========================
+            // 🔹 1. Duplikasi Produk Utama
+            // ==========================
+            $newProduct = $product->replicate();
+            $newProduct->name = $product->name . ' (Copy)';
+            $newProduct->slug = Str::of($newProduct->name)->slug('-')->value . '-' . uniqid();
+            $newProduct->push(); // save
+            $newId = $newProduct->id;
+
+            // ==========================
+            // 🔹 2. Duplikasi Kategori
+            // ==========================
+            $categoryIds = $product->category()->pluck('category_id')->toArray();
+            $newProduct->category()->attach($categoryIds);
+
+            // ==========================
+            // 🔹 3. Duplikasi Dimensi
+            // ==========================
+            if ($product->dimention) {
+                $newDimention = $product->dimention->replicate();
+                $newDimention->product_id = $newProduct->id;
+                $newDimention->save();
+            }
+
+            // ==========================
+            // 🔹 4. Duplikasi Promo
+            // ==========================
+            if ($product->promo) {
+                $newPromo = $product->promo->replicate();
+                $newPromo->product_id = $newProduct->id;
+                $newPromo->save();
+            }
+
+            // ==========================
+            // 🔹 5. Duplikasi Detail
+            // ==========================
+            foreach ($product->detail_value as $detailValue) {
+                $newDetailValue = $detailValue->replicate();
+                $newDetailValue->product_id = $newProduct->id;
+                $newDetailValue->save();
+            }
+
+            // ==========================
+            // 🔹 6. Duplikasi Product Variants + Details
+            // ==========================
+            $variantMap = []; // lama -> baru
+
+            foreach ($product->product_variant as $variant) {
+                $newVariant = $variant->replicate();
+                $newVariant->product_id = $newProduct->id;
+                $newVariant->save();
+
+                $variantMap[$variant->id] = $newVariant->id;
+
+                // ProductDetail
+                foreach ($variant->product_detail as $detail) {
+                    $newDetail = $detail->replicate();
+                    $newDetail->product_variant_id = $newVariant->id;
+                    $newDetail->save();
+                }
+            }
+
+            // ==========================
+            // 🔹 7. Duplikasi Gambar Produk (utama)
+            // ==========================
+            $picture_folder = $this->picture_folder;
+            $lastPosition = 0;
+
+            foreach ($product->product_pictures as $picture) {
+                $newPicture = $picture->replicate();
+                $newPicture->product_id = $newProduct->id;
+
+                // Jika gambar punya variant_id, map ke varian baru
+                if ($picture->variant_id) {
+                    $newVariantId = $variantMap[$picture->variant_id] ?? null;
+                    $newPicture->variant_id = $newVariantId;
+                }
+
+                // Copy file fisik
+                if (Storage::exists($picture->path)) {
+                    $ext = pathinfo($picture->path, PATHINFO_EXTENSION);
+                    $newFileName = $newProduct->slug . '-' . uniqid() . '.' . $ext;
+                    $newPath = $picture_folder . $newFileName;
+
+                    Storage::copy($picture->path, $newPath);
+                    $newPicture->path = $newPath;
+                }
+
+                $newPicture->position = ++$lastPosition;
+                $newPicture->save();
+            }
+        });
+
+        return redirect()->route('product.edit', $newId);
     }
 
     function destroy(Product $product)

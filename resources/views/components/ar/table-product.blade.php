@@ -413,35 +413,50 @@
                         @endforeach
 
                         {{-- Aksi --}}
-                        <td class="flex items-center justify-evenly gap-2">
+                        <td class="flex items-center justify-center gap-4 py-2 text-lg">
+
+                            {{-- 👁️ Lihat --}}
+                            @if (Route::has($routeName . '.show'))
+                                <div class="tooltip" data-tip="Lihat">
+                                    <a href="{{ route($routeName . '.show', $row['id']) }}" class="text-teal-600">
+                                        <i class="fa fa-eye"></i>
+                                    </a>
+                                </div>
+                            @endif
+
+                            {{-- ✏️ Edit --}}
+                            @if (Route::has($routeName . '.edit'))
+                                <div class="tooltip" data-tip="Edit">
+                                    <a href="{{ route($routeName . '.edit', $row['id']) }}" class="text-blue-600">
+                                        <i class="fa fa-pen"></i>
+                                    </a>
+                                </div>
+                            @endif
+
+                            {{-- 📋 Copy --}}
+                            @if (Route::has($routeName . '.copy'))
+                                <div class="tooltip" data-tip="Copy">
+                                    <a href="{{ route($routeName . '.copy', $row['id']) }}" class="text-indigo-600">
+                                        <i class="fa fa-copy"></i>
+                                    </a>
+                                </div>
+                            @endif
+
+                            {{-- 🗑️ Hapus --}}
                             @if (Route::has($routeName . '.destroy'))
-                                <div class="tooltip" data-tip="Delete">
+                                <div class="tooltip" data-tip="Hapus">
                                     <form action="{{ route($routeName . '.destroy', $row['id']) }}" method="post"
+                                        onsubmit="return confirm('Yakin ingin menghapus item ini? 😢')"
                                         class="inline-block">
                                         @csrf
                                         @method('delete')
-                                        <button type="submit" class="delete">
-                                            <i class="fa fa-trash text-red-600"></i>
+                                        <button type="submit" class="text-red-600">
+                                            <i class="fa fa-trash"></i>
                                         </button>
                                     </form>
                                 </div>
                             @endif
 
-                            @if (Route::has($routeName . '.edit'))
-                                <div class="tooltip" data-tip="Edit">
-                                    <a href="{{ route($routeName . '.edit', $row['id']) }}">
-                                        <i class="fa fa-pen text-blue-600"></i>
-                                    </a>
-                                </div>
-                            @endif
-
-                            @if (Route::has($routeName . '.show'))
-                                <div class="tooltip" data-tip="Lihat">
-                                    <a href="{{ route($routeName . '.show', $row['id']) }}">
-                                        <i class="fa fa-eye text-teal-600"></i>
-                                    </a>
-                                </div>
-                            @endif
                         </td>
                     </tr>
                 @endforeach
