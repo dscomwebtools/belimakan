@@ -30,6 +30,14 @@
                                     <div class="text-base md:text-lg lg:text-xl font-bold" x-text="item.product.name">
                                     </div>
 
+                                    <!-- Label pre-order -->
+                                    <template x-if="item.product.pre_order">
+                                        <span
+                                            class="inline-block mt-1 text-[10px] px-2 py-[2px] rounded-full border border-green-600 text-green-600 font-semibold">
+                                            Pre-Order
+                                        </span>
+                                    </template>
+
                                     <template x-if="item.product_variant">
                                         <template x-for="detail in item.product_variant.product_detail">
                                             <div class="text-sm md:text-base mt-2"
@@ -118,9 +126,7 @@
                     </div>
                 </div>
                 <div class="card-actions my-2">
-                    <a
-                        @click.prevent="$store.cart.proceedToCheckout"
-                        class="btn btn-primary btn-block"
+                    <a @click.prevent="$store.cart.proceedToCheckout" class="btn btn-primary btn-block"
                         :class="{ 'btn-disabled': $store.cart.selectedIds.length === 0 }"
                         :disabled="$store.cart.selectedIds.length === 0">
                         Beli

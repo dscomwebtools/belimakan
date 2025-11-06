@@ -58,6 +58,9 @@ class UpdateProductRequest extends FormRequest
             'youtube' => 'nullable',
             'seo_title' => 'nullable',
             'seo_description' => 'nullable',
+            'pre_order' => 'required|boolean',
+            'pre_order_date' => 'nullable|required_if:pre_order,1|date',
+            'pre_order_message' => 'nullable|required_if:pre_order,1|string|max:1000',
         ];
     }
 

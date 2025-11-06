@@ -138,6 +138,9 @@ class ProductController extends Controller
         $new_product->youtube = $this->extractYoutubeId($validated["youtube"]) ?? null;
         $new_product->seo_title = $validated["seo_title"];
         $new_product->seo_description = $validated["seo_description"];
+        $new_product->pre_order = $validated['pre_order'];
+        $new_product->pre_order_date = $validated['pre_order_date'] ?? null;
+        $new_product->pre_order_message = $validated['pre_order_message'] ?? null;
 
         DB::transaction(function () use ($new_product, $validated) {
             $new_product->save();
@@ -431,6 +434,10 @@ class ProductController extends Controller
         $product->youtube = $this->extractYoutubeId($validated["youtube"]) ?? null;
         $product->seo_title = $validated["seo_title"];
         $product->seo_description = $validated["seo_description"];
+        $product->pre_order = $validated['pre_order'];
+        $product->pre_order_date = $validated['pre_order_date'] ?? null;
+        $product->pre_order_message = $validated['pre_order_message'] ?? null;
+
 
         DB::transaction(function () use ($product, $validated) {
             $product->save();

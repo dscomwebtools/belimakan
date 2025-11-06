@@ -31,6 +31,118 @@
                     <div class="form-container flex flex-col gap-4">
                         <x-ar.note-required-fields />
 
+                        {{-- === PRE-ORDER MODAL SYSTEM === --}}
+                        <div x-data="{
+                            type: '{{ old('pre_order', $data->pre_order ?? false) ? 'pre_order' : 'regular' }}',
+                            showModal: false,
+                            date: '{{ old('pre_order_date', $data->pre_order_date ?? '') }}',
+                            message: `{{ old('pre_order_message', $data->pre_order_message ?? '') }}`
+                        }" class="border-t border-base-300">
+
+                            {{-- Label & Button --}}
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <div>
+                                    <label class="font-semibold text-base-content">Tipe Pemesanan:</label>
+                                    <span
+                                        class="ml-2 px-2 py-1 rounded bg-primary/10 text-primary font-medium capitalize"
+                                        x-text="type === 'regular' ? 'Reguler' : 'Pre-Order'"></span>
+                                </div>
+                                <button type="button"
+                                    class="bg-primary text-primary-content px-4 py-2 rounded shadow hover:brightness-110 transition"
+                                    @click="showModal = true">
+                                    <i class="fa fa-gear mr-1"></i> Atur Tipe Pemesanan
+                                </button>
+                            </div>
+
+                            {{-- Hidden fields --}}
+                            <input type="hidden" name="pre_order" :value="type === 'pre_order' ? 1 : 0">
+                            <input type="hidden" name="pre_order_date" :value="date">
+                            <input type="hidden" name="pre_order_message" :value="message">
+
+                            {{-- === MODAL === --}}
+                            <template x-if="showModal">
+                                <div
+                                    class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 animate-fade-in backdrop-blur-sm">
+                                    <div class="bg-base-100 rounded-2xl shadow-xl w-full max-w-lg p-6 relative">
+                                        <button type="button"
+                                            class="absolute top-3 right-3 text-gray-400 hover:text-black"
+                                            @click="showModal = false">
+                                            <i class="fa fa-times text-lg"></i>
+                                        </button>
+
+                                        <h3 class="text-xl font-bold mb-5 text-base-content">Atur Tipe Pemesanan</h3>
+
+                                        <div class="flex flex-col gap-5">
+                                            {{-- Pilihan Tipe --}}
+                                            <div class="flex items-center gap-6">
+                                                <label class="flex items-center gap-2 cursor-pointer">
+                                                    <input type="radio" value="regular" x-model="type"
+                                                        class="radio radio-primary">
+                                                    <span class="font-medium">Reguler</span>
+                                                </label>
+
+                                                <label class="flex items-center gap-2 cursor-pointer">
+                                                    <input type="radio" value="pre_order" x-model="type"
+                                                        class="radio radio-primary">
+                                                    <span class="font-medium">Pre-Order</span>
+                                                </label>
+                                            </div>
+
+                                            {{-- Form Pre-Order --}}
+                                            <template x-if="type === 'pre_order'">
+                                                <div class="flex flex-col gap-4 mt-3">
+                                                    <div>
+                                                        <label for="pre_order_date"
+                                                            class="font-semibold mb-1 block">Tanggal Kirim
+                                                            (Estimasi)</label>
+                                                        <input type="datetime-local" id="pre_order_date" x-model="date"
+                                                            class="my-input w-full bg-primary/5 rounded border border-base-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary cursor-pointer">
+                                                    </div>
+
+                                                    <div>
+                                                        <label for="pre_order_message"
+                                                            class="font-semibold mb-1 block">Pesan Pre-Order</label>
+                                                        <textarea id="pre_order_message" rows="3" x-model="message"
+                                                            placeholder="Contoh: Barang akan dikirim 7 hari setelah pemesanan."
+                                                            class="my-input w-full bg-primary/5 rounded border border-base-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none"></textarea>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+
+                                        {{-- Buttons --}}
+                                        <div class="mt-6 flex justify-end gap-2">
+                                            <button type="button" class="px-4 py-2 bg-base-200 rounded"
+                                                @click="showModal = false">Batal</button>
+                                            <button type="button"
+                                                class="px-4 py-2 bg-primary text-primary-content rounded"
+                                                @click="showModal = false">Simpan</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        @push('styles')
+                            <style>
+                                @keyframes fadeIn {
+                                    from {
+                                        opacity: 0;
+                                        transform: translateY(-10px);
+                                    }
+
+                                    to {
+                                        opacity: 1;
+                                        transform: translateY(0);
+                                    }
+                                }
+
+                                .animate-fade-in {
+                                    animation: fadeIn 0.25s ease-out;
+                                }
+                            </style>
+                        @endpush
+
                         <div class="form-content-without-variant">
                             <div class="flex flex-wrap gap-2">
                                 <div class="flex flex-col mb-4 flex-1">
@@ -63,7 +175,8 @@
                                     </div>
                                 </div>
                                 <template x-if="variantMode">
-                                    <div class="bg-primary/5 p-2 self-center mx-auto animate-pulse text-center rounded">
+                                    <div
+                                        class="bg-primary/5 p-2 self-center mx-auto animate-pulse text-center rounded">
                                         <i class="fa fa-circle-exclamation mr-1"></i>
                                         jika produk memiliki varian beberapa input dipindah ke masing-masing varian
                                     </div>
@@ -294,6 +407,16 @@
                         @push('scripts')
                             <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
                             <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    const radios = document.querySelectorAll('input[name="pre_order"]');
+                                    const section = document.getElementById('pre-order-section');
+                                    radios.forEach(r => {
+                                        r.addEventListener('change', () => {
+                                            if (r.value == '1') section.classList.remove('hidden');
+                                            else section.classList.add('hidden');
+                                        });
+                                    });
+                                });
                                 document.addEventListener('DOMContentLoaded', () => {
                                     const grid = document.getElementById('image-preview');
                                     const deletedPicturesInput = document.getElementById('deleted_pictures');
@@ -420,7 +543,8 @@
                                 </label>
                                 <input type="text" id="seo_title" name="seo_title"
                                     class="my-input bg-primary/5 rounded"
-                                    value="{{ old('seo_title', isset($data) ? $data->seo_title : '') }}" required autofocus>
+                                    value="{{ old('seo_title', isset($data) ? $data->seo_title : '') }}" required
+                                    autofocus>
                             </div>
                             <div class="flex flex-col mb-4 flex-1">
                                 <label for="seo_description" class="font-semibold mb-2">SEO Deskripsi</label>

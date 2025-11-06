@@ -135,8 +135,19 @@
                                 class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg border border-gray-200 dark:border-gray-700">
 
                             <div class="flex-1 block sm:hidden text-sm">
-                                <div class="font-semibold text-gray-900 dark:text-gray-50 text-base sm:text-lg"
-                                    x-text="orderDetail.product.name"></div>
+                                <div class="flex items-center gap-2">
+                                    <div class="font-semibold text-gray-900 dark:text-gray-50 text-base sm:text-lg"
+                                        x-text="orderDetail.product.name">
+                                    </div>
+
+                                    <template x-if="orderDetail.product.pre_order">
+                                        <span
+                                            class="text-green-600 border border-green-600 text-[11px] font-semibold px-2 py-[2px] rounded-full">
+                                            Pre-Order
+                                        </span>
+                                    </template>
+                                </div>
+
 
                                 <template
                                     x-if="orderDetail.product_variant && orderDetail.product_variant.product_detail.length > 0">
@@ -155,8 +166,19 @@
 
                         <div class="flex-1 text-sm w-full">
                             <div class="hidden sm:block">
-                                <div class="font-semibold text-gray-900 dark:text-gray-50 text-base sm:text-lg"
-                                    x-text="orderDetail.product.name"></div>
+                                <div class="flex items-center gap-2">
+                                    <div class="font-semibold text-gray-900 dark:text-gray-50 text-base sm:text-lg"
+                                        x-text="orderDetail.product.name">
+                                    </div>
+
+                                    <template x-if="orderDetail.product.pre_order">
+                                        <span
+                                            class="text-green-600 border border-green-600 text-[11px] font-semibold px-2 py-[2px] rounded-full">
+                                            Pre-Order
+                                        </span>
+                                    </template>
+                                </div>
+
 
                                 <template
                                     x-if="orderDetail.product_variant && orderDetail.product_variant.product_detail.length > 0">
