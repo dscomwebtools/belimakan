@@ -6,6 +6,40 @@
         {{ $product->name }}
     </h1>
 
+    @if ($product->pre_order && $product->pre_order_date)
+        <div class="divider">Pre-Order</div>
+
+        @php
+            $preOrderDate = \Carbon\Carbon::parse($product->pre_order_date);
+            $now = \Carbon\Carbon::now();
+            $isFuture = $preOrderDate->greaterThan($now);
+            $isToday = $preOrderDate->isToday();
+            $days = ceil($now->diffInHours($preOrderDate) / 24);
+        @endphp
+
+        <div class="bg-primary/5 border border-primary/20 rounded-lg p-4 text-sm md:text-base">
+            <div class="flex flex-col gap-1">
+                <span class="font-medium text-green-600">Estimasi pengiriman:</span>
+                <span class="font-semibold">
+                    {{ $preOrderDate->translatedFormat('d F Y') }}
+                    @if ($isFuture && !$isToday)
+                        <span class="text-gray-500">— {{ $days }} hari lagi</span>
+                    @elseif ($isToday)
+                        <span class="text-orange-500">— Dikirim hari ini</span>
+                    @else
+                        <span class="text-red-500">— Sudah lewat {{ abs($days) }} hari</span>
+                    @endif
+                </span>
+
+                @if ($product->pre_order_message)
+                    <p class="text-gray-700 mt-2 leading-relaxed">
+                        {!! nl2br(e($product->pre_order_message)) !!}
+                    </p>
+                @endif
+            </div>
+        </div>
+    @endif
+
     <div class="divider">
         Harga
     </div>

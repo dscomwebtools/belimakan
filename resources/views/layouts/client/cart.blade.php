@@ -51,14 +51,26 @@
                             </div>
                             <div class="flex flex-col gap-2">
                                 <div class="name flex-1">
-                                    <div x-text="item.product.name"></div>
-                                    <template x-if="item.product_variant">
-                                        <template x-for="detail in item.product_variant.product_detail">
-                                            <div class="text-xs"
-                                                x-text="`${detail.variant_value.value}`">
-                                            </div>
+                                    <div>
+                                        <!-- Nama produk -->
+                                        <div class="font-medium" x-text="item.product.name"></div>
+
+                                        <!-- Label pre-order -->
+                                        <template x-if="item.product.pre_order">
+                                            <span
+                                                class="inline-block mt-1 text-[10px] px-2 py-[2px] rounded-full border border-green-600 text-green-600 font-semibold">
+                                                Pre-Order
+                                            </span>
                                         </template>
-                                    </template>
+
+                                        <!-- Detail varian -->
+                                        <template x-if="item.product_variant">
+                                            <template x-for="detail in item.product_variant.product_detail"
+                                                :key="detail.id">
+                                                <div class="text-xs" x-text="`${detail.variant_value.value}`"></div>
+                                            </template>
+                                        </template>
+                                    </div>
                                 </div>
                                 <div class="price mr-2">
                                     <template x-if="item.product.promo && item.product.promo.discount > 0">
