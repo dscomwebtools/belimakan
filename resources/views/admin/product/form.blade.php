@@ -389,7 +389,7 @@
                                             </svg>
                                             <span class="text-xs">Upload</span>
                                         </label>
-                                        <input type="file" accept="image/*" name="product_pictures[]"
+                                        <input type="file" accept="image/*;" capture="camera" name="product_pictures[]"
                                             id="product_pictures{{ $i }}" class="hidden file-input" />
 
                                         @if ($i === 0)
