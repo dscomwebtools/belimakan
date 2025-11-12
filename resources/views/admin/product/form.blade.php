@@ -355,21 +355,13 @@
                         </div>
 
                         <div class="flex flex-col flex-1 mb-6">
-                            <label class="font-semibold mb-2 text-base-content">
-                                Foto Produk
-                            </label>
-
+                            <label class="font-semibold mb-2 text-base-content">Foto Produk</label>
                             <div id="image-preview"
                                 class="grid grid-cols-[12rem_repeat(6,8rem)] gap-3 overflow-x-auto pb-2">
                                 @for ($i = 0; $i < 7; $i++)
-                                    @php
-                                        $pic = $data->product_pictures[$i] ?? null;
-                                    @endphp
-                                    <div class="relative flex items-center justify-center border-2 border-dashed rounded-lg cursor-move
-                {{ $i === 0 ? 'w-48 h-48' : 'w-32 h-32' }}
-                bg-gray-50 hover:bg-gray-100 transition-all"
+                                    @php $pic = $data->product_pictures[$i] ?? null; @endphp
+                                    <div class="relative flex items-center justify-center border-2 border-dashed rounded-lg cursor-move {{ $i === 0 ? 'w-48 h-48' : 'w-32 h-32' }} bg-gray-50 hover:bg-gray-100 transition-all"
                                         data-index="{{ $i }}" data-id="{{ $pic->id ?? '' }}">
-
                                         @if ($pic)
                                             <img src="{{ Storage::url($pic->path) }}"
                                                 alt="Image {{ $i + 1 }}"
@@ -378,8 +370,6 @@
                                                 class="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 text-xs delete-picture w-[20px] h-[20px] flex items-center justify-center"
                                                 data-id="{{ $pic->id }}">✕</button>
                                         @endif
-
-                                        {{-- Input tetap ada walau ada preview --}}
                                         <label for="product_pictures{{ $i }}"
                                             class="flex flex-col items-center justify-center w-full h-full text-gray-400 cursor-pointer upload-label {{ $pic ? 'hidden' : '' }}">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 mb-1"
@@ -391,7 +381,6 @@
                                         </label>
                                         <input type="file" name="product_pictures[]"
                                             id="product_pictures{{ $i }}" class="hidden file-input" />
-
                                         @if ($i === 0)
                                             <span
                                                 class="thumb-label absolute bottom-1 left-1 bg-blue-600 text-white text-xs px-1 rounded">Thumbnail</span>
@@ -399,49 +388,60 @@
                                     </div>
                                 @endfor
                             </div>
-
                             <input type="hidden" name="deleted_pictures" id="deleted_pictures">
                             <input type="hidden" name="picture_positions" id="picture_positions">
+                        </div>
+
+                        <div id="crop-modal"
+                            class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                            <div class="bg-white rounded-lg p-4 w-[90%] max-w-lg flex flex-col gap-3">
+                                <h2 class="font-semibold text-lg mb-1">Crop Gambar</h2>
+                                <div class="relative bg-gray-100 flex items-center justify-center overflow-hidden">
+                                    <canvas id="crop-canvas"
+                                        class="max-w-full max-h-[60vh] cursor-crosshair bg-white"></canvas>
+                                </div>
+                                <div class="flex justify-between items-center mt-2">
+                                    <div class="flex gap-2 items-center">
+                                        <label class="text-sm">Rasio:</label>
+                                        <select id="aspect-ratio" class="border rounded px-2 py-1 text-sm">
+                                            <option value="1">1:1</option>
+                                            <option value="0.5">1:2</option>
+                                            <option value="2">2:1</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button id="cancel-crop" type="button"
+                                            class="px-3 py-1 bg-gray-300 rounded">Batal</button>
+                                        <button id="save-crop" type="button"
+                                            class="px-3 py-1 bg-blue-600 text-white rounded">Simpan</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         @push('scripts')
                             <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
                             <script>
-                                document.addEventListener('DOMContentLoaded', function() {
-                                    const radios = document.querySelectorAll('input[name="pre_order"]');
-                                    const section = document.getElementById('pre-order-section');
-                                    radios.forEach(r => {
-                                        r.addEventListener('change', () => {
-                                            if (r.value == '1') section.classList.remove('hidden');
-                                            else section.classList.add('hidden');
-                                        });
-                                    });
-                                });
                                 document.addEventListener('DOMContentLoaded', () => {
                                     const grid = document.getElementById('image-preview');
                                     const deletedPicturesInput = document.getElementById('deleted_pictures');
                                     const picturePositionsInput = document.getElementById('picture_positions');
                                     const deletedPictures = [];
 
-                                    // Enable drag sort
                                     new Sortable(grid, {
                                         animation: 150,
                                         onSort: updateOrder
                                     });
 
-                                    // DELETE PICTURE
                                     grid.addEventListener('click', e => {
                                         const btn = e.target.closest('.delete-picture');
                                         if (!btn) return;
                                         const parent = btn.closest('[data-index]');
                                         const id = btn.dataset.id;
-
                                         if (id) {
                                             deletedPictures.push(id);
                                             deletedPicturesInput.value = JSON.stringify(deletedPictures);
                                         }
-
-                                        // Reset slot ke upload mode (tidak hapus input)
                                         parent.querySelector('.preview-img')?.remove();
                                         btn.remove();
                                         parent.querySelector('.upload-label').classList.remove('hidden');
@@ -449,48 +449,19 @@
                                         updateOrder();
                                     });
 
-                                    // FILE UPLOAD PREVIEW
                                     grid.addEventListener('change', e => {
                                         const fileInput = e.target.closest('.file-input');
                                         if (!fileInput || !fileInput.files.length) return;
-
-                                        const parent = fileInput.closest('[data-index]');
-                                        const reader = new FileReader();
-                                        reader.onload = ev => {
-                                            let preview = parent.querySelector('.preview-img');
-                                            if (!preview) {
-                                                preview = document.createElement('img');
-                                                preview.className = 'object-cover w-full h-full rounded-lg preview-img';
-                                                parent.appendChild(preview);
-                                            }
-                                            preview.src = ev.target.result;
-
-                                            let delBtn = parent.querySelector('.delete-picture');
-                                            if (!delBtn) {
-                                                delBtn = document.createElement('button');
-                                                delBtn.type = 'button';
-                                                delBtn.className =
-                                                    'absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 text-xs delete-picture w-[20px] h-[20px] flex items-center justify-center';
-                                                delBtn.textContent = '✕';
-                                                parent.appendChild(delBtn);
-                                            }
-
-                                            parent.querySelector('.upload-label').classList.add('hidden');
-                                            updateOrder();
-                                        };
-                                        reader.readAsDataURL(fileInput.files[0]);
+                                        openCropModal(fileInput);
                                     });
 
-                                    // Update posisi gambar & label thumbnail
                                     function updateOrder() {
                                         const items = Array.from(grid.children);
                                         picturePositionsInput.value = JSON.stringify(items.map(i => i.dataset.id || null));
-
                                         items.forEach((div, i) => {
                                             div.classList.remove('w-48', 'h-48', 'ring-2', 'ring-blue-500');
                                             div.classList.add('w-32', 'h-32');
                                             div.querySelector('.thumb-label')?.remove();
-
                                             if (i === 0) {
                                                 div.classList.remove('w-32', 'h-32');
                                                 div.classList.add('w-48', 'h-48', 'ring-2', 'ring-blue-500');
@@ -502,11 +473,362 @@
                                             }
                                         });
                                     }
-
                                     updateOrder();
+
+                                    const cropModal = document.getElementById('crop-modal');
+                                    const saveBtn = document.getElementById('save-crop');
+                                    const cancelBtn = document.getElementById('cancel-crop');
+                                    const cropCanvas = document.getElementById('crop-canvas');
+                                    const ctx = cropCanvas.getContext('2d');
+                                    const aspectSelect = document.getElementById('aspect-ratio');
+
+                                    let img = new Image();
+                                    let fileInput = null;
+                                    let displayScale = 1;
+                                    let cropBox = {
+                                        x: 50,
+                                        y: 50,
+                                        w: 200,
+                                        h: 200
+                                    };
+                                    let isDragging = false,
+                                        isResizing = false,
+                                        activeHandle = null;
+                                    let startX = 0,
+                                        startY = 0;
+                                    let aspectRatio = parseFloat(aspectSelect.value) || 1;
+
+                                    const HANDLE = {
+                                        NONE: 0,
+                                        TL: 1,
+                                        TR: 2,
+                                        BL: 3,
+                                        BR: 4,
+                                    };
+                                    const handleSize = 16;
+
+                                    function openCropModal(input) {
+                                        fileInput = input;
+                                        const reader = new FileReader();
+                                        reader.onload = ev => {
+                                            img = new Image();
+                                            img.onload = () => {
+                                                const maxW = 600;
+                                                displayScale = img.width > maxW ? maxW / img.width : 1;
+                                                cropCanvas.width = Math.round(img.width * displayScale);
+                                                cropCanvas.height = Math.round(img.height * displayScale);
+                                                setCropBoxToFullWidth();
+                                                draw();
+                                                cropModal.classList.remove('hidden');
+                                            };
+                                            img.src = ev.target.result;
+                                        };
+                                        reader.readAsDataURL(input.files[0]);
+                                    }
+
+                                    function setCropBoxToFullWidth() {
+                                        aspectRatio = parseFloat(aspectSelect.value) || 1;
+                                        let w = cropCanvas.width;
+                                        let h = Math.round(w / aspectRatio);
+                                        if (h > cropCanvas.height) {
+                                            h = cropCanvas.height;
+                                            w = Math.round(h * aspectRatio);
+                                        }
+                                        cropBox.w = Math.max(1, w);
+                                        cropBox.h = Math.max(1, h);
+                                        cropBox.x = Math.round((cropCanvas.width - cropBox.w) / 2);
+                                        cropBox.y = Math.round((cropCanvas.height - cropBox.h) / 2);
+                                    }
+
+                                    // ====== REPLACE getTouchPoint ======
+                                    function getTouchPoint(e) {
+                                        const rect = cropCanvas.getBoundingClientRect();
+                                        const clientX = e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX;
+                                        const clientY = e.touches && e.touches[0] ? e.touches[0].clientY : e.clientY;
+
+                                        // map dari CSS pixels (rect.width/height) ke canvas pixels (cropCanvas.width/height)
+                                        const scaleX = cropCanvas.width / rect.width;
+                                        const scaleY = cropCanvas.height / rect.height;
+
+                                        const x = (clientX - rect.left) * scaleX;
+                                        const y = (clientY - rect.top) * scaleY;
+
+                                        return {
+                                            x: Math.max(0, Math.min(cropCanvas.width, x)),
+                                            y: Math.max(0, Math.min(cropCanvas.height, y))
+                                        };
+                                    }
+
+                                    // ====== REPLACE whichHandle ======
+                                    function whichHandle(x, y) {
+                                        const cx = cropBox.x,
+                                            cy = cropBox.y,
+                                            cw = cropBox.w,
+                                            ch = cropBox.h;
+                                        // toleransi hitbox lebih besar agar klik/drag lebih mudah
+                                        const s = handleSize / 2 + 6;
+
+                                        // corners only
+                                        const corners = [{
+                                                type: HANDLE.TL,
+                                                x: cx,
+                                                y: cy
+                                            },
+                                            {
+                                                type: HANDLE.TR,
+                                                x: cx + cw,
+                                                y: cy
+                                            },
+                                            {
+                                                type: HANDLE.BL,
+                                                x: cx,
+                                                y: cy + ch
+                                            },
+                                            {
+                                                type: HANDLE.BR,
+                                                x: cx + cw,
+                                                y: cy + ch
+                                            }
+                                        ];
+
+                                        for (const c of corners) {
+                                            if (x >= c.x - s && x <= c.x + s && y >= c.y - s && y <= c.y + s) {
+                                                return c.type;
+                                            }
+                                        }
+
+                                        // inside box -> drag
+                                        if (x > cx + s && x < cx + cw - s && y > cy + s && y < cy + ch - s) {
+                                            return HANDLE.NONE;
+                                        }
+
+                                        return null;
+                                    }
+
+                                    // ====== REPLACE draw ======
+                                    function draw() {
+                                        ctx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
+                                        ctx.drawImage(img, 0, 0, cropCanvas.width, cropCanvas.height);
+
+                                        // dim outside area (optional visual) - keep image visible but highlight box
+                                        ctx.save();
+                                        ctx.fillStyle = 'rgba(0,0,0,0.0)'; // keep transparent; can darken if desired
+                                        ctx.fillRect(0, 0, cropCanvas.width, cropCanvas.height);
+                                        ctx.restore();
+
+                                        // crop border
+                                        ctx.beginPath();
+                                        ctx.lineWidth = 2;
+                                        ctx.strokeStyle = 'dodgerblue';
+                                        ctx.rect(cropBox.x, cropBox.y, cropBox.w, cropBox.h);
+                                        ctx.stroke();
+                                        ctx.closePath();
+
+                                        // draw only 4 corner handles (centered on corner)
+                                        const hs = handleSize;
+                                        const half = hs / 2;
+                                        const points = [
+                                            [cropBox.x, cropBox.y], // TL
+                                            [cropBox.x + cropBox.w, cropBox.y], // TR
+                                            [cropBox.x, cropBox.y + cropBox.h], // BL
+                                            [cropBox.x + cropBox.w, cropBox.y + cropBox.h] // BR
+                                        ];
+                                        ctx.fillStyle = 'dodgerblue';
+                                        points.forEach(p => {
+                                            ctx.fillRect(Math.round(p[0] - half), Math.round(p[1] - half), hs, hs);
+                                        });
+                                    }
+
+                                    // ====== REPLACE startAction ======
+                                    function startAction(e) {
+                                        const p = getTouchPoint(e);
+                                        const h = whichHandle(p.x, p.y);
+                                        if (h === null) return; // klik di luar area crop -> abaikan
+
+                                        // set posisi awal sesuai koordinat canvas
+                                        startX = p.x;
+                                        startY = p.y;
+                                        activeHandle = h;
+
+                                        if (h === HANDLE.NONE) {
+                                            isDragging = true;
+                                            isResizing = false;
+                                        } else {
+                                            isResizing = true;
+                                            isDragging = false;
+                                        }
+                                    }
+
+                                    // ====== REPLACE moveAction ======
+                                    function moveAction(e) {
+                                        // hanya proses kalau sedang drag/resize
+                                        if (!isDragging && !isResizing) return;
+
+                                        const p = getTouchPoint(e);
+                                        if (e.touches) e.preventDefault();
+
+                                        // delta berdasarkan canvas coordinates
+                                        const dx = p.x - startX;
+                                        const dy = p.y - startY;
+
+                                        const minSize = Math.max(24, Math.round(Math.min(cropCanvas.width, cropCanvas.height) * 0.06));
+
+                                        if (isDragging) {
+                                            cropBox.x = Math.max(0, Math.min(cropCanvas.width - cropBox.w, cropBox.x + dx));
+                                            cropBox.y = Math.max(0, Math.min(cropCanvas.height - cropBox.h, cropBox.y + dy));
+                                        } else if (isResizing && activeHandle) {
+                                            // gunakan aspect ratio seperti sebelumnya, tapi clamped ke dalam canvas
+                                            const a = aspectRatio;
+                                            let nx = cropBox.x,
+                                                ny = cropBox.y,
+                                                nw = cropBox.w,
+                                                nh = cropBox.h;
+
+                                            const applyWH = (w, h) => {
+                                                // jaga aspect
+                                                if (w / h > a) {
+                                                    w = Math.round(h * a);
+                                                } else {
+                                                    h = Math.round(w / a);
+                                                }
+                                                if (w < minSize) {
+                                                    w = minSize;
+                                                    h = Math.round(w / a);
+                                                }
+                                                if (h < minSize) {
+                                                    h = minSize;
+                                                    w = Math.round(h * a);
+                                                }
+                                                return [w, h];
+                                            };
+
+                                            switch (activeHandle) {
+                                                case HANDLE.BR:
+                                                    nw = cropBox.w + dx;
+                                                    nh = Math.round(nw / a);
+                                                    [nw, nh] = applyWH(nw, nh);
+                                                    break;
+                                                case HANDLE.TR:
+                                                    nw = cropBox.w + dx;
+                                                    nh = Math.round(nw / a);
+                                                    [nw, nh] = applyWH(nw, nh);
+                                                    ny = cropBox.y + (cropBox.h - nh);
+                                                    break;
+                                                case HANDLE.TL:
+                                                    nw = cropBox.w - dx;
+                                                    nh = Math.round(nw / a);
+                                                    [nw, nh] = applyWH(nw, nh);
+                                                    nx = cropBox.x + (cropBox.w - nw);
+                                                    ny = cropBox.y + (cropBox.h - nh);
+                                                    break;
+                                                case HANDLE.BL:
+                                                    nw = cropBox.w - dx;
+                                                    nh = Math.round(nw / a);
+                                                    [nw, nh] = applyWH(nw, nh);
+                                                    nx = cropBox.x + (cropBox.w - nw);
+                                                    break;
+                                            }
+
+                                            // clamp posisi & ukuran supaya tetap di canvas
+                                            if (nx < 0) nx = 0;
+                                            if (ny < 0) ny = 0;
+                                            if (nx + nw > cropCanvas.width) nx = cropCanvas.width - nw;
+                                            if (ny + nh > cropCanvas.height) ny = cropCanvas.height - nh;
+
+                                            cropBox.x = Math.round(nx);
+                                            cropBox.y = Math.round(ny);
+                                            cropBox.w = Math.round(nw);
+                                            cropBox.h = Math.round(nh);
+                                        }
+
+                                        // update start point agar perubahan berikutnya relatif
+                                        startX = p.x;
+                                        startY = p.y;
+
+                                        draw();
+                                    }
+
+                                    function endAction() {
+                                        isDragging = false;
+                                        isResizing = false;
+                                        activeHandle = null;
+                                        cropCanvas.style.cursor = 'default';
+                                    }
+
+                                    cropCanvas.addEventListener('mousedown', startAction);
+                                    cropCanvas.addEventListener('mousemove', moveAction);
+                                    cropCanvas.addEventListener('mouseup', endAction);
+                                    cropCanvas.addEventListener('mouseleave', endAction);
+                                    cropCanvas.addEventListener('touchstart', e => startAction(e), {
+                                        passive: false
+                                    });
+                                    cropCanvas.addEventListener('touchmove', e => moveAction(e), {
+                                        passive: false
+                                    });
+                                    cropCanvas.addEventListener('touchend', endAction);
+                                    cropCanvas.addEventListener('touchcancel', endAction);
+
+                                    aspectSelect.addEventListener('change', () => {
+                                        aspectRatio = parseFloat(aspectSelect.value) || 1;
+                                        setCropBoxToFullWidth();
+                                        draw();
+                                    });
+
+                                    saveBtn.addEventListener('click', e => {
+                                        e.preventDefault();
+                                        const temp = document.createElement('canvas');
+                                        const sx = cropBox.x / displayScale;
+                                        const sy = cropBox.y / displayScale;
+                                        const sw = cropBox.w / displayScale;
+                                        const sh = cropBox.h / displayScale;
+                                        temp.width = Math.round(sw);
+                                        temp.height = Math.round(sh);
+                                        const tctx = temp.getContext('2d');
+                                        tctx.fillStyle = "white";
+                                        tctx.fillRect(0, 0, temp.width, temp.height);
+                                        tctx.drawImage(img, sx, sy, sw, sh, 0, 0, temp.width, temp.height);
+                                        temp.toBlob(blob => {
+                                            const file = new File([blob], fileInput.files[0].name, {
+                                                type: 'image/jpeg'
+                                            });
+                                            const dt = new DataTransfer();
+                                            dt.items.add(file);
+                                            fileInput.files = dt.files;
+                                            const reader = new FileReader();
+                                            reader.onload = ev => {
+                                                const parent = fileInput.closest('[data-index]');
+                                                let preview = parent.querySelector('.preview-img');
+                                                if (!preview) {
+                                                    preview = document.createElement('img');
+                                                    preview.className =
+                                                        'object-cover w-full h-full rounded-lg preview-img';
+                                                    parent.appendChild(preview);
+                                                }
+                                                preview.src = ev.target.result;
+                                                parent.querySelector('.upload-label').classList.add('hidden');
+                                                if (!parent.querySelector('.delete-picture')) {
+                                                    const delBtn = document.createElement('button');
+                                                    delBtn.type = 'button';
+                                                    delBtn.className =
+                                                        'absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 text-xs delete-picture w-[20px] h-[20px] flex items-center justify-center';
+                                                    delBtn.textContent = '✕';
+                                                    delBtn.dataset.id = '';
+                                                    parent.appendChild(delBtn);
+                                                }
+                                            };
+                                            reader.readAsDataURL(file);
+                                            cropModal.classList.add('hidden');
+                                        }, 'image/jpeg', 0.95);
+                                    });
+
+                                    cancelBtn.addEventListener('click', () => {
+                                        cropModal.classList.add('hidden');
+                                        fileInput.value = '';
+                                    });
                                 });
                             </script>
                         @endpush
+
 
                         {{-- PRODUCT DETAILS --}}
                         <div id="detail-product-container" class="mt-2 flex flex-col gap-4">

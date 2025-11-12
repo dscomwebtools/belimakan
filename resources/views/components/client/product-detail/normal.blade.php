@@ -7,7 +7,7 @@
     </h1>
 
     @if ($product->pre_order && $product->pre_order_date)
-        <div class="divider">Pre-Order</div>
+        <div class="divider text-red-500">Pre-Order</div>
 
         @php
             $preOrderDate = \Carbon\Carbon::parse($product->pre_order_date);
@@ -17,7 +17,7 @@
             $days = ceil($now->diffInHours($preOrderDate) / 24);
         @endphp
 
-        <div class="bg-primary/5 border border-primary/20 rounded-lg p-4 text-sm md:text-base">
+        <div class="bg-primary/5 border-2 border-primary/20 rounded-lg p-4 text-sm md:text-base">
             <div class="flex flex-col gap-1">
                 <span class="font-medium text-green-600">Estimasi pengiriman:</span>
                 <span class="font-semibold">
