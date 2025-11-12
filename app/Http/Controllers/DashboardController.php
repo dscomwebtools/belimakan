@@ -6,8 +6,10 @@ use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Models\User;
+use App\Models\Visitor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Jenssegers\Agent\Agent;
 
 class DashboardController extends Controller
 {
@@ -18,6 +20,17 @@ class DashboardController extends Controller
             'members' => User::whereNot('level_id', 1)->count(),
             'orders_this_year' => Order::whereYear('created_at', now()->year)->count(),
             'orders_today' => Order::whereDate('created_at', now())->count(),
+            'visitor_by_agent' => Visitor::select('user_agent', 'is_bot', DB::raw('SUM(count) as total'))
+                ->groupBy('user_agent', 'is_bot')
+                ->orderByDesc('total')
+                ->get()
+                ->map(function ($item) {
+                    $agent = new Agent();
+                    $agent->setUserAgent($item->user_agent);
+                    $item->browser = $agent->browser() ?? 'Tidak Diketahui';
+                    $item->platform = $agent->platform() ?? '-';
+                    return $item;
+                }),
             'order_products_this_year' => OrderDetail::whereYear('created_at', now()->year)->count(),
             'order_products_today' => OrderDetail::whereDate('created_at', now())->count(),
         ];
