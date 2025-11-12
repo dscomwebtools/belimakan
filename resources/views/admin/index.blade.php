@@ -5,7 +5,7 @@
                 <h2 class="card-title">Produk</h2>
                 <p>Jumlah total produk</p>
                 <div class="card-actions justify-end">
-                    <button class="btn btn-circle">{{ $data["products"] }}</button>
+                    <button class="btn btn-circle">{{ $data['products'] }}</button>
                 </div>
             </div>
         </div>
@@ -14,7 +14,7 @@
                 <h2 class="card-title">Member</h2>
                 <p>Jumlah total member</p>
                 <div class="card-actions justify-end">
-                    <button class="btn btn-circle">{{$data["members"]}}</button>
+                    <button class="btn btn-circle">{{ $data['members'] }}</button>
                 </div>
             </div>
         </div>
@@ -23,7 +23,7 @@
                 <h2 class="card-title">Order Hari ini</h2>
                 <p>Jumlah order hari ini</p>
                 <div class="card-actions justify-end">
-                    <button class="btn btn-circle">{{$data["orders_today"]}}</button>
+                    <button class="btn btn-circle">{{ $data['orders_today'] }}</button>
                 </div>
             </div>
         </div>
@@ -32,7 +32,7 @@
                 <h2 class="card-title">Order Tahun ini</h2>
                 <p>Jumlah order tahun ini</p>
                 <div class="card-actions justify-end">
-                    <button class="btn btn-circle">{{$data["orders_this_year"]}}</button>
+                    <button class="btn btn-circle">{{ $data['orders_this_year'] }}</button>
                 </div>
             </div>
         </div>
@@ -46,48 +46,78 @@
         </div>
     </div>
 
+    <div class="card bg-base-100 shadow-md border border-base-200 m-8">
+        <div class="card-body">
+            <h2 class="card-title text-gray-700 mb-2">🧭 Akses Berdasarkan Perangkat</h2>
+            <table class="table w-full">
+                <thead>
+                    <tr class="text-gray-600">
+                        <th>Browser / OS</th>
+                        <th>Bot?</th>
+                        <th class="text-right">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($data['visitor_by_agent'] as $v)
+                        <tr>
+                            <td>{{ $v->browser }} ({{ $v->platform }})</td>
+                            <td>
+                                @if ($v->is_bot)
+                                    <span class="badge bg-red-500 text-white">Bot</span>
+                                @else
+                                    <span class="badge bg-green-500 text-white">User</span>
+                                @endif
+                            </td>
+                            <td class="text-right">{{ $v->total }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script>
-        const ctx = document.getElementById('orders');
-        new Chart(ctx, {
-            type: 'bar', // atau 'line', sesuai dengan jenis chart yang Anda inginkan
-            data: {
-                labels: @json($chartData['months']), // Label bulan dari Januari hingga Desember
-                datasets: [{
-                    label: 'Data Order tahun ' + new Date().getFullYear(),
-                    data: @json($chartData['totals']), // Data jumlah pesanan per bulan
-                    backgroundColor: 'rgba(75, 192, 75, 0.2)', // Hijau
-                    borderColor: 'rgba(75, 192, 75, 1)', // Hijau
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1, // Kenaikan sumbu Y menggunakan bilangan bulat
-                            callback: function(value) {
-                                return Number.isInteger(value) ? value : ''; // Hanya menampilkan angka bulat
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+        <script>
+            const ctx = document.getElementById('orders');
+            new Chart(ctx, {
+                type: 'bar', // atau 'line', sesuai dengan jenis chart yang Anda inginkan
+                data: {
+                    labels: @json($chartData['months']), // Label bulan dari Januari hingga Desember
+                    datasets: [{
+                        label: 'Data Order tahun ' + new Date().getFullYear(),
+                        data: @json($chartData['totals']), // Data jumlah pesanan per bulan
+                        backgroundColor: 'rgba(75, 192, 75, 0.2)', // Hijau
+                        borderColor: 'rgba(75, 192, 75, 1)', // Hijau
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1, // Kenaikan sumbu Y menggunakan bilangan bulat
+                                callback: function(value) {
+                                    return Number.isInteger(value) ? value : ''; // Hanya menampilkan angka bulat
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        datalabels: {
+                            color: '#000', // Warna teks (hitam)
+                            anchor: 'end', // Penempatan label
+                            align: 'start',
+                            formatter: function(value) {
+                                return value > 0 ? value : ''; // Jangan tampilkan jika nilainya 0
                             }
                         }
                     }
                 },
-                plugins: {
-                    datalabels: {
-                        color: '#000', // Warna teks (hitam)
-                        anchor: 'end', // Penempatan label
-                        align: 'start',
-                        formatter: function(value) {
-                            return value > 0 ? value : ''; // Jangan tampilkan jika nilainya 0
-                        }
-                    }
-                }
-            },
-            plugins: [ChartDataLabels] // Pastikan plugin ChartDataLabels digunakan
-        });
-    </script>
+                plugins: [ChartDataLabels] // Pastikan plugin ChartDataLabels digunakan
+            });
+        </script>
     @endpush
 </x-app-layout>
