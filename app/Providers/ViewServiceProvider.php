@@ -42,11 +42,10 @@ class ViewServiceProvider extends ServiceProvider
 
         View::composer('layouts.client.footer', function ($view) {
             $sosmed = Sosmed::where('is_footer', true)->get();
-            $visitorCount = Visitor::sum('count');
             $wa = User::where('level_id', 1)
                 ->where('is_sales', 1)
                 ->get();
-            $view->with('sosmed', $sosmed)->with('visitorCount', $visitorCount)->with('wa', $wa);
+            $view->with('sosmed', $sosmed)->with('wa', $wa);
         });
 
         View::composer('components.client.features', function ($view) {

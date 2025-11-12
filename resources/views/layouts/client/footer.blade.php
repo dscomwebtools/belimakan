@@ -25,17 +25,6 @@
         <div class="flex flex-col">
             <p>Toko Online</p>
             <strong>DSCOMPUTER SOLUTION</strong>
-
-            {{-- Visitor Counter --}}
-            <div class="mt-2 flex items-center space-x-1 text-sm">
-                <span class="text-xs text-white/80 mr-2">Pengunjung:</span>
-                <div class="flex bg-black/40 px-2 py-1 rounded-md shadow-inner tracking-widest font-mono">
-                    @foreach (str_split(str_pad($visitorCount, 4, '0', STR_PAD_LEFT)) as $digit)
-                        <span
-                            class="bg-green-600 text-white rounded-sm px-1 mx-0.5 shadow-md">{{ $digit }}</span>
-                    @endforeach
-                </div>
-            </div>
         </div>
     </aside>
 
