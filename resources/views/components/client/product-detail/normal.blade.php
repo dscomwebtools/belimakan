@@ -124,24 +124,35 @@
     @endif
 
 
-    <div>Sisa stok : <span x-ref="stock">{{ $product->product_variant->first()->stock }}</span></div>
-    {{-- <input type="text" class="input w-11/12 my-2" placeholder="Catatan"> --}}
+    <div>
+        Sisa stok :
+        <span x-ref="stock">{{ $product->product_variant->first()->stock }}</span>
+    </div>
+
+    {{-- Subtotal hanya tampil jika bukan call_to_buy --}}
     @auth
-        <div class="mb-2" x-ref="subtotal"></div>
+        @if (!($product->call_to_buy ?? false))
+            <div class="mb-2" x-ref="subtotal"></div>
+        @endif
     @endauth
+
     <div class="flex justify-center gap-3 mt-4">
+        {{-- Tombol share tetap tampil --}}
         <div class="tooltip" data-tip="Bagikan">
             <button class="btn btn-ghost btn-sm text-lg" x-data
-                @click.prevent="$dispatch('open-modal', 'share-product')"><i class="fa fa-share-nodes"></i>
+                @click.prevent="$dispatch('open-modal', 'share-product')">
+                <i class="fa fa-share-nodes"></i>
             </button>
         </div>
-        {{-- <button class="btn btn-ghost btn-sm text-lg text-secondary"><i
-                class="fa fa-heart-circle-plus"></i></button> --}}
+
+        {{-- Tombol keranjang hanya jika bukan Call To Buy --}}
         @can('is-member')
-            <button class="btn btn-primary btn-sm btn-circle"
-                @click="$store.cart.addToCart('{{ $product->id }}', $refs.variant_id_selected ? $refs.variant_id_selected.value : {{ $product->product_variant[0]->id }}, $refs.quantity.value)">
-                <i class="fa fa-cart-shopping"></i>
-            </button>
+            @if (!($product->call_to_buy ?? false))
+                <button class="btn btn-primary btn-sm btn-circle"
+                    @click="$store.cart.addToCart('{{ $product->id }}', $refs.variant_id_selected ? $refs.variant_id_selected.value : {{ $product->product_variant[0]->id }}, $refs.quantity.value)">
+                    <i class="fa fa-cart-shopping"></i>
+                </button>
+            @endif
         @endcan
     </div>
 </div>

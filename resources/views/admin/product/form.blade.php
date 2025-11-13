@@ -33,7 +33,7 @@
 
                         {{-- === PRE-ORDER MODAL SYSTEM === --}}
                         <div x-data="{
-                            type: '{{ old('pre_order', $data->pre_order ?? false) ? 'pre_order' : 'regular' }}',
+                            type: '{{ old('type', $data->call_to_buy ?? false ? 'call_to_buy' : ($data->pre_order ?? false ? 'pre_order' : 'regular')) }}',
                             showModal: false,
                             date: '{{ old('pre_order_date', $data->pre_order_date ?? '') }}',
                             message: `{{ old('pre_order_message', $data->pre_order_message ?? '') }}`
@@ -45,7 +45,8 @@
                                     <label class="font-semibold text-base-content">Tipe Pemesanan:</label>
                                     <span
                                         class="ml-2 px-2 py-1 rounded bg-primary/10 text-primary font-medium capitalize"
-                                        x-text="type === 'regular' ? 'Reguler' : 'Pre-Order'"></span>
+                                        x-text="type === 'regular' ? 'Reguler' : (type === 'pre_order' ? 'Pre-Order' : 'Call To Buy')">
+                                    </span>
                                 </div>
                                 <button type="button"
                                     class="bg-primary text-primary-content px-4 py-2 rounded shadow hover:brightness-110 transition"
@@ -54,10 +55,11 @@
                                 </button>
                             </div>
 
-                            {{-- Hidden fields --}}
+                            {{-- Hidden fields (untuk dikirim ke backend) --}}
                             <input type="hidden" name="pre_order" :value="type === 'pre_order' ? 1 : 0">
                             <input type="hidden" name="pre_order_date" :value="date">
                             <input type="hidden" name="pre_order_message" :value="message">
+                            <input type="hidden" name="call_to_buy" :value="type === 'call_to_buy' ? 1 : 0">
 
                             {{-- === MODAL === --}}
                             <template x-if="showModal">
@@ -86,26 +88,46 @@
                                                         class="radio radio-primary">
                                                     <span class="font-medium">Pre-Order</span>
                                                 </label>
+
+                                                <label class="flex items-center gap-2 cursor-pointer">
+                                                    <input type="radio" value="call_to_buy" x-model="type"
+                                                        class="radio radio-primary">
+                                                    <span class="font-medium">Call To Buy</span>
+                                                </label>
                                             </div>
 
                                             {{-- Form Pre-Order --}}
                                             <template x-if="type === 'pre_order'">
                                                 <div class="flex flex-col gap-4 mt-3">
                                                     <div>
-                                                        <label for="pre_order_date"
-                                                            class="font-semibold mb-1 block">Tanggal Kirim
-                                                            (Estimasi)</label>
+                                                        <label for="pre_order_date" class="font-semibold mb-1 block">
+                                                            Tanggal Kirim (Estimasi)
+                                                        </label>
                                                         <input type="datetime-local" id="pre_order_date" x-model="date"
-                                                            class="my-input w-full bg-primary/5 rounded border border-base-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary cursor-pointer">
+                                                            class="my-input w-full bg-primary/5 rounded border border-base-300 px-3 py-2
+                                        focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary cursor-pointer">
                                                     </div>
 
                                                     <div>
-                                                        <label for="pre_order_message"
-                                                            class="font-semibold mb-1 block">Pesan Pre-Order</label>
+                                                        <label for="pre_order_message" class="font-semibold mb-1 block">
+                                                            Pesan Pre-Order
+                                                        </label>
                                                         <textarea id="pre_order_message" rows="3" x-model="message"
                                                             placeholder="Contoh: Barang akan dikirim 7 hari setelah pemesanan."
-                                                            class="my-input w-full bg-primary/5 rounded border border-base-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none"></textarea>
+                                                            class="my-input w-full bg-primary/5 rounded border border-base-300 px-3 py-2
+                                        focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none"></textarea>
                                                     </div>
+                                                </div>
+                                            </template>
+
+                                            {{-- Info Call To Buy --}}
+                                            <template x-if="type === 'call_to_buy'">
+                                                <div class="mt-3 bg-primary/5 p-3 rounded border border-base-300">
+                                                    <p class="text-sm text-gray-700">
+                                                        Mode <strong>Call To Buy</strong> aktif — pelanggan akan
+                                                        diarahkan
+                                                        untuk menghubungi penjual sebelum membeli produk ini.
+                                                    </p>
                                                 </div>
                                             </template>
                                         </div>
@@ -163,8 +185,8 @@
 
                             <div class="flex flex-col sm:flex-row gap-2 my-2">
                                 <div class="flex flex-col mb-4">
-                                    <label for="discount" class="font-semibold mb-2">Discount <div class="tooltip ml-1"
-                                            data-tip="Promo akan aktif jika ada diskon"><i
+                                    <label for="discount" class="font-semibold mb-2">Discount <div
+                                            class="tooltip ml-1" data-tip="Promo akan aktif jika ada diskon"><i
                                                 class="fa fa-circle-exclamation animate-pulse"></i></div></label>
                                     <div class="flex">
                                         <input type="number" id="discount" name="discount" min="0"

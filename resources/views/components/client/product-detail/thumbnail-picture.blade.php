@@ -8,17 +8,37 @@
     @open-fullscreen.window="openFullscreen($event.detail)" @keydown.escape.window="close()"
     @variant-changed.window="selectedVariantId = $event.detail; onVariantChanged()">
 
-    {{-- Main Preview (sekarang menampilkan 1 gambar utama yang reaktif) --}}
-    <div class="my-4">
-        <div x-data="imageZoom(activeMainUrl)" class="relative overflow-hidden w-full cursor-zoom-in h-[250px] md:h-[350px]"
-            @mousemove="move($event)" @mouseenter="show = true" @mouseleave="show = false"
-            @click="$dispatch('open-fullscreen', activeMainUrl)">
-            <img loading="lazy" :src="activeMainUrl" class="object-contain w-full h-full transition-transform duration-200"
-                :style="show ?
-                    `transform: scale(${zoom}); transform-origin: ${originX}% ${originY}%;` :
-                    'transform: scale(1);'">
+    <figure class="relative">
+        {{-- Main Preview (sekarang menampilkan 1 gambar utama yang reaktif) --}}
+        <div class="my-4">
+            <div x-data="imageZoom(activeMainUrl)" class="relative overflow-hidden w-full cursor-zoom-in h-[250px] md:h-[350px]"
+                @mousemove="move($event)" @mouseenter="show = true" @mouseleave="show = false"
+                @click="$dispatch('open-fullscreen', activeMainUrl)">
+                <img loading="lazy" :src="activeMainUrl"
+                    class="object-contain w-full h-full transition-transform duration-200"
+                    :style="show ?
+                        `transform: scale(${zoom}); transform-origin: ${originX}% ${originY}%;` :
+                        'transform: scale(1);'">
+            </div>
         </div>
-    </div>
+
+        {{-- Label tipe produk --}}
+        @if ($product->call_to_buy)
+            <span
+                class="absolute top-[0px] right-[0px] bg-gradient-to-r from-emerald-500 to-green-600 text-white text-sm font-semibold px-3 py-1 rounded-full shadow-md">
+                Call To Buy
+            </span>
+        @elseif ($product->pre_order)
+            <span
+                class="absolute top-[0px] right-[0px] bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-semibold px-3 py-1 rounded-full shadow-md">
+                Pre-Order
+            </span>
+        @endif
+
+        @if (isset($product->promo) && $product->promo->active)
+            <x-client.logo-promo />
+        @endif
+    </figure>
 
     {{-- Thumbnail (semua gambar tampil, klik akan ganti activeMainUrl) --}}
     <div class="swiper productSwiper mt-2">
@@ -44,8 +64,8 @@
                 aria-label="Close">&times;</button>
 
             <div class="flex-1 flex items-center justify-center">
-                <img loading="lazy" :src="imgSrc" class="max-h-[60vh] md:max-h-[85vh] object-contain rounded-xl"
-                    alt="Product image">
+                <img loading="lazy" :src="imgSrc"
+                    class="max-h-[60vh] md:max-h-[85vh] object-contain rounded-xl" alt="Product image">
             </div>
 
             <div

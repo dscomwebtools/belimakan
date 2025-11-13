@@ -20,14 +20,28 @@
 }" x-init="selectedVariant = variants.length > 0 ? variants[0].id : null">
     <figure class="sm:px-5 sm:pt-5 relative">
         <a href="{{ route('client.product', $product['slug']) }}">
-            {{-- <img :src="filteredPicture()" alt="{{ $product->name }}" class="rounded-xl" /> --}}
             @if ($product->product_pictures->isNotEmpty())
                 <img src="{{ Storage::url($product->product_pictures->first()->path) }}" alt="{{ $product->name }}"
                     class="rounded-xl" />
             @else
                 <img src="{{ '/assets/images/image-not-found.webp' }}" alt="{{ $product->name }}" class="rounded-xl" />
             @endif
+
+            {{-- Label tipe produk --}}
+            @if ($product->call_to_buy)
+                <span
+                    class="absolute top-[0px] right-[0px] bg-gradient-to-r from-emerald-500 to-green-600 text-white text-sm font-semibold px-3 py-1 rounded-full shadow-md">
+                    Call To Buy
+                </span>
+            @elseif ($product->pre_order)
+                <span
+                    class="absolute top-[0px] right-[0px] bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-semibold px-3 py-1 rounded-full shadow-md">
+                    Pre-Order
+                </span>
+            @endif
         </a>
+
+        {{-- Logo promo/lelang --}}
         @if (isset($product->auction) && $product->auction->active)
             <x-client.logo-lelang :endtime="$product->auction->endtime" />
         @elseif (isset($product->promo) && $product->promo->active)

@@ -61,6 +61,7 @@ class UpdateProductRequest extends FormRequest
             'pre_order' => 'required|boolean',
             'pre_order_date' => 'nullable|required_if:pre_order,1|date',
             'pre_order_message' => 'nullable|required_if:pre_order,1|string|max:1000',
+            'call_to_buy' => 'required|boolean',
         ];
     }
 
