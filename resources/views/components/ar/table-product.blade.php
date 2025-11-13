@@ -374,12 +374,20 @@
 
                             {{-- Kolom promo --}}
                             @if ($k === 'promo')
-                                <td>
-                                    @if ($cell == 1)
-                                        <i class="fa fa-toggle-on text-[#086B35]"></i>
-                                    @else
-                                        <i class="fa fa-toggle-off text-gray-800"></i>
-                                    @endif
+                                <td class="text-left py-2 px-4">
+                                    <div
+                                        class="flex items-center space-x-2 p-1 rounded transition-colors duration-150">
+                                        <button type="button"
+                                            class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300
+                    {{ $cell ? 'bg-green-600' : 'bg-gray-300' }}"
+                                            disabled>
+                                            <span class="sr-only">Promo Status</span>
+                                            <span
+                                                class="inline-block h-4 w-4 transform bg-white rounded-full transition-transform duration-300
+                    {{ $cell ? 'translate-x-6' : 'translate-x-1' }}">
+                                            </span>
+                                        </button>
+                                    </div>
                                 </td>
                                 @continue
                             @endif

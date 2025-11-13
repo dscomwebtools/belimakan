@@ -141,6 +141,7 @@ class ProductController extends Controller
         $new_product->pre_order = $validated['pre_order'];
         $new_product->pre_order_date = $validated['pre_order_date'] ?? null;
         $new_product->pre_order_message = $validated['pre_order_message'] ?? null;
+        $new_product->call_to_buy = $validated['call_to_buy'];
 
         DB::transaction(function () use ($new_product, $validated) {
             $new_product->save();
@@ -437,7 +438,7 @@ class ProductController extends Controller
         $product->pre_order = $validated['pre_order'];
         $product->pre_order_date = $validated['pre_order_date'] ?? null;
         $product->pre_order_message = $validated['pre_order_message'] ?? null;
-
+        $product->call_to_buy = $validated['call_to_buy'];
 
         DB::transaction(function () use ($product, $validated) {
             $product->save();
