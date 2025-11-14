@@ -111,19 +111,50 @@
     @auth
         <div class="mb-2" x-ref="subtotal"></div>
     @endauth
-    <div class="flex justify-center gap-3 mt-4">
-        <div class="tooltip" data-tip="Bagikan">
-            <button class="btn btn-ghost btn-sm text-lg" x-data
-                @click.prevent="$dispatch('open-modal', 'share-product')"><i class="fa fa-share-nodes"></i>
-            </button>
-        </div>
-        {{-- <button class="btn btn-ghost btn-sm text-lg text-secondary"><i
-                class="fa fa-heart-circle-plus"></i></button> --}}
+    <div class="flex flex-col gap-3 mt-4">
+
+        {{-- Tombol Share --}}
+        <button
+            class="h-12 w-full flex items-center justify-center gap-2 
+               bg-gray-100 hover:bg-gray-200 text-gray-700
+               rounded-xl shadow-sm transition font-semibold active:scale-[0.98]"
+            x-data @click.prevent="$dispatch('open-modal', 'share-product')">
+            <i class="fa fa-share-nodes text-base"></i>
+            <span>Bagikan Produk</span>
+        </button>
+
+        @php
+            use Carbon\Carbon;
+            $now = Carbon::now('Asia/Jakarta');
+            $hour = $now->hour;
+            $isWorkingHour = $hour >= 9 && $hour < 17;
+            $waNumber = $isWorkingHour ? '6281234567890' : '6281383655055';
+        @endphp
+
         @can('is-member')
-            <button class="btn btn-primary btn-sm btn-circle"
-                @click="$store.cart.addToCart('{{ $product->id }}', $refs.variant_id_selected ? $refs.variant_id_selected.value : {{ $product->product_variant[0]->id }}, $refs.quantity.value)">
-                <i class="fa fa-cart-shopping"></i>
-            </button>
+            {{-- Jika bukan Call To Buy → Keranjang --}}
+            @if (!($product->call_to_buy ?? false))
+                <button
+                    class="h-12 w-full flex items-center justify-center gap-2 
+                       bg-primary hover:bg-primary/90 text-white
+                       rounded-xl shadow transition font-semibold active:scale-[0.98]"
+                    @click="$store.cart.addToCart('{{ $product->id }}', $refs.variant_id_selected ? $refs.variant_id_selected.value : {{ $product->product_variant[0]->id }}, $refs.quantity.value)">
+                    <i class="fa fa-cart-shopping"></i>
+                    <span>Tambah ke Keranjang</span>
+                </button>
+            @endif
+
+            {{-- Jika Call To Buy → WhatsApp --}}
+            @if ($product->call_to_buy)
+                <a href="https://wa.me/{{ $waNumber }}" target="_blank"
+                    class="h-12 w-full flex items-center justify-center gap-2 
+                       bg-green-500 hover:bg-green-600 text-white
+                       rounded-xl shadow transition font-semibold active:scale-[0.98]">
+                    <i class="fa fa-whatsapp text-lg"></i>
+                    <span>Hubungi via WhatsApp</span>
+                </a>
+            @endif
         @endcan
+
     </div>
 </div>

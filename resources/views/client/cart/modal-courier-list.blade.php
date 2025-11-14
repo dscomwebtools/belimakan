@@ -3,17 +3,42 @@
         <h1 class="text-xl mb-4 font-bold">Pilih Metode Pengiriman</h1>
 
         <!-- Manual Section -->
-        <label class="text-lg font-bold mb-2" for="manual">Manual</label>
-        <div class="flex flex-col gap-2">
-            <input type="text" id="manual" class="my-input flex-1" x-ref="shippingManual"
-                placeholder="Contoh: COD, Ambil di Toko, Baraka, Kalog, Mex, Gojek, Cargo, Lainnya">
+        <label class="text-lg font-bold mb-2">Manual</label>
+
+        <div x-data="{
+            options: ['COD', 'Ambil di Toko', 'Gojek', 'GrabExpress', 'Baraka', 'Kalog', 'Mex', 'Cargo'],
+            search: '',
+            selected: '',
+            open: false,
+            get filtered() {
+                if (!this.search) return this.options;
+                return this.options.filter(o => o.toLowerCase().includes(this.search.toLowerCase()));
+            }
+        }" class="flex flex-col gap-2 relative">
+
+            <!-- Select/Creatable Input -->
+            <div class="relative">
+                <input x-model="search" @focus="open = true" @input="selected = search" @click="open = true"
+                    class="my-input w-full" placeholder="Pilih atau ketik metode pengiriman...">
+
+                <!-- Dropdown -->
+                <div class="absolute z-30 bg-white w-full mt-1 border rounded shadow max-h-40 overflow-auto"
+                    x-show="open && filtered.length > 0" @click.outside="open = false">
+                    <template x-for="opt in filtered" :key="opt">
+                        <div @click="selected = opt; search = opt; open = false"
+                            class="px-3 py-2 hover:bg-gray-100 cursor-pointer" x-text="opt">
+                        </div>
+                    </template>
+                </div>
+            </div>
+
             <button class="btn btn-primary"
-                @click.prevent="$store.checkout.setCourierSelected($refs.shippingManual.value, 'manual'); $dispatch('close');">
+                @click.prevent="$store.checkout.setCourierSelected(selected, 'manual'); $dispatch('close');">
                 Pilih Manual
             </button>
         </div>
 
-        <!-- Sistem Section -->
+        <!-- 🚀 Sistem Section -->
         <h2 class="text-lg font-bold mb-2 mt-10">Melalui Sistem</h2>
 
         <div class="h-96 overflow-auto relative space-y-8">
@@ -26,54 +51,7 @@
                 </div>
             </div>
 
-
-            <!-- Reguler Section -->
-            <div x-show="!$store.checkout.regular_loading && !$store.checkout.instant_loading" class="relative">
-                <h2 class="text-lg font-bold mb-2">Reguler</h2>
-
-                <!-- Loading State Reguler -->
-                <div x-show="$store.checkout.regular_loading"
-                    class="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
-                    <div class="flex flex-col items-center gap-4 p-6 bg-white rounded-2xl shadow-lg">
-                        <i class="fa fa-spinner fa-spin text-4xl text-primary"></i>
-                        <span class="text-base font-semibold text-gray-700">Mengambil data kurir reguler...</span>
-                        <div class="w-48 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                            <div class="h-full bg-primary animate-pulse"></div>
-                        </div>
-                        <p class="text-xs text-gray-400 italic">Mohon tunggu sebentar, data sedang dimuat</p>
-                    </div>
-                </div>
-
-                <!-- Courier Grouped -->
-                <template x-for="(services, courier) in $store.checkout.groupedCourierListRegular"
-                    :key="courier">
-                    <div class="mb-4 bg-base-100 rounded border">
-                        <div class="p-3 font-bold cursor-pointer flex justify-between items-center"
-                            @click="services.open = !services.open">
-                            <span x-text="courier"></span>
-                            <i class="fa fa-chevron-down"></i>
-                        </div>
-                        <div x-show="services.open" class="divide-y">
-                            <template x-for="courierRate in services.data" :key="courierRate.courier_service_code">
-                                <div @click.prevent="$store.checkout.setCourierSelected(courierRate, 'regular'); $dispatch('close');"
-                                    class="p-3 hover:bg-base-200 cursor-pointer">
-                                    <div class="flex justify-between">
-                                        <span x-text="courierRate.courier_service_name"></span>
-                                        <span class="font-bold"
-                                            x-text="new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR'}).format(courierRate.price)">
-                                        </span>
-                                    </div>
-                                    <div class="text-xs text-gray-500"
-                                        x-text="`Estimasi: ${$store.checkout.translateDuration(courierRate.duration)}`">
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </template>
-            </div>
-
-            <!-- Instant Section -->
+            <!-- INSTANT SECTION (DIPINDAH KE ATAS) -->
             <div x-show="!$store.checkout.regular_loading && !$store.checkout.instant_loading" class="relative">
                 <h2 class="text-lg font-bold mb-2">Instant</h2>
 
@@ -98,15 +76,14 @@
                     Longitude) di profil Anda.
                 </div>
 
-                <!-- ⚠️ Kalau tidak ada kurir instant yang tersedia -->
+                <!-- Tidak ada kurir instant -->
                 <div x-show="$store.checkout.profileHasLocation && !$store.checkout.instant_loading && Object.keys($store.checkout.groupedCourierListInstant || {}).length === 0"
                     class="p-3 bg-red-100 rounded text-sm text-red-700 border border-red-300">
-                    <b>Tidak ada kurir instant tersedia.</b><br>
-                    Lokasi tujuan kemungkinan terlalu jauh dari titik pengiriman, atau layanan belum mencakup area
-                    tersebut.
+                    <b>Tidak ada kurir instant tersedia.</b>
+                    Lokasi tujuan kemungkinan terlalu jauh dari titik pengiriman.
                 </div>
 
-                <!-- Courier Grouped Instant -->
+                <!-- Daftar Kurir Instant -->
                 <template x-if="$store.checkout.profileHasLocation">
                     <template x-for="(services, courier) in $store.checkout.groupedCourierListInstant"
                         :key="courier">
@@ -120,12 +97,14 @@
                                 <template x-for="courierRate in services.data" :key="courierRate.courier_service_code">
                                     <div @click.prevent="$store.checkout.setCourierSelected(courierRate, 'instant'); $dispatch('close');"
                                         class="p-3 hover:bg-green-100 cursor-pointer">
+
                                         <div class="flex justify-between">
                                             <span x-text="courierRate.courier_service_name"></span>
                                             <span class="font-bold"
                                                 x-text="new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR'}).format(courierRate.price)">
                                             </span>
                                         </div>
+
                                         <div class="text-xs text-gray-500"
                                             x-text="`Estimasi: ${$store.checkout.translateDuration(courierRate.duration)}`">
                                         </div>
@@ -134,6 +113,55 @@
                             </div>
                         </div>
                     </template>
+                </template>
+            </div>
+
+            <!-- REGULER SECTION (DIPINDAH KE BAWAH) -->
+            <div x-show="!$store.checkout.regular_loading && !$store.checkout.instant_loading" class="relative">
+                <h2 class="text-lg font-bold mb-2">Reguler</h2>
+
+                <!-- Loading State Reguler -->
+                <div x-show="$store.checkout.regular_loading"
+                    class="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+                    <div class="flex flex-col items-center gap-4 p-6 bg-white rounded-2xl shadow-lg">
+                        <i class="fa fa-spinner fa-spin text-4xl text-primary"></i>
+                        <span class="text-base font-semibold text-gray-700">Mengambil data kurir reguler...</span>
+                        <div class="w-48 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full bg-primary animate-pulse"></div>
+                        </div>
+                        <p class="text-xs text-gray-400 italic">Mohon tunggu sebentar, data sedang dimuat</p>
+                    </div>
+                </div>
+
+                <!-- Daftar Kurir Reguler -->
+                <template x-for="(services, courier) in $store.checkout.groupedCourierListRegular"
+                    :key="courier">
+                    <div class="mb-4 bg-base-100 rounded border">
+                        <div class="p-3 font-bold cursor-pointer flex justify-between items-center"
+                            @click="services.open = !services.open">
+                            <span x-text="courier"></span>
+                            <i class="fa fa-chevron-down"></i>
+                        </div>
+
+                        <div x-show="services.open" class="divide-y">
+                            <template x-for="courierRate in services.data" :key="courierRate.courier_service_code">
+                                <div @click.prevent="$store.checkout.setCourierSelected(courierRate, 'regular'); $dispatch('close');"
+                                    class="p-3 hover:bg-base-200 cursor-pointer">
+
+                                    <div class="flex justify-between">
+                                        <span x-text="courierRate.courier_service_name"></span>
+                                        <span class="font-bold"
+                                            x-text="new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR'}).format(courierRate.price)">
+                                        </span>
+                                    </div>
+
+                                    <div class="text-xs text-gray-500"
+                                        x-text="`Estimasi: ${$store.checkout.translateDuration(courierRate.duration)}`">
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
                 </template>
             </div>
         </div>
