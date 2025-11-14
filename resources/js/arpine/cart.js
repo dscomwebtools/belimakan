@@ -54,17 +54,17 @@ export default {
 
         // Restore checkout selection
         let checkoutId = sessionStorage.getItem('checkoutId');
-        if (checkoutId) {
-            let stored = localStorage.getItem(`checkoutSelected_${checkoutId}`);
-            try {
-                this.selectedIds = stored ? JSON.parse(stored) : [];
-                if (!Array.isArray(this.selectedIds)) {
-                    this.selectedIds = [];
-                }
-            } catch {
-                this.selectedIds = [];
-            }
-        }
+        // if (checkoutId) {
+        //     let stored = localStorage.getItem(`checkoutSelected_${checkoutId}`);
+        //     try {
+        //         this.selectedIds = stored ? JSON.parse(stored) : [];
+        //         if (!Array.isArray(this.selectedIds)) {
+        //             this.selectedIds = [];
+        //         }
+        //     } catch {
+        //         this.selectedIds = [];
+        //     }
+        // }
     },
 
     // --- utility for saving ---

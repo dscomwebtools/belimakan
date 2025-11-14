@@ -401,6 +401,15 @@
                                                     </a>
                                                 </li>
                                             @endif
+                                            @if ($data->bukti_pembayaran_ongkir)
+                                                <li>
+                                                    <a href="{{ Storage::url($data->bukti_pembayaran_ongkir) }}"
+                                                        download="Bukti_Transfer_{{ $data->invoice }}.jpg">
+                                                        <i class="fa fa-download text-blue-500"></i> Unduh bukti
+                                                        ongkir
+                                                    </a>
+                                                </li>
+                                            @endif
                                             @if (
                                                 $data->delivery_state_id >= 1 &&
                                                     $data->delivery_state_id != 6 &&

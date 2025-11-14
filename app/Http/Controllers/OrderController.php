@@ -320,23 +320,39 @@ class OrderController extends Controller
 
     function upload_bukti_bayar(Request $request, Order $order)
     {
+        $isOngkir = $request->has('bukti_bayar_ongkir');
+
         $validated = $request->validate([
-            "bukti_bayar" => ["required"]
+            $isOngkir ? 'bukti_bayar_ongkir' : 'bukti_bayar' => ['required']
         ]);
 
-        if (isset($validated["bukti_bayar"])) {
-            // remove old
-            if (isset($order->bukti_pembayaran)) {
-                Storage::delete($order->bukti_pembayaran);
+        if ($isOngkir) {
+            if ($order->bukti_pembayaran_ongkir) {
+                Storage::delete($order->bukti_pembayaran_ongkir);
             }
 
-            $filename = 'bukti_bayar-' . uniqid() . '.webp';
-            $path = 'bukti-bayar/' . $filename;
-            Storage::put($path, file_get_contents($validated["bukti_bayar"]));
+            $filename = 'bukti_ongkir-' . uniqid() . '.webp';
+            $path = 'bukti-bayar-ongkir/' . $filename;
 
-            $order->bukti_pembayaran = $path;
+            Storage::put($path, file_get_contents($validated['bukti_bayar_ongkir']));
+
+            $order->bukti_pembayaran_ongkir = $path;
+            $order->save();
+
+            return redirect()->route('client.profile')
+                ->with('success', 'Berhasil upload bukti bayar ongkir!');
         }
 
+        if ($order->bukti_pembayaran) {
+            Storage::delete($order->bukti_pembayaran);
+        }
+
+        $filename = 'bukti_bayar-' . uniqid() . '.webp';
+        $path = 'bukti-bayar/' . $filename;
+
+        Storage::put($path, file_get_contents($validated['bukti_bayar']));
+
+        $order->bukti_pembayaran = $path;
         $order->delivery_state_id = 3;
         $order->save();
 
