@@ -32,7 +32,7 @@
                     <!-- Tab Contents -->
                     <div class="p-6 bg-base-200 rounded text-sm">
                         <div x-show="activeTab === 1">
-                            <div class="flex items-center justify-between">
+                            <div class="flex flex-col-reverse md:flex-row gap-4 justify-between">
                                 <!-- Invoice Info -->
                                 <h2 class="font-semibold text-base-content uppercase text-sm md:text-base">
                                     No Invoice :
@@ -152,9 +152,20 @@
                                         enctype="multipart/form-data" class="space-y-4">
                                         @csrf
 
+                                        {{-- Field Ongkir (Khusus manual shipping) --}}
+                                        @if (!empty($data->shipping_method_manual) && $data->delivery_state_id >= 3)
+                                            <div class="form-control">
+                                                <label for="shipping_method_manual_fee"
+                                                    class="label font-semibold">Ongkir</label>
+                                                <input type="number" name="shipping_method_manual_fee"
+                                                    id="shipping_method_manual_fee"
+                                                    value="{{ $data->shipping_method_manual_fee ?? '' }}"
+                                                    class="input input-bordered w-full" required>
+                                            </div>
+                                        @endif
+
                                         <div class="form-control">
-                                            <label for="receipt_number" class="label font-semibold">Nomor
-                                                Resi</label>
+                                            <label for="receipt_number" class="label font-semibold">Nomor Resi</label>
 
                                             @if ($data->biteship_waybill)
                                                 {{-- Dari Biteship, readonly --}}
@@ -176,6 +187,7 @@
                                                 Resi</label>
                                             <input type="file" name="receipt_img" id="receipt_img"
                                                 class="file-input file-input-bordered w-full">
+
                                             @if ($data->receipt?->receipt_img)
                                                 <div class="mt-3">
                                                     <p class="text-sm text-red-500">
@@ -221,74 +233,127 @@
                             <div class="mb-4">
                                 <h2 class="font-bold text-lg text-center dark:text-primary-content">Data Pesanan</h2>
 
-                                <div class="overflow-auto max-h-40">
-                                    <table class="table">
-                                        <thead>
-                                            <tr>
-                                                <th>No</th>
-                                                <th>Nama</th>
-                                                <th>qty</th>
-                                                <th>Harga</th>
-                                                <th>Diskon</th>
-                                                <th>Subtotal</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($data->order_detail as $key => $order_detail)
-                                                <tr class="hover dark:text-accent-content">
-                                                    <td>{{ ++$key }}</td>
-                                                    <td>
-                                                        @if ($order_detail->product_variant)
-                                                            <span>
-                                                                <span>{{ $order_detail->product->name }}</span>
-                                                                <br />
-                                                                @if ($order_detail->product_variant && $order_detail->product_variant->product_detail->isNotEmpty())
-                                                                    <span>(
-                                                                        @foreach ($order_detail->product_variant->product_detail as $index => $detail)
-                                                                            {{ $detail->variant_value->value }}
-                                                                            {{ $index < $order_detail->product_variant->product_detail->count() - 1 ? ', ' : '' }}
-                                                                        @endforeach
-                                                                        )
+                                <div class="mb-8 mt-8 border-t pt-4">
+                                    <div class="space-y-3">
+                                        @foreach ($data->order_detail as $key => $order_detail)
+                                            @php
+                                                $priceAfterDiscount =
+                                                    $order_detail->price -
+                                                    ($order_detail->price * $order_detail->discount) / 100;
+                                                $subtotal = $priceAfterDiscount * $order_detail->quantity;
+                                            @endphp
+
+                                            <div
+                                                class="border rounded-xl p-3 bg-white/50 dark:bg-gray-800 flex flex-col sm:flex-row gap-3 items-start">
+
+                                                <!-- IMAGE -->
+                                                <div class="w-full sm:w-24 flex-shrink-0 flex gap-2 items-start">
+                                                    <img src="{{ $order_detail->product->product_pictures->count() > 0
+                                                        ? asset('storage/' . $order_detail->product->product_pictures[0]->path)
+                                                        : asset('/placeholder.png') }}"
+                                                        alt="{{ $order_detail->product->name }}" loading="lazy"
+                                                        class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg border border-gray-200 dark:border-gray-700">
+
+                                                    <!-- MOBILE TITLE -->
+                                                    <div class="flex-1 block sm:hidden text-sm">
+                                                        <div class="flex items-center gap-2">
+                                                            <div
+                                                                class="font-semibold text-gray-900 dark:text-gray-50 text-base sm:text-lg">
+                                                                {{ $order_detail->product->name }}
+                                                            </div>
+
+                                                            @if ($order_detail->product->pre_order)
+                                                                <span
+                                                                    class="text-green-600 border border-green-600 text-[11px] font-semibold px-2 py-[2px] rounded-full">
+                                                                    Pre-Order
+                                                                </span>
+                                                            @endif
+                                                        </div>
+
+                                                        @if ($order_detail->product_variant && $order_detail->product_variant->product_detail->isNotEmpty())
+                                                            <div class="text-xs text-gray-500 mt-1">
+                                                                Varian:
+                                                                @foreach ($order_detail->product_variant->product_detail as $index => $detail)
+                                                                    <span>
+                                                                        {{ $detail->variant_value->value }}{{ $index < $order_detail->product_variant->product_detail->count() - 1 ? ', ' : '' }}
                                                                     </span>
-                                                                @endif
-                                                            </span>
-                                                        @else
-                                                            <span>{{ $order_detail->product->name }}</span>
+                                                                @endforeach
+                                                            </div>
                                                         @endif
-                                                    </td>
-                                                    <td>{{ $order_detail->quantity }}</td>
-                                                    <td>
-                                                        {{-- Harga Satuan (tanpa diskon) --}}
-                                                        <x-client.format-rp :value="$order_detail->price" />
-                                                    </td>
+                                                    </div>
+                                                </div>
 
-                                                    <td>
-                                                        {{-- Diskon --}}
+                                                <!-- CONTENT -->
+                                                <div class="flex-1 text-sm w-full">
+
+                                                    <!-- DESKTOP TITLE -->
+                                                    <div class="hidden sm:block">
+                                                        <div class="flex items-center gap-2">
+                                                            <div
+                                                                class="font-semibold text-gray-900 dark:text-gray-50 text-base sm:text-lg">
+                                                                {{ $order_detail->product->name }}
+                                                            </div>
+
+                                                            @if ($order_detail->product->pre_order)
+                                                                <span
+                                                                    class="text-green-600 border border-green-600 text-[11px] font-semibold px-2 py-[2px] rounded-full">
+                                                                    Pre-Order
+                                                                </span>
+                                                            @endif
+                                                        </div>
+
+                                                        @if ($order_detail->product_variant && $order_detail->product_variant->product_detail->isNotEmpty())
+                                                            <div class="text-xs text-gray-500 mt-1">
+                                                                Varian:
+                                                                @foreach ($order_detail->product_variant->product_detail as $index => $detail)
+                                                                    <span>
+                                                                        {{ $detail->variant_value->value }}{{ $index < $order_detail->product_variant->product_detail->count() - 1 ? ', ' : '' }}
+                                                                    </span>
+                                                                @endforeach
+                                                            </div>
+                                                        @endif
+                                                    </div>
+
+                                                    <!-- DETAIL GRID -->
+                                                    <div class="grid grid-cols-3 gap-2 mt-3 text-xs sm:text-sm">
+
+                                                        <div>
+                                                            <div class="text-gray-400">Harga</div>
+                                                            <div class="font-medium">
+                                                                <x-client.format-rp :value="$order_detail->price" />
+                                                            </div>
+                                                        </div>
+
+                                                        <div>
+                                                            <div class="text-gray-400">Qty</div>
+                                                            <div class="font-medium">{{ $order_detail->quantity }}
+                                                            </div>
+                                                        </div>
+
                                                         @if ($order_detail->discount > 0)
-                                                            ({{ $order_detail->discount }}%)
-                                                            <x-client.format-rp :value="($order_detail->price *
-                                                                $order_detail->discount) /
-                                                                100" />
-                                                        @else
-                                                            -
+                                                            <div>
+                                                                <div class="text-gray-400">Diskon</div>
+                                                                <div class="font-medium">
+                                                                    ({{ $order_detail->discount }}%)
+                                                                    <x-client.format-rp :value="($order_detail->price *
+                                                                        $order_detail->discount) /
+                                                                        100" />
+                                                                </div>
+                                                            </div>
                                                         @endif
-                                                    </td>
+                                                    </div>
 
-                                                    <td>
-                                                        {{-- Total setelah diskon * quantity --}}
-                                                        @php
-                                                            $priceAfterDiscount =
-                                                                $order_detail->price -
-                                                                ($order_detail->price * $order_detail->discount) / 100;
-                                                            $total = $priceAfterDiscount * $order_detail->quantity;
-                                                        @endphp
-
-                                                        <x-client.format-rp :value="$total" />
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
+                                                    <!-- SUBTOTAL -->
+                                                    <div class="mt-3">
+                                                        <div class="text-gray-400">Subtotal</div>
+                                                        <div class="font-semibold text-green-600 dark:text-green-400">
+                                                            <x-client.format-rp :value="$subtotal" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 </div>
                             </div>
                             {{-- END DATA BARANG --}}
@@ -313,7 +378,7 @@
                                 <div class="flex justify-between leading-8">
                                     <span>Ongkos Kirim</span>
                                     <span>
-                                        <x-client.format-rp :value="$data->shipping_method?->price ?? 0" />
+                                        <x-client.format-rp :value="$data->shipping_method?->price ?? $data->shipping_method_manual_fee" />
                                     </span>
                                 </div>
 
@@ -332,7 +397,7 @@
                             <div class="flex justify-between mb-4 font-bold text-lg">
                                 <span>Total Bayar</span>
                                 <span>
-                                    <x-client.format-rp :value="$data->total" />
+                                    <x-client.format-rp :value="$data->total + $data->shipping_method_manual_fee" />
                                 </span>
                             </div>
 
@@ -414,7 +479,8 @@
                                                 $data->delivery_state_id >= 1 &&
                                                     $data->delivery_state_id != 6 &&
                                                     !$data->biteship_waybill &&
-                                                    $data->delivery_state_id != 3 && !$data->cancel_status)
+                                                    $data->delivery_state_id != 3 &&
+                                                    !$data->cancel_status)
                                                 <li>
                                                     <form action="{{ route('admin-order.next-state', $data->id) }}"
                                                         method="POST" id="nextStateForm_{{ $data->id }}"
