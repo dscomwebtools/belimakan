@@ -599,6 +599,7 @@ class OrderController extends Controller
     {
         $rules = [
             'receipt_img' => 'nullable|file|max:2048',
+            'shipping_method_manual_fee' => 'nullable|numeric', // <= simpan ke order
         ];
 
         // Kalau manual, wajib isi nomor resi
@@ -615,6 +616,7 @@ class OrderController extends Controller
             'receipt_number' => $order->biteship_waybill ?: $validated['receipt_number'],
         ];
 
+        // upload gambar resi
         if ($request->hasFile('receipt_img')) {
             if ($oldPath && Storage::disk('public')->exists($oldPath)) {
                 Storage::disk('public')->delete($oldPath);
@@ -623,15 +625,22 @@ class OrderController extends Controller
             $attributes['receipt_img'] = $request->file('receipt_img')->store('receipts', 'public');
         }
 
+        // simpan atau update receipt
         $receipt = OrderReceipt::updateOrCreate(
             ['id' => $order->order_receipt_id],
             $attributes
         );
 
+        // pastikan order terhubung ke receipt
         if (!$order->order_receipt_id) {
             $order->order_receipt_id = $receipt->id;
-            $order->save();
         }
+
+        // **simpan shipping_method_manual_fee ke table orders**
+        $order->shipping_method_manual_fee = $validated['shipping_method_manual_fee'] ?? null;
+
+        // simpan perubahan order
+        $order->save();
 
         return back()->with('success', 'Resi berhasil disimpan!');
     }

@@ -6,7 +6,7 @@
         <label class="text-lg font-bold mb-2">Manual</label>
 
         <div x-data="{
-            options: ['COD', 'Ambil di Toko', 'Gojek', 'GrabExpress', 'Baraka', 'Kalog', 'Mex', 'Cargo'],
+            options: ['COD', 'Ambil di Toko', 'Baraka', 'Kalog', 'Mex', 'Cargo'],
             search: '',
             selected: '',
             open: false,

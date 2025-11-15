@@ -61,7 +61,7 @@
                             @endif
                         </p>
                         <p class="mt-1">
-                            Total: <x-client.format-rp value="{{ $item->total }}" />
+                            Total: <x-client.format-rp :value="$item->total + ($item->shipping_method_manual_fee ?? 0)" />
                         </p>
                     </div>
                 </div>

@@ -263,7 +263,7 @@
                 <span class="text-gray-600 dark:text-gray-300">Ongkos Kirim</span>
                 <span class="font-semibold text-gray-900 dark:text-gray-100"
                     x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })
-                .format($store.cart.orderDetail.shipping_method?.price || 0)">
+                .format($store.cart.orderDetail.shipping_method?.price || $store.cart.orderDetail.shipping_method_manual_fee)">
                 </span>
             </div>
 
@@ -301,7 +301,7 @@
                             }, 0)
                             : 0
                         ) 
-                        + ($store.cart.orderDetail.shipping_method?.price || 0)
+                        + ($store.cart.orderDetail.shipping_method?.price || $store.cart.orderDetail.shipping_method_manual_fee)
                         - ($store.cart.orderDetail.coupon_discount || 0)
                     )
                 )">
