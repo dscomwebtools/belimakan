@@ -258,6 +258,33 @@
                                             ])
                                         </div>
                                     </div>
+                                    <div class="mt-4" x-data="{
+                                        bulk: {{ $productVariantsJson }}[0]?.bulk_prices || []
+                                    }">
+
+                                        <label class="font-semibold mb-2 block">Harga Grosir</label>
+
+                                        <template x-for="(bp, i) in bulk" :key="i">
+                                            <div class="flex items-center gap-2 mb-2">
+                                                <input type="number" min="1"
+                                                    class="my-input w-20 text-center" placeholder="Qty"
+                                                    :name="'bulk_prices_single[' + i + '][min_qty]'"
+                                                    x-model="bp.min_qty">
+
+                                                <input type="number" min="1"
+                                                    class="my-input w-24 text-center" placeholder="Harga"
+                                                    :name="'bulk_prices_single[' + i + '][price]'" x-model="bp.price">
+
+                                                <button type="button" class="px-2 py-1 bg-red-600 text-white rounded"
+                                                    @click="bulk.splice(i, 1)">✕</button>
+                                            </div>
+                                        </template>
+
+                                        <button type="button" class="bg-primary text-white px-2 py-1 rounded text-xs"
+                                            @click="bulk.push({min_qty: null, price: null})">
+                                            + Tambah Harga
+                                        </button>
+                                    </div>
                                 </div>
                             </template>
                             <div
