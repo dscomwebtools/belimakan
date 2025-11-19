@@ -6,7 +6,7 @@
                 <figure class="px-10 pt-10 pb-2">
                     <div class="avatar">
                         <div class="w-full rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                            <img src="{{ isset($data->img) ? Storage::url($data->img) : asset('assets/images/image-not-found.webp') }}"
+                            <img src="{{ isset($data->img) ? Storage::url($data->img) : asset('assets/images/user_not_found.png') }}"
                                 alt="profile picture" />
                         </div>
                     </div>

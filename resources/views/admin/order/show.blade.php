@@ -7,7 +7,7 @@
                     <h2 class="font-bold">DATA MEMBER</h2>
                     <div class="avatar">
                         <div class="w-full rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                            <img src="{{ isset($data->user->img) ? Storage::url($data->user->img) : asset('assets/images/image-not-found.webp') }}"
+                            <img src="{{ isset($data->user->img) ? Storage::url($data->user->img) : asset('assets/images/user_not_found.png') }}"
                                 alt="profile picture" />
                         </div>
                     </div>

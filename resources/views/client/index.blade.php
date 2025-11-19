@@ -244,7 +244,7 @@
                                                     ? Storage::url($testi->img)
                                                     : ($testi->user?->img
                                                         ? Storage::url($testi->user->img)
-                                                        : asset('assets/images/image-not-found.webp')) }}" />
+                                                        : asset('assets/images/user_not_found.png')) }}" />
                                         </div>
                                     </div>
                                     <div class="chat-header text-primary ml-2">

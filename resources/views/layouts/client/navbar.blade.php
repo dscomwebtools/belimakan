@@ -102,7 +102,7 @@
                 <div class="w-10 rounded-full">
                     @auth
                         <img alt="User profile photo"
-                            src="{{ auth()->user()->img ? Storage::url(auth()->user()->img) : asset('assets/images/image-not-found.webp') }}" />
+                            src="{{ auth()->user()->img ? Storage::url(auth()->user()->img) : asset('assets/images/user_not_found.png') }}" />
                     @else
                         <div class="flex items-center justify-center h-full bg-gray-200">
                             <span class="fa fa-user text-gray-600 text-xl"></span>
