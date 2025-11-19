@@ -19,7 +19,7 @@
             <figure class="px-10 pt-10 pb-2">
                 <div class="avatar">
                     <div class="w-full rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                        <img src="{{ isset(auth()->user()->img) ? Storage::url(auth()->user()->img) : asset('assets/images/image-not-found.webp') }}"
+                        <img src="{{ isset(auth()->user()->img) ? Storage::url(auth()->user()->img) : asset('assets/images/user_not_found.png') }}"
                             alt="profile picture" id='profile-photo' />
 
                         <div class="absolute rounded-full bg-primary/80 opacity-0 hover:opacity-100 w-full h-full top-0 flex justify-center items-center cursor-pointer transition-opacity duration-700"
