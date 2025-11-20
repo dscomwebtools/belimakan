@@ -384,12 +384,41 @@ class OrderController extends Controller
         $reference = (new DNS1D())->getBarcodePNG($order->invoice ?? '24BIT00000000013', 'C128');
         $origin = SettingAddress::first();
 
-        $courier = strtolower($order->shipping_method->company ?? '');
+        // Ambil nama kurir (prioritas manual)
+        if (!empty($order->shipping_method_manual)) {
+            $courierRaw = $order->shipping_method_manual;
+        } else {
+            $courierRaw = $order->shipping_method->company ?? '';
+        }
+
+        function normalizeCourier($str)
+        {
+            $str = strtolower($str);
+            $str = trim($str);
+            $str = preg_replace('/[^a-z0-9\s]/', '', $str);
+            $str = preg_replace('/\s+/', ' ', $str);
+            return $str;
+        }
+
+        $courier = normalizeCourier($courierRaw);
+
         $shippingLogo = null;
         $dir = public_path('assets/images/shipping');
 
+        $aliases = [
+            'baraka' => 'baraka',
+            'braka' => 'baraka',
+            'bara ka' => 'baraka',
+            'mex' => 'mex',
+            'kai' => 'kai',
+            'kai kalog' => 'kai',
+            'kalog' => 'kai',
+        ];
+
+        $courierKey = $aliases[$courier] ?? $courier;
+
         foreach (['png', 'jpg', 'jpeg', 'webp'] as $ext) {
-            $path = "$dir/$courier.$ext";
+            $path = "$dir/$courierKey.$ext";
             if (file_exists($path)) {
                 $shippingLogo = $path;
                 break;
