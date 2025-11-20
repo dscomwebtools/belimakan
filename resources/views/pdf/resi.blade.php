@@ -274,7 +274,7 @@
 
         <!-- ONGKIR DAN LAYANAN -->
         <div class="service-info">
-            <div>Ongkos Kirim: <strong>Rp {{ number_format($order->shipping_method->price ?? 0, 0, ',', '.') }}</strong>
+            <div>Ongkos Kirim: <strong>Rp {{ number_format($order->shipping_method->price ?? $order->shipping_method_manual_fee, 0, ',', '.') }}</strong>
             </div>
         </div>
         <div class="service-info">
@@ -295,6 +295,7 @@
                     <div class="address-header">Alamat Penerima:</div>
                     <div class="address-phone">{{ formatPhoneUniversal($order->order_address->hp ?? '-') }}</div>
                     <p>{{ $order->order_address->recipient ?? '-' }}</p>
+                    <p>{{ $order->order_address->noteForCurrier ?? '-' }}</p>
                     <p>{{ $order->order_address->address ?? '-' }}</p>
                     <p>{{ $order->order_address->area_name ?? '' }}</p>
                 </td>

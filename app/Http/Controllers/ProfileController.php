@@ -163,6 +163,8 @@ class ProfileController extends Controller
             'area_id' => ['required', 'string'],
             'hp' => ['required', 'string', 'regex:/^(?:\+62|62|0)8[1-9][0-9]{6,9}$/'],
             'isMain' => ['nullable', 'string'],
+            'latitude'        => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude'       => ['nullable', 'numeric', 'between:-180,180'],
         ], [
             'hp.regex' => 'Format nomor HP tidak valid',
         ]);
@@ -188,6 +190,8 @@ class ProfileController extends Controller
         $address->noteForCurrier = $request->noteForCurrier;
         $address->recipient = $request->recipient;
         $address->hp = $request->hp;
+        $address->latitude = $request->latitude_update ?? $request->latitude_store;
+        $address->longitude = $request->longitude_update ?? $request->longitude_store;
         $address->isMain = $request->isMain ?? false;
         $address->user_id = $user_id;
         $address->area_id = $area["id"];
