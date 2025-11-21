@@ -37,7 +37,7 @@ class ProfileController extends Controller
             'name' => ['string', 'nullable'],
         ]);
 
-        $data = Order::with(['order_detail.product', 'order_detail.product.product_pictures'])->where('user_id', auth()->user()->id)->latest();
+        $data = Order::with(['order_detail.product', 'order_detail.product.product_pictures', 'order_detail.product.product_variant.bulk_prices'])->where('user_id', auth()->user()->id)->latest();
 
         $testimonial = Testimonial::where('user_id', auth()->id())->first();
 

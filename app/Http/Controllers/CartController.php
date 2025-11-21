@@ -57,7 +57,7 @@ class CartController extends Controller
             return response()->json([]);
         }
 
-        $data = Cart::with('user', 'product.product_variant.product_detail.variant_value.variant', 'product_variant.product_detail.variant_value.variant', 'product.category', 'product.dimention', 'product.promo', 'product_variant', 'product.product_pictures')
+        $data = Cart::with('user', 'product.product_variant.product_detail.variant_value.variant', 'product_variant.product_detail.variant_value.variant', 'product.category', 'product.dimention', 'product.promo', 'product_variant', 'product.product_pictures', 'product_variant.bulk_prices')
             ->where('user_id', auth()->user()->id)
             ->latest()
             ->get();

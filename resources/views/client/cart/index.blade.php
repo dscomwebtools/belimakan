@@ -64,17 +64,57 @@
 
                                 <div class="price flex flex-col text-sm md:text-base">
                                     <div>
-                                        <span x-text="item.quantity"></span>
-                                        <template x-if="item.product_variant">
+                                        <template x-if="item.product_variant && !item.product_variant.bulk_prices">
+                                            <span x-text="item.quantity"></span>
                                             <span
                                                 x-text="'x ' + new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.product.promo ? item.product_variant.price - (item.product_variant.price * (item.product.promo.discount / 100)) : item.product_variant.price)">
                                             </span>
                                         </template>
-                                        <template x-if="!item.product_variant">
-                                            <span
-                                                x-text="item.product.product_variant ? 'x ' + new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.product.promo ? item.product.product_variant[0].price - (item.product.product_variant[0].price * (item.product.promo.discount / 100)) : item.product.product_variant[0].price) : ''">
-                                            </span>
-                                        </template>
+                                        <div>
+                                            {{-- <span x-text="item.quantity"></span> --}}
+                                            {{-- JIKA PRODUCT VARIANT ID TIDAK ADA BERARTI TIDAK ADA VARIAN MAKA AMBIL DARI RELASI PRODUCT->PRODUCT_VARAINT, JIKA ADA YA AMBIL DARI PRODUCT_VARIANT GA USAH DARI PRODUCT KARENA BERARTI PRODUCT NYA ADA VARIANT --}}
+                                            <!-- Harga coret jika kena bulk -->
+                                            <template
+                                                x-if="
+    (() => {
+        if (!item.product_variant || !item.product_variant.bulk_prices) return false;
+        let qty = Number(item.quantity);
+        return item.product_variant.bulk_prices
+            .sort((a,b) => b.min_qty - a.min_qty)
+            .some(bp => qty >= bp.min_qty);
+    })()
+">
+                                                <div class="line-through"
+                                                    x-text="'Rp' + new Intl.NumberFormat('id-ID').format(item.product_variant.price)">
+                                                </div>
+                                            </template>
+
+
+                                            <!-- Harga akhir -->
+                                            <div
+                                                x-text="
+    (() => {
+        let base = item.product_variant.price;
+        let qty = Number(item.quantity);
+
+        if (item.product_variant.bulk_prices) {
+            let bulk = item.product_variant.bulk_prices
+                .slice()
+                .sort((a,b) => b.min_qty - a.min_qty)
+                .find(bp => qty >= bp.min_qty);
+
+            if (bulk) base = bulk.price;
+        }
+
+        if (item.product.promo && item.product.promo.discount > 0) {
+            base -= base * (item.product.promo.discount / 100);
+        }
+
+        return item.quantity + ' x ' + new Intl.NumberFormat('id-ID', { style:'currency', currency:'IDR', minimumFractionDigits:0 }).format(base);
+    })()
+">
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div class="mt-3 flex flex-wrap justify-between w-full items-center gap-2">
