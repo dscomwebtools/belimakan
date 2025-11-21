@@ -36,13 +36,30 @@ export default {
 
     get subtotalCart() {
         return this.selectedItems.reduce((sum, item) => {
-            let price = item.product_variant ? item.product_variant.price : item.product.product_variant[0].price;
+            let variant = item.product_variant
+                ? item.product_variant
+                : item.product.product_variant[0];
 
-            if (item.product.promo) {
-                price = price - (price * item.product.promo.discount / 100);
+            let basePrice = variant.price;
+
+            if (variant.bulk_prices && variant.bulk_prices.length > 0) {
+                let qty = Number(item.quantity);
+
+                let bulk = variant.bulk_prices
+                    .slice()
+                    .sort((a, b) => b.min_qty - a.min_qty)
+                    .find(bp => qty >= bp.min_qty);
+
+                if (bulk) {
+                    basePrice = bulk.price;
+                }
             }
 
-            return sum + (item.quantity * price);
+            if (item.product.promo && item.product.promo.discount > 0) {
+                basePrice = basePrice - (basePrice * item.product.promo.discount / 100);
+            }
+
+            return sum + (item.quantity * basePrice);
         }, 0);
     },
 

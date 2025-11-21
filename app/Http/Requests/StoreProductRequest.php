@@ -58,6 +58,13 @@ class StoreProductRequest extends FormRequest
             'pre_order_date' => 'nullable|required_if:pre_order,1|date',
             'pre_order_message' => 'nullable|required_if:pre_order,1|string|max:1000',
             'call_to_buy' => 'required|boolean',
+            'bulk_prices' => 'nullable|array',
+            'bulk_prices.*' => 'nullable|array',
+            'bulk_prices.*.*.min_qty' => 'nullable|numeric',
+            'bulk_prices.*.*.price' => 'nullable|numeric',
+            'bulk_prices_single' => ['nullable', 'array'],
+            'bulk_prices_single.*.min_qty' => ['nullable', 'numeric'],
+            'bulk_prices_single.*.price' => ['nullable', 'numeric'],
         ];
     }
 

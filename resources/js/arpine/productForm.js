@@ -10,6 +10,7 @@ export default () => ({
     isSubmitting: false,
     colorOptions: ['Merah', 'Biru', 'Hijau', 'Kuning', 'Putih', 'Hitam', 'Jingga', 'Ungu', 'Cokelat', 'Abuabu', 'Pink', 'Toska', 'Biru langit', 'Biru laut', 'Biru muda', 'Biru tua', 'Hijau muda', 'Hijau tua', 'Merah muda', 'Merah tua', 'Emas', 'Perak', 'Marun', 'Lavender', 'Cyan', 'Indigo', 'Lemon', 'Mocca', 'Peach', 'Olive', 'Nila', 'Amber', 'Coral'],
     sizeOptions: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'],
+    bulkPrices: [],
     setVariantMode(mode) {
         this.variantMode = mode
     },
@@ -198,6 +199,16 @@ export default () => ({
         }
 
         this.variantCombinations = combinations;
+
+        if (this.bulkPrices.length > combinations.length) {
+            this.bulkPrices.splice(combinations.length);
+        }
+
+        if (this.bulkPrices.length < combinations.length) {
+            for (let i = this.bulkPrices.length; i < combinations.length; i++) {
+                this.bulkPrices[i] = [];
+            }
+        }
     },
     initSelect2(el) {
         $(el).select2({
