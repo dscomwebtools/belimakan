@@ -57,6 +57,7 @@
                         <th>Berat <span class="text-sm">(g)</span></th>
                         <th>SKU</th>
                         <th>Status</th>
+                        <th class="text-center">Harga Grosir</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -141,6 +142,41 @@
                                         @isset($data) :selected="productVariants[index].active === 0" @endisset>
                                         Tidak Aktif</option>
                                 </select>
+                            </td>
+                            <!-- Harga Grosir -->
+                            <td class="align-top">
+                                <div class="space-y-2" x-data="{ bulk: [] }" x-init="{{ $productVariantsJson }}[index]?.bulk_prices && (bulk = {{ $productVariantsJson }}[index]?.bulk_prices)">
+
+                                    <!-- Daftar Harga Grosir -->
+                                    <template x-for="(bp, i) in bulk" :key="i">
+                                        <div class="flex items-center gap-1">
+                                            <input type="number" min="1" class="my-input w-16 text-center"
+                                                placeholder="Qty"
+                                                :name="'bulk_prices[' + index + '][' + i + '][min_qty]'"
+                                                x-model="bp.min_qty">
+
+                                            <input type="number" min="1" class="my-input w-24 text-center"
+                                                placeholder="Harga"
+                                                :name="'bulk_prices[' + index + '][' + i + '][price]'"
+                                                x-model="bp.price">
+
+                                            <button type="button" class="px-2 py-1 bg-red-600 text-white rounded"
+                                                @click="bulk.splice(i, 1)">
+                                                ✕
+                                            </button>
+                                        </div>
+                                    </template>
+
+                                    <!-- Tombol tambah -->
+                                    <button type="button" class="bg-primary text-white px-2 py-1 rounded text-xs"
+                                        @click="bulk.push({min_qty: null, price: null})">
+                                        + Tambah Harga
+                                    </button>
+
+                                    <!-- Hidden binder to Alpine global -->
+                                    <input type="hidden" :value="JSON.stringify(bulk)"
+                                        x-effect="bulkPrices[index] = bulk">
+                                </div>
                             </td>
                         </tr>
                     </template>

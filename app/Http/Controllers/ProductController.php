@@ -17,6 +17,7 @@ use App\Models\Product;
 use App\Models\ProductDetail;
 use App\Models\ProductPicture;
 use App\Models\ProductVariant;
+use App\Models\ProductVariantBulkPrice;
 use App\Models\Promo;
 use App\Models\Setting;
 use App\Models\Variant;
@@ -126,7 +127,7 @@ class ProductController extends Controller
         return view('admin.product.form', compact('variants', 'categories', 'brands'));
     }
 
-    function store(StoreProductRequest $request)
+    public function store(StoreProductRequest $request)
     {
         $validated = $request->validated();
 
@@ -146,10 +147,15 @@ class ProductController extends Controller
         DB::transaction(function () use ($new_product, $validated) {
             $new_product->save();
 
+            // ======================
+            // VARIANT / NON VARIANT
+            // ======================
+            $variantIdMap = [];
+
             if (isset($validated["variantData"])) {
-                // JIKA ADA VARIANT
                 $variants = json_decode($validated['variantData'], true);
                 $variantCombinations = json_decode($validated['variantCombinationsData'], true);
+
                 foreach ($variants as $variantName => $values) {
                     $variant = Variant::firstOrCreate(['variant' => $variantName]);
 
@@ -161,25 +167,21 @@ class ProductController extends Controller
                     }
                 }
 
-                // Simpan kombinasi varian ke tabel product_variants dan product_details
-                // Simpan kombinasi varian ke tabel product_variants dan product_details
-                $variantIdMap = []; // 🔹 buat mapping untuk koneksi id varian ke index array
                 foreach ($variantCombinations as $i => $combination) {
-                    $productVariant = new ProductVariant([
-                        'product_id' => $new_product->id,
-                        'stock' => $validated['stock_variant'][$i],
-                        'price' => $validated['price_variant'][$i],
-                        'weight' => $validated['weight_variant'][$i],
-                        'sku' => $validated['sku_variant'][$i],
-                        'active' => $validated['active_variant'][$i] ?? false,
-                    ]);
+                    $productVariant = new ProductVariant();
+                    $productVariant->product_id = $new_product->id;
+                    $productVariant->stock = $validated['stock_variant'][$i];
+                    $productVariant->price = $validated['price_variant'][$i];
+                    $productVariant->weight = $validated['weight_variant'][$i];
+                    $productVariant->sku = $validated['sku_variant'][$i];
+                    $productVariant->active = $validated['active_variant'][$i] ?? false;
                     $productVariant->save();
 
-                    // simpan id mapping biar nanti bisa pakai saat upload gambar
                     $variantIdMap[$i] = $productVariant->id;
 
                     foreach ($combination as $value) {
                         [$variantName, $variantValue] = explode(': ', $value);
+
                         $variant = Variant::where('variant', $variantName)->first();
                         $variantValueObj = VariantValue::firstOrCreate([
                             'variant_id' => $variant->id,
@@ -192,138 +194,134 @@ class ProductController extends Controller
                             'isMain' => false,
                         ]);
                     }
-                }
 
-                // 🔹 Variant Pictures
-                if (isset($validated['variant_pictures'])) {
-                    $lastPosition = 0;
-                    foreach ($validated['variant_pictures'] as $index => $file) {
-                        if ($file instanceof \Illuminate\Http\UploadedFile) {
-                            $variantId = $variantIdMap[$index] ?? null;
-                            if (!$variantId) continue;
+                    // ====== SAVE BULK PRICE VARIANT ======
+                    if (isset($validated['bulk_prices'][$i])) {
+                        foreach ($validated['bulk_prices'][$i] as $row) {
 
-                            $filename = $new_product->slug . '-variant-' . $variantId . '-' . uniqid() . '.webp';
-                            $path = $this->picture_folder . $filename;
+                            if (!isset($row['min_qty']) || !isset($row['price'])) continue;
+                            if (!$row['min_qty'] || !$row['price']) continue;
 
-                            Storage::put($path, file_get_contents($file));
+                            ProductVariantBulkPrice::create([
+                                'product_variant_id' => $productVariant->id,
+                                'min_qty' => $row['min_qty'],
+                                'price' => $row['price'],
+                            ]);
+                        }
+                    }
 
-                            $newPicture = new ProductPicture();
-                            $newPicture->product_id = $new_product->id;
-                            $newPicture->variant_id = $variantId;
-                            $newPicture->path = $path;
-                            $newPicture->position = ++$lastPosition;
-                            $newPicture->save();
+                    // Variant Pictures
+                    if (isset($validated['variant_pictures'])) {
+                        $lastPosition = 0;
+                        foreach ($validated['variant_pictures'] as $index => $file) {
+                            if ($file instanceof \Illuminate\Http\UploadedFile) {
+                                $variantId = $variantIdMap[$index] ?? null;
+                                if (!$variantId) continue;
+
+                                $filename = $new_product->slug . '-variant-' . $variantId . '-' . uniqid() . '.webp';
+                                $path = $this->picture_folder . $filename;
+                                Storage::put($path, file_get_contents($file));
+
+                                $pic = new ProductPicture();
+                                $pic->product_id = $new_product->id;
+                                $pic->variant_id = $variantId;
+                                $pic->path = $path;
+                                $pic->position = ++$lastPosition;
+                                $pic->save();
+                            }
                         }
                     }
                 }
             } else {
-                // JIKA TIDAK ADA VARIANT MAKA SIMPAN SATU SAJA PADA PRODUCT VARIANT JIKA ADA VARIANT MAKA DI HANDLE DIBAWAH DIBAGIAN VARIANTS
-                $newProductVariant = new ProductVariant();
-                $newProductVariant->product_id = $new_product->id;
-                $newProductVariant->stock = $validated["stock"];
-                $newProductVariant->price = $validated["price"];
-                $newProductVariant->weight = $validated["weight"];
-                $newProductVariant->sku = $validated["sku"];
-                $newProductVariant->active = $validated["active"] ?? false;
-                $newProductVariant->save();
+                // ======================
+                // SINGLE VARIANT PRODUCT
+                // ======================
+                $productVariant = new ProductVariant();
+                $productVariant->product_id = $new_product->id;
+                $productVariant->stock = $validated["stock"];
+                $productVariant->price = $validated["price"];
+                $productVariant->weight = $validated["weight"];
+                $productVariant->sku = $validated["sku"];
+                $productVariant->active = $validated["active"] ?? false;
+                $productVariant->save();
+
+                // ====== SAVE BULK PRICE NON VARIANT ======
+                // ===== SAVE BULK PRICE SINGLE PRODUCT =====
+                if (isset($validated['bulk_prices_single'])) {
+                    foreach ($validated['bulk_prices_single'] as $row) {
+
+                        if (!isset($row['min_qty']) || !isset($row['price'])) continue;
+                        if (!$row['min_qty'] || !$row['price']) continue;
+
+                        ProductVariantBulkPrice::create([
+                            'product_variant_id' => $productVariant->id,
+                            'min_qty' => $row['min_qty'],
+                            'price' => $row['price'],
+                        ]);
+                    }
+                }
             }
 
-            // CATEGORIES (many to many)
+            // ======================
+            // CATEGORIES
+            // ======================
             if (isset($validated["categories"])) {
                 $categoryIds = [];
-
                 foreach ($validated["categories"] as $categoryId) {
-                    $category = Category::find($categoryId);
-
-                    if (!$category) {
-                        // If the category does not exist, create it with the ID as the name
-                        $category = Category::create(['name' => $categoryId]);
-                    }
-
+                    $category = Category::find($categoryId) ?? Category::create(['name' => $categoryId]);
                     $categoryIds[] = $category->id;
                 }
-
                 $new_product->category()->attach($categoryIds);
             }
 
-            // PICTURES
+            // ======================
+            // PRODUCT PICTURES
+            // ======================
             if (isset($validated["product_pictures"])) {
                 foreach ($validated["product_pictures"] as $product_picture) {
                     $filename = $new_product->slug . '-' . uniqid() . '.webp';
                     $path = $this->picture_folder . $filename;
                     Storage::put($path, file_get_contents($product_picture));
 
-                    $newPicture = new ProductPicture();
-                    $newPicture->product_id = $new_product->id;
-                    $newPicture->path = $path;
-                    $newPicture->save();
+                    $pic = new ProductPicture();
+                    $pic->product_id = $new_product->id;
+                    $pic->path = $path;
+                    $pic->save();
                 }
             }
 
-            // DISCOUNT (PROMO)
-            $discount = $validated["discount"];
-            if ($discount && $discount > 0) {
+            // DISCOUNT
+            if (!empty($validated["discount"]) && $validated["discount"] > 0) {
                 $promo = new Promo();
                 $promo->product_id = $new_product->id;
-                $promo->discount = $discount;
+                $promo->discount = $validated["discount"];
                 $promo->save();
             }
 
             // DIMENTION
-            $dimention = new Dimention();
-            $dimention->product_id = $new_product->id;
-            $dimention->length = $validated["length"];
-            $dimention->width = $validated["width"];
-            $dimention->height = $validated["height"];
-            $dimention->save();
+            $dim = new Dimention();
+            $dim->product_id = $new_product->id;
+            $dim->length = $validated["length"];
+            $dim->width = $validated["width"];
+            $dim->height = $validated["height"];
+            $dim->save();
 
             // DETAILS
             if (isset($validated["detail"])) {
                 foreach ($validated["detail"] as $index => $detail_input) {
+                    if (!$detail_input) continue;
 
-                    if (isset($detail_input)) { //hanya simpan detail yang tidak null
-                        $detail = Detail::firstOrCreate(['detail' => $detail_input]);
-
-                        $detail_value = new DetailValue();
-                        $detail_value->detail_id = $detail->id;
-                        $detail_value->product_id = $new_product->id;
-                        $detail_value->value = $validated["detail-value"][$index];
-
-                        $detail_value->save();
-                    }
+                    $detail = Detail::firstOrCreate(['detail' => $detail_input]);
+                    $detail_value = new DetailValue();
+                    $detail_value->detail_id = $detail->id;
+                    $detail_value->product_id = $new_product->id;
+                    $detail_value->value = $validated["detail-value"][$index];
+                    $detail_value->save();
                 }
             }
         });
-        // $variants = json_decode($request->input('variantData'), true);
-        // $variantCombinations = json_decode($request->input('variantCombinationsData'), true);
 
-        // // Simpan varian dan nilai varian
-        // foreach ($variants as $variantName => $values) {
-        //     $variant = Variant::firstOrCreate(['variant' => $variantName]);
-
-        //     foreach ($values as $value) {
-        //         $variantValue = VariantValue::firstOrCreate([
-        //             'variant_id' => $variant->id,
-        //             'value' => $value,
-        //         ]);
-        //     }
-        // }
-
-        // // Simpan kombinasi varian ke tabel product_variants
-        // foreach ($variantCombinations as $variantData) {
-        //     $productVariant = new ProductVariant([
-        //         'stock' => $variantData['stock'],
-        //         'price' => $variantData['price'],
-        //         'weight' => $variantData['weight'],
-        //         'sku' => $variantData['sku'],
-        //         'active' => $variantData['active'],
-        //     ]);
-
-        //     // $product->productVariants()->save($productVariant);
-        // }
-
-        return redirect()->route('product.index')
-            ->with('success', 'Berhasil ditambahkan!');
+        return redirect()->route('product.index')->with('success', 'Berhasil ditambahkan!');
     }
 
     function show(Product $product)
@@ -343,6 +341,7 @@ class ProductController extends Controller
             // tambahkan relasi ini supaya bisa ambil gambar tiap varian
             'product_variant.product_pictures',
             'product_variant.product_detail.variant_value.variant',
+            'product_variant.bulk_prices',
         ]);
 
         $variants = Variant::limit(2)->get();
@@ -388,6 +387,12 @@ class ProductController extends Controller
                         'value' => $detail->variant_value->value,
                     ];
                 }),
+                'bulk_prices' => $variant->bulk_prices->map(function ($bp) {
+                    return [
+                        'min_qty' => $bp->min_qty,
+                        'price'   => $bp->price,
+                    ];
+                })->values()->toArray(),
             ];
         });
 
@@ -548,6 +553,21 @@ class ProductController extends Controller
                     } else {
                         $variantIdMap[$i] = $productVariant->id;
                     }
+
+                    // ====== SAVE BULK PRICE VARIANT ======
+                    if (isset($validated['bulk_prices'][$i])) {
+                        foreach ($validated['bulk_prices'][$i] as $row) {
+
+                            if (!isset($row['min_qty']) || !isset($row['price'])) continue;
+                            if (!$row['min_qty'] || !$row['price']) continue;
+
+                            ProductVariantBulkPrice::create([
+                                'product_variant_id' => $productVariant->id,
+                                'min_qty' => $row['min_qty'],
+                                'price' => $row['price'],
+                            ]);
+                        }
+                    }
                 }
 
                 $lastPosition = ProductPicture::where('product_id', $product->id)->max('position') ?? 0;
@@ -644,6 +664,21 @@ class ProductController extends Controller
                 $newProductVariant->sku = $validated["sku"];
                 $newProductVariant->active = $validated["active"] ?? false;
                 $newProductVariant->save();
+
+                if (!empty($validated['bulk_prices_single'])) {
+
+                    ProductVariantBulkPrice::where('product_variant_id', $newProductVariant->id)->delete();
+
+                    foreach ($validated['bulk_prices_single'] as $row) {
+                        if (empty($row['min_qty']) || empty($row['price'])) continue;
+
+                        ProductVariantBulkPrice::create([
+                            'product_variant_id' => $newProductVariant->id,
+                            'min_qty' => $row['min_qty'],
+                            'price' => $row['price'],
+                        ]);
+                    }
+                }
             }
 
             $lastMainPos = ProductPicture::where('product_id', $product->id)
@@ -958,6 +993,7 @@ class ProductController extends Controller
                         'product_detail.variant_value.variant'
                     ]);
             },
+            'product_variant.bulk_prices'
         ])->where('slug', $slug)->firstOrFail();
 
         return view('client.product.detail', compact('product'));

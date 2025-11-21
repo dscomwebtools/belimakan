@@ -29,4 +29,9 @@ class ProductVariant extends Model
     {
         return $this->hasMany(ProductPicture::class, 'variant_id');
     }
+
+    public function bulk_prices()
+    {
+        return $this->hasMany(ProductVariantBulkPrice::class)->orderBy('min_qty', 'asc');
+    }
 }
