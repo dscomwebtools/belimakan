@@ -313,7 +313,7 @@ class OrderController extends Controller
 
     function order_by_id(Order $order)
     {
-        $order->load(['delivery_state', 'order_address', 'shipping_method', 'order_detail.product.product_pictures', 'order_detail.product_variant.product_detail.variant_value.variant', 'bank_account', 'receipt']);
+        $order->load(['delivery_state', 'order_address', 'shipping_method', 'order_detail.product.product_pictures', 'order_detail.product_variant.product_detail.variant_value.variant', 'order_detail.product_variant.bulk_prices', 'bank_account', 'receipt']);
 
         return response()->json($order);
     }
