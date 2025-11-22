@@ -123,8 +123,9 @@ class ProductController extends Controller
         $variants = Variant::limit(2)->get();
         $categories = Category::orderBy('name', 'asc')->get();
         $brands = Brand::orderBy('name', 'asc')->get();
+        $productVariantsJson = "";
 
-        return view('admin.product.form', compact('variants', 'categories', 'brands'));
+        return view('admin.product.form', compact('variants', 'categories', 'brands', 'productVariantsJson'));
     }
 
     public function store(StoreProductRequest $request)
@@ -472,8 +473,10 @@ class ProductController extends Controller
 
                 $variants_id = [];
                 $variant_values_id = [];
+                $product_variant_id = [];
 
                 foreach ($product->product_variant as $variant) {
+                    $product_variant_id[] = $variant->id;
                     foreach ($variant->product_detail as $detail) {
                         $variant_values_id[] = $detail->variant_value->id;
                         $variants_id[] = $detail->variant_value->variant_id;
@@ -496,6 +499,8 @@ class ProductController extends Controller
                         Variant::destroy($variant_id);
                     }
                 }
+
+                ProductVariantBulkPrice::whereIn('product_variant_id', $product_variant_id)->delete();
 
                 $variants = json_decode($validated['variantData'], true);
                 $variantCombinations = json_decode($validated['variantCombinationsData'], true);
@@ -630,7 +635,9 @@ class ProductController extends Controller
 
                 $variants_id = [];
                 $variant_values_id = [];
+                $product_variant_id = [];
                 foreach ($product->product_variant as $variant) {
+                    $product_variant_id[] = $variant->id;
                     foreach ($variant->product_detail as $detail) {
                         $variant_values_id[] = $detail->variant_value->id;
                         $variants_id[] = $detail->variant_value->variant_id;
@@ -655,6 +662,8 @@ class ProductController extends Controller
                         Variant::destroy($variant_id);
                     }
                 }
+
+                ProductVariantBulkPrice::whereIn('product_variant_id', $product_variant_id)->delete();
 
                 $newProductVariant = ProductVariant::firstWhere('product_id', $product->id);
                 $newProductVariant->product_id = $product->id;

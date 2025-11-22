@@ -237,11 +237,33 @@
                                     <div class="space-y-3">
                                         @foreach ($data->order_detail as $key => $order_detail)
                                             @php
+                                                // CARI BULK PRICE DARI PRODUCT VARIANT
+                                                $bulkPrice = null;
+
+                                                if (
+                                                    $order_detail->product_variant &&
+                                                    $order_detail->product_variant->bulk_prices->isNotEmpty()
+                                                ) {
+                                                    foreach ($order_detail->product_variant->bulk_prices as $b) {
+                                                        if ($order_detail->quantity >= $b->min_qty) {
+                                                            $bulkPrice = $b->price;
+                                                        }
+                                                    }
+                                                }
+
+                                                // HARGA DISKON NORMAL (Jika ada diskon)
                                                 $priceAfterDiscount =
                                                     $order_detail->price -
                                                     ($order_detail->price * $order_detail->discount) / 100;
-                                                $subtotal = $priceAfterDiscount * $order_detail->quantity;
+
+                                                // FINAL PRICE PAKAI PRIORITAS:
+                                                // bulk > diskon > harga asli
+                                                $finalPrice = $bulkPrice ?? $priceAfterDiscount;
+
+                                                // SUBTOTAL
+                                                $subtotal = $finalPrice * $order_detail->quantity;
                                             @endphp
+
 
                                             <div
                                                 class="border rounded-xl p-3 bg-white/50 dark:bg-gray-800 flex flex-col sm:flex-row gap-3 items-start">
@@ -319,9 +341,22 @@
 
                                                         <div>
                                                             <div class="text-gray-400">Harga</div>
-                                                            <div class="font-medium">
-                                                                <x-client.format-rp :value="$order_detail->price" />
-                                                            </div>
+
+                                                            {{-- Jika ada bulk price --}}
+                                                            @if ($bulkPrice)
+                                                                <div class="line-through text-gray-500">
+                                                                    <x-client.format-rp :value="$order_detail->price" />
+                                                                </div>
+                                                                <div class="font-bold text-green-600">
+                                                                    <x-client.format-rp :value="$bulkPrice" />
+                                                                </div>
+
+                                                                {{-- Jika tak ada bulk price --}}
+                                                            @else
+                                                                <div class="font-medium">
+                                                                    <x-client.format-rp :value="$priceAfterDiscount" />
+                                                                </div>
+                                                            @endif
                                                         </div>
 
                                                         <div>
@@ -351,6 +386,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
+
                                             </div>
                                         @endforeach
                                     </div>
@@ -363,14 +399,48 @@
                                 <h2 class="font-bold text-lg text-center dark:text-primary-content">Ringkasan
                                     Pembayaran</h2>
 
+                                @php
+                                    // Hitung subtotal barang (support bulk price + discount)
+                                    $subtotalBarang = $data->order_detail->sum(function ($d) {
+                                        // BASE PRICE
+                                        $basePrice = $d->price;
+
+                                        // Jika punya variant + bulk price
+                                        if ($d->product_variant && $d->product_variant->bulk_prices->count() > 0) {
+                                            $qty = $d->quantity;
+
+                                            $bulk = $d->product_variant->bulk_prices
+                                                ->sortByDesc('min_qty')
+                                                ->first(function ($bp) use ($qty) {
+                                                    return $qty >= $bp->min_qty;
+                                                });
+
+                                            if ($bulk) {
+                                                $basePrice = $bulk->price;
+                                            }
+                                        }
+
+                                        // APPLY DISCOUNT
+                                        $finalPrice = $basePrice - ($basePrice * $d->discount) / 100;
+
+                                        return $finalPrice * $d->quantity;
+                                    });
+
+                                    // Ongkir
+                                    $ongkir = $data->shipping_method?->price ?? $data->shipping_method_manual_fee;
+
+                                    // Voucher
+                                    $voucher = $data->coupon_discount ?? 0;
+
+                                    // Total bayar
+                                    $totalBayar = $subtotalBarang + $ongkir - $voucher;
+                                @endphp
+
                                 <!-- Subtotal Barang -->
                                 <div class="flex justify-between leading-8">
                                     <span>Subtotal Barang</span>
                                     <span>
-                                        <x-client.format-rp :value="$data->order_detail->sum(function ($d) {
-                                            $priceAfterDiscount = $d->price - ($d->price * $d->discount) / 100;
-                                            return $priceAfterDiscount * $d->quantity;
-                                        })" />
+                                        <x-client.format-rp :value="$subtotalBarang" />
                                     </span>
                                 </div>
 
@@ -378,7 +448,7 @@
                                 <div class="flex justify-between leading-8">
                                     <span>Ongkos Kirim</span>
                                     <span>
-                                        <x-client.format-rp :value="$data->shipping_method?->price ?? $data->shipping_method_manual_fee" />
+                                        <x-client.format-rp :value="$ongkir" />
                                     </span>
                                 </div>
 
@@ -387,7 +457,7 @@
                                     <div class="flex justify-between leading-8 text-red-600">
                                         <span>Voucher ({{ $data->coupon_code }})</span>
                                         <span>
-                                            -<x-client.format-rp :value="$data->coupon_discount" />
+                                            -<x-client.format-rp :value="$voucher" />
                                         </span>
                                     </div>
                                 @endif
@@ -397,7 +467,7 @@
                             <div class="flex justify-between mb-4 font-bold text-lg">
                                 <span>Total Bayar</span>
                                 <span>
-                                    <x-client.format-rp :value="$data->total + $data->shipping_method_manual_fee" />
+                                    <x-client.format-rp :value="$totalBayar" />
                                 </span>
                             </div>
 

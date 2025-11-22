@@ -52,32 +52,32 @@
     @endguest
 
     {{-- TABEL HARGA GROSIR --}}
-    @php
-        $firstVariant = $product->product_variant->first();
-    @endphp
+    @foreach ($product->product_variant as $variant)
+        @if ($variant->bulk_prices->isNotEmpty())
+            <div class="mt-4 bulk-table" id="bulk-{{ $variant->id }}" style="display:none">
+                <h3 class="font-semibold mb-2">Harga Grosir:</h3>
 
-    @if ($firstVariant && $firstVariant->bulk_prices->isNotEmpty())
-        <div class="mt-4">
-            <h3 class="font-semibold mb-2">Harga Grosir:</h3>
-
-            <table class="table table-sm w-full text-sm">
-                <thead>
-                    <tr>
-                        <th>Min Qty</th>
-                        <th>Harga</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($firstVariant->bulk_prices as $bp)
+                <table class="table table-sm w-full text-sm">
+                    <thead>
                         <tr>
-                            <td>{{ $bp->min_qty }}+</td>
-                            <td>Rp. {{ number_format($bp->price, 0, ',', '.') }}</td>
+                            <th>Min Qty</th>
+                            <th>Harga</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    @endif
+                    </thead>
+                    <tbody>
+                        @foreach ($variant->bulk_prices as $bp)
+                            <tr>
+                                <td>{{ $bp->min_qty }}+</td>
+                                <td>Rp. {{ number_format($bp->price, 0, ',', '.') }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <div id="bulk-{{ $variant->id }}" style="display:none"></div>
+        @endif
+    @endforeach
 
     {{-- VARIANT --}}
     @if (count($product->product_variant) > 1)
@@ -191,11 +191,29 @@
 {{-- ALPINE SCRIPT LOGIC --}}
 {{-- ================================================================= --}}
 <script>
+    function showBulkTable(variantId) {
+        // sembunyikan semua dulu
+        document.querySelectorAll('.bulk-table').forEach(el => el.style.display = 'none');
+
+        // tampilkan tabel varian yang dipilih
+        let target = document.getElementById('bulk-' + variantId);
+        if (target) target.style.display = 'block';
+    }
+    document.addEventListener("DOMContentLoaded", () => {
+        let defaultVariant = @json($product->product_variant->first()->id);
+        showBulkTable(defaultVariant);
+    });
     document.addEventListener('alpine:init', () => {
         Alpine.data('priceHandler', () => ({
             product: @json($product),
 
             loadInitial() {
+                let selector = document.querySelector('[x-ref=variant_id_selected]');
+                if (selector) {
+                    selector.addEventListener("change", () => {
+                        this.updatePrice();
+                    });
+                }
                 this.updatePrice();
             },
 
