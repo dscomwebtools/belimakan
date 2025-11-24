@@ -88,7 +88,7 @@
                 <h2 class="text-lg font-semibold mb-4">Riwayat Pelacakan</h2>
                 <template x-if="$store.cart.trackingDetail.history && $store.cart.trackingDetail.history.length">
                     <ul class="space-y-4">
-                        <template x-for="(event, index) in $store.cart.trackingDetail.history" :key="event.updated_at">
+                        <template x-for="(event, index) in $store.cart.trackingDetail.history" :key="index">
                             <li class="border-l-4 pl-4"
                                 :class="{
                                     'border-green-500': index === $store.cart.trackingDetail.history.length - 1,
