@@ -876,6 +876,12 @@ class ProductController extends Controller
                     $newDetail->product_variant_id = $newVariant->id;
                     $newDetail->save();
                 }
+
+                foreach ($variant->bulk_prices as $detail) {
+                    $newDetail = $detail->replicate();
+                    $newDetail->product_variant_id = $newVariant->id;
+                    $newDetail->save();
+                }
             }
 
             // ==========================
