@@ -624,14 +624,14 @@ class OrderController extends Controller
         return redirect()->back()->with('success', 'Berhasil membatalkan order dan mengembalikan stok produk');
     }
 
-    function save_receipt(Request $request, Order $order)
+    public function save_receipt(Request $request, Order $order)
     {
         $rules = [
             'receipt_img' => 'nullable|file|max:2048',
-            'shipping_method_manual_fee' => 'nullable|numeric', // <= simpan ke order
+            'shipping_method_manual_fee' => 'nullable|numeric',
+            'shipping_method_manual_note' => 'nullable|string|max:500',
         ];
 
-        // Kalau manual, wajib isi nomor resi
         if (!$order->biteship_waybill) {
             $rules['receipt_number'] = 'required|string|unique:order_receipts,receipt_number,' . $order->order_receipt_id;
         }
@@ -641,34 +641,31 @@ class OrderController extends Controller
         $oldPath = $order->receipt?->receipt_img;
 
         $attributes = [
-            // kalau biteship, pakai langsung dari order
-            'receipt_number' => $order->biteship_waybill ?: $validated['receipt_number'],
+            'receipt_number' => $order->biteship_waybill ?: ($validated['receipt_number'] ?? null),
         ];
 
-        // upload gambar resi
         if ($request->hasFile('receipt_img')) {
             if ($oldPath && Storage::disk('public')->exists($oldPath)) {
                 Storage::disk('public')->delete($oldPath);
             }
 
-            $attributes['receipt_img'] = $request->file('receipt_img')->store('receipts', 'public');
+            $attributes['receipt_img'] = $request
+                ->file('receipt_img')
+                ->store('receipts', 'public');
         }
 
-        // simpan atau update receipt
         $receipt = OrderReceipt::updateOrCreate(
             ['id' => $order->order_receipt_id],
             $attributes
         );
 
-        // pastikan order terhubung ke receipt
         if (!$order->order_receipt_id) {
             $order->order_receipt_id = $receipt->id;
         }
 
-        // **simpan shipping_method_manual_fee ke table orders**
         $order->shipping_method_manual_fee = $validated['shipping_method_manual_fee'] ?? null;
+        $order->shipping_method_manual_note = $validated['shipping_method_manual_note'] ?? null;
 
-        // simpan perubahan order
         $order->save();
 
         return back()->with('success', 'Resi berhasil disimpan!');

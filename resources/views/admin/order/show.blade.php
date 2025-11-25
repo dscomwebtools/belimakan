@@ -217,6 +217,34 @@
                                             @endif
                                         </div>
 
+                                        <div class="form-control">
+                                            <label class="label font-semibold">Catatan</label>
+
+                                            <div x-data="{ showList: false, keyword: '{{ old('shipping_method_manual_note', $data->shipping_method_manual_note ?? '') }}' }" class="relative">
+
+                                                <!-- INPUT -->
+                                                <input type="text" x-model="keyword" @focus="showList = true"
+                                                    @click.outside="showList = false"
+                                                    name="shipping_method_manual_note"
+                                                    id="shipping_method_manual_note"
+                                                    class="input input-bordered w-full"
+                                                    placeholder="Pilih atau ketik manual...">
+
+                                                <!-- LIST OPTIONS -->
+                                                <ul x-show="showList"
+                                                    class="absolute z-[1000] bg-base-100 border border-base-300 w-full mt-1 rounded shadow-md max-h-40 overflow-y-auto">
+
+                                                    @foreach (['Ongkir bayar disini', 'Ongkir bayar disana'] as $option)
+                                                        <li class="px-3 py-2 hover:bg-base-200 cursor-pointer"
+                                                            @click="keyword = '{{ $option }}'; showList = false;">
+                                                            {{ $option }}
+                                                        </li>
+                                                    @endforeach
+
+                                                </ul>
+                                            </div>
+                                        </div>
+
                                         <div class="flex justify-end gap-2 pt-2">
                                             <x-primary-button type="submit">
                                                 Simpan <i class="fa fa-paper-plane ml-1"></i>
