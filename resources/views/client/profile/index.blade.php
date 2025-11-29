@@ -97,13 +97,26 @@
                             <template
                                 x-for="(tab, i) in ['Biodata','Data Order','Daftar Alamat','Testimonial','Keamanan', 'Kotak Masuk']"
                                 :key="i">
+
                                 <button
-                                    class="px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-300 transform hover:scale-105"
-                                    :class="activeTab === (i + 1) ? 'bg-primary text-white shadow-md' :
+                                    class="relative px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-300 transform hover:scale-105"
+                                    :class="activeTab === (i + 1) ?
+                                        'bg-primary text-white shadow-md' :
                                         'bg-base-300 text-gray-600 hover:bg-base-200'"
                                     @click="activeTab = i+1; localStorage.setItem('activeTab', i+1)">
+
                                     <span x-text="tab"></span>
+
+                                    <!-- BADGE khusus tab Kotak Masuk -->
+                                    <span x-show="tab === 'Kotak Masuk' && $store.notification.unreadCount > 0"
+                                        x-text="$store.notification.unreadCount"
+                                        class="absolute bg-red-600 text-white text-[10px] min-w-[18px] h-[18px]
+                   flex items-center justify-center font-bold rounded-full px-1.5 py-0.5"
+                                        style="top: 0; right: 0">
+                                    </span>
+
                                 </button>
+
                             </template>
                         </div>
                     </div>
