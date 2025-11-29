@@ -27,6 +27,14 @@
                 <img src="{{ '/assets/images/image-not-found.webp' }}" alt="{{ $product->name }}" class="rounded-xl" />
             @endif
 
+            {{-- Label Bulk Price --}}
+            @if ($product->product_variant->first() && $product->product_variant->first()->bulk_prices->count() > 0)
+                <span
+                    class="absolute top-[0px] right-[0px] bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-semibold px-3 py-1 rounded-full shadow-md">
+                    Grosir
+                </span>
+            @endif
+
             {{-- Label tipe produk --}}
             @if ($product->call_to_buy)
                 <span

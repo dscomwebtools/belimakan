@@ -504,6 +504,26 @@
                                         openCropModal(fileInput);
                                     });
 
+                                    grid.addEventListener('click', e => {
+                                        const imgEl = e.target.closest('.preview-img');
+                                        if (!imgEl) return;
+
+                                        fileInput = imgEl.closest('[data-index]').querySelector('.file-input');
+
+                                        img = new Image();
+                                        img.onload = () => {
+                                            const maxW = 600;
+                                            displayScale = img.width > maxW ? maxW / img.width : 1;
+                                            cropCanvas.width = Math.round(img.width * displayScale);
+                                            cropCanvas.height = Math.round(img.height * displayScale);
+                                            setCropBoxToFullWidth();
+                                            draw();
+                                            cropModal.classList.remove('hidden');
+                                        };
+                                        img.crossOrigin = "anonymous";
+                                        img.src = imgEl.src;
+                                    });
+
                                     function updateOrder() {
                                         const items = Array.from(grid.children);
                                         picturePositionsInput.value = JSON.stringify(items.map(i => i.dataset.id || null));
@@ -837,7 +857,7 @@
                                         tctx.fillRect(0, 0, temp.width, temp.height);
                                         tctx.drawImage(img, sx, sy, sw, sh, 0, 0, temp.width, temp.height);
                                         temp.toBlob(blob => {
-                                            const file = new File([blob], fileInput.files[0].name, {
+                                            const file = new File([blob], "TEST", {
                                                 type: 'image/jpeg'
                                             });
                                             const dt = new DataTransfer();
