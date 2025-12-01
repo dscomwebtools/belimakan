@@ -18,17 +18,20 @@
         return variantPic ? variantPic.url : (this.pictures.find(p => !p.variant_id)?.url ?? '/assets/images/image-not-found.webp');
     }
 }" x-init="selectedVariant = variants.length > 0 ? variants[0].id : null">
+
     <figure class="sm:px-5 sm:pt-5 relative">
         <a href="{{ route('client.product', $product['slug']) }}">
             @if ($product->product_pictures->isNotEmpty())
                 <img src="{{ Storage::url($product->product_pictures->first()->path) }}" alt="{{ $product->name }}"
                     class="rounded-xl" />
             @else
-                <img src="{{ '/assets/images/image-not-found.webp' }}" alt="{{ $product->name }}" class="rounded-xl" />
+                <img src="/assets/images/image-not-found.webp" alt="{{ $product->name }}" class="rounded-xl" />
             @endif
 
             {{-- Label Bulk Price --}}
-            @if ($product->product_variant->first() && $product->product_variant->first()->bulk_prices->count() > 0)
+            @if (
+                $product->product_variant->first() &&
+                    $product->product_variant->first()->bulk_prices->count() > 0)
                 <span
                     class="absolute top-[0px] right-[0px] bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-semibold px-3 py-1 rounded-full shadow-md">
                     Grosir
@@ -72,6 +75,8 @@
             @can('is-member')
                 @if ($product->product_variant->count() > 0)
                     <div class="w-full flex flex-col items-center gap-2">
+
+                        {{-- Select variant --}}
                         @if ($product->product_variant->count() > 1)
                             <select name="variant" class="my-input w-full text-sm md:text-base mb-2"
                                 @change="selectedVariantIndex = $event.target.selectedIndex;" x-model="selectedVariant">
@@ -83,9 +88,12 @@
                             </select>
                         @endif
 
+                        {{-- Harga / Promo / Grosir --}}
                         <div>
                             <template x-for="variant in variants" :key="variant.id">
                                 <div x-show="selectedVariant == variant.id">
+
+                                    {{-- Harga normal + promo --}}
                                     <template x-if="promo > 0">
                                         <div>
                                             <span class="line-through text-sm md:text-base"
@@ -93,26 +101,42 @@
                                             </span>
                                             <span class="text-xs align-top ml-2" x-text="'-' + promo + '%'"></span>
                                             <br>
+
                                             <span class="text-sm md:text-base font-bold"
                                                 x-text="'Rp. ' + new Intl.NumberFormat('id-ID').format(variant.price - (variant.price * promo / 100))">
                                             </span>
                                         </div>
                                     </template>
 
+                                    {{-- Harga normal tanpa promo --}}
                                     <template x-if="promo == 0">
                                         <span class="text-sm md:text-base font-bold"
                                             x-text="'Rp. ' + new Intl.NumberFormat('id-ID').format(variant.price)">
                                         </span>
                                     </template>
+
+                                    {{-- Harga Grosir --}}
+                                    <template x-if="variant.bulk_prices && variant.bulk_prices.length > 0">
+                                        <div class="mt-2 text-xs text-left bg-base-300 p-2 rounded shadow-inner w-full">
+                                            <div class="font-semibold mb-1">Harga Grosir:</div>
+
+                                            <template x-for="bp in variant.bulk_prices" :key="bp.id">
+                                                <div class="flex justify-between">
+                                                    <span x-text="'≥ ' + bp.min_qty + ' pcs'"></span>
+                                                    <span x-text="'Rp. ' + new Intl.NumberFormat('id-ID').format(bp.price)"></span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+
                                 </div>
                             </template>
                         </div>
 
-                        @if (auth()->user()->hasVerifiedEmail())
+                        @if (auth()->user()->hasVerifiedEmail() && !$product->call_to_buy)
                             <div class="card-actions mt-2">
                                 <div class="flex gap-2">
-                                    <input type="number" x-ref="quantity" class="my-input px-1 w-16" min="1"
-                                        value="1">
+                                    <input type="number" x-ref="quantity" class="my-input px-1 w-16" min="1" value="1">
                                     <div class="tooltip tooltip-bottom" data-tip="Tambah ke keranjang">
                                         <button class="btn btn-circle btn-primary"
                                             @click="$store.cart.addToCart('{{ $product->id }}', selectedVariant, $refs.quantity.value)">
@@ -122,6 +146,7 @@
                                 </div>
                             </div>
                         @endif
+
                     </div>
                 @endif
             @endcan

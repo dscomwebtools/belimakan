@@ -93,7 +93,7 @@ class ClientController extends Controller
                 'auction',
                 'product_variant' => function ($query) {
                     $query->where('active', 1)
-                        ->with(['product_detail.variant_value.variant']);
+                        ->with(['product_detail.variant_value.variant', 'bulk_prices']);
                 }
             ])
                 ->whereHas('product_variant', function ($query) {
