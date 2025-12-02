@@ -53,7 +53,7 @@ class ProductController extends Controller
         if (isset($validated["nama"])) {
             $data = $data->where('name', 'like', '%' . $validated["nama"] . '%');
         }
-        // NUMBER OF ROWS PER PAGE
+
         $numbRows = $request['numbRows'] ?? 100;
 
         $data = $data->paginate($numbRows)->appends(array_merge($validated, ['numbRows' => $numbRows]));
