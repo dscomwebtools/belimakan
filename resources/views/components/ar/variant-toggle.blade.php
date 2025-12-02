@@ -2,8 +2,8 @@
     .product-form .switch {
         position: relative;
         display: inline-block;
-        width: 180px;
-        height: 40px;
+        width: 200px;
+        height: 34px;
     }
 
     .product-form .switch input {
@@ -12,52 +12,64 @@
 
     .product-form .slider {
         position: absolute;
-        inset: 0;
-        background: oklch(var(--n) / 0.2);
-        border-radius: 40px;
         cursor: pointer;
-        transition: 0.35s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        color: oklch(var(--p));
-        padding: 0 12px;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #3C3C3C;
+        -webkit-transition: .4s;
+        transition: .4s;
+        border-radius: 34px;
     }
 
-    /* Text content */
-    .product-form .slider::after {
-        content: "TANPA VARIAN";
-    }
-
-    /* Circle */
-    .product-form .slider::before {
-        content: "";
+    .product-form .slider:before {
         position: absolute;
-        width: 32px;
-        height: 32px;
-        background: white;
-        border-radius: 50%;
+        content: "";
+        height: 26px;
+        width: 26px;
         left: 4px;
-        transition: 0.35s ease;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        bottom: 4px;
+        background-color: oklch(var(--n));
+        -webkit-transition: .4s;
+        transition: .4s;
+        border-radius: 50%;
     }
 
-    /* Checked State */
-    .product-form input:checked + .slider {
-        background: oklch(var(--p));
+    .product-form input:checked+.slider {
+        background-color: oklch(var(--p));
+    }
+
+    .product-form input:focus+.slider {
+        box-shadow: 0 0 1px #2196F3;
+    }
+
+    .product-form input:checked+.slider:before {
+        -webkit-transform: translateX(165px);
+        -ms-transform: translateX(165px);
+        /* transform: translateX(165px); */
+        background-color: white;
+    }
+
+    /*------ ADDED CSS ---------*/
+    .product-form .slider:after {
+        content: 'TANPA VARIAN';
+        color: oklch(var(--p));
+        display: block;
+        position: absolute;
+        transform: translate(-50%, -50%);
+        top: 50%;
+        left: 50%;
+        font-size: 10px;
+        font-family: Verdana, sans-serif;
+    }
+
+    .product-form input:checked+.slider:after {
         color: oklch(var(--pc));
+        content: 'DENGAN VARIAN';
     }
 
-    .product-form input:checked + .slider::after {
-        content: "DENGAN VARIAN";
-    }
-
-    .product-form input:checked + .slider::before {
-        transform: translateX(140px);
-    }
+    /*--------- END --------*/
 </style>
 <label class="switch hover:scale-105 duration-200">
     <input type="checkbox" x-model="variantMode">
