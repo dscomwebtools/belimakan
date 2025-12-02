@@ -6,9 +6,6 @@
                 <div class="flex flex-col items-center sm:flex-row sm:justify-between sm:items-stretch">
                     <h2 class="text-xl uppercase mb-6 font-bold">{{ isset($data) ? 'Ubah' : 'Tambah' }}
                         {{ __('Produk') }}</h2>
-                    <div>
-                        @include('components.ar.variant-toggle')
-                    </div>
                 </div>
 
                 @if ($errors->any())
@@ -181,6 +178,10 @@
                                         class="my-input bg-primary/5 rounded"
                                         value="{{ old('youtube', isset($data) ? $data->youtube : '') }}">
                                 </div>
+                            </div>
+
+                            <div>
+                                @include('components.ar.variant-toggle')
                             </div>
 
                             <div class="flex flex-col sm:flex-row gap-2 my-2">

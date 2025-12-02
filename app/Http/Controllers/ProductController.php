@@ -46,7 +46,7 @@ class ProductController extends Controller
             'promo',
             'auction',
             'product_variant' => function ($query) {
-                $query->with(['product_detail.variant_value.variant']);
+                $query->with(['product_detail.variant_value.variant', 'bulk_prices']);
             }
         ])->latest();
 
@@ -948,7 +948,7 @@ class ProductController extends Controller
                 'auction',
                 'product_variant' => function ($query) {
                     $query->where('active', 1)
-                        ->with(['product_detail.variant_value.variant']);
+                        ->with(['product_detail.variant_value.variant', 'bulk_prices']);
                 }
             ])
                 ->whereHas('product_variant', function ($query) {
@@ -976,7 +976,7 @@ class ProductController extends Controller
             'auction',
             'product_variant' => function ($query) {
                 $query->where('active', 1)
-                    ->with(['product_detail.variant_value.variant']);
+                    ->with(['product_detail.variant_value.variant', 'bulk_prices']);
             }
         ])
             ->whereHas('product_variant', function ($query) {
@@ -1005,7 +1005,7 @@ class ProductController extends Controller
                 $query->where('active', 1)
                     ->orderBy('id', 'asc')
                     ->with([
-                        'product_detail.variant_value.variant'
+                        'product_detail.variant_value.variant', 'bulk_prices'
                     ]);
             },
             'product_variant.bulk_prices'
@@ -1025,7 +1025,7 @@ class ProductController extends Controller
             'auction',
             'product_variant' => function ($query) {
                 $query->where('active', 1)
-                    ->with(['product_detail.variant_value.variant']);
+                    ->with(['product_detail.variant_value.variant', 'bulk_prices']);
             }
         ])
             ->whereHas('product_variant', function ($query) {
