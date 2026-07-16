@@ -31,6 +31,13 @@ class PageController extends Controller
         return view('client.page.index', compact('page'));
     }
 
+    function pricelist()
+    {
+        $page = Page::where('name', 'pricelist')->first();
+
+        return view('client.page.index', compact('page'));
+    }
+
     function aboutUs()
     {
         $page = Page::where('name', 'about_us')->first();
@@ -98,6 +105,24 @@ class PageController extends Controller
         $page->save();
 
         return redirect()->route('admin.payment-method')->with('success', 'Data berhasil diupdate');
+    }
+
+    function pricelistAdmin(): View
+    {
+        $form_name = 'Download Pricelist';
+        $data = Page::where('name', 'pricelist')->first();
+        $update_route = route('admin.pricelist-update', $data->id);
+
+        return view('admin.page.index', compact('data', 'form_name', 'update_route'));
+    }
+
+    function pricelistUpdateAdmin(Request $request, Page $page)
+    {
+        $page->title = $request->title;
+        $page->content = $request->content;
+        $page->save();
+
+        return redirect()->route('admin.pricelist')->with('success', 'Data berhasil diupdate');
     }
 
     function aboutUsAdmin(): View

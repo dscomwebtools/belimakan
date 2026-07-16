@@ -115,6 +115,9 @@ Route::prefix('admin')
             Route::get('payment-method', [PageController::class, 'paymentMethodAdmin'])->name('admin.payment-method');
             Route::patch('payment-method/{page}', [PageController::class, 'paymentMethodUpdateAdmin'])->name('admin.payment-method-update');
 
+            Route::get('pricelist', [PageController::class, 'pricelistAdmin'])->name('admin.pricelist');
+            Route::patch('pricelist/{page}', [PageController::class, 'pricelistUpdateAdmin'])->name('admin.pricelist-update');
+
             Route::get('about-us', [PageController::class, 'aboutUsAdmin'])->name('admin.about-us');
             Route::patch('about-us/{page}', [PageController::class, 'aboutUsUpdateAdmin'])->name('admin.about-us-update');
 
@@ -162,6 +165,7 @@ Route::post('/profile/testimonial', [ProfileController::class, 'save_testimonial
 Route::get('/how-to-order', [PageController::class, 'howToOrder'])->name('client.how-to-order');
 Route::get('/how-to-return', [PageController::class, 'howToReturn'])->name('client.how-to-return');
 Route::get('/payment-method', [PageController::class, 'paymentMethod'])->name('client.payment-method');
+Route::get('/pricelist', [PageController::class, 'pricelist'])->name('client.pricelist');
 Route::get('/about-us', [PageController::class, 'aboutUs'])->name('client.about-us');
 Route::get('/contact', [PageController::class, 'contact'])->name('client.contact');
 

@@ -32,6 +32,12 @@ class PageSeeder extends Seeder
         ]);
         
         Page::create([
+            'name' => 'pricelist', 
+            'title' => 'Download Pricelist',
+            'content' => 'Ini content halaman download pricelist'
+        ]);
+        
+        Page::create([
             'name' => 'about_us', 
             'title' => 'Tentang Kami',
             'content' => 'Ini content halaman tentang kami'

@@ -4,6 +4,7 @@
         <a class="link link-hover" href="{{ route('client.how-to-order') }}">Cara Belanja</a>
         <a class="link link-hover" href="{{ route('client.how-to-return') }}">Cara Pengembalian</a>
         <a class="link link-hover" href="{{ route('client.payment-method') }}">Metode Pembayaran</a>
+        <a class="link link-hover" href="{{ route('client.pricelist') }}">Download Pricelist</a>
     </nav>
     <nav class="md:mx-auto">
         <h6 class="footer-title tracking-widest">Promo & Layanan</h6>
