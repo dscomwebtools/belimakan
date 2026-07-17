@@ -44,12 +44,12 @@
     <div class="divider">Harga</div>
 
     {{-- HARGA UTAMA --}}
-    @auth
-        <span x-ref="priceEl">{{ 'Rp. ' . number_format($product->product_variant->first()->price, 0, ',', '.') }}</span>
-    @endauth
-    @guest
+    {{-- @auth --}}
+    <span x-ref="priceEl">{{ 'Rp. ' . number_format($product->product_variant->first()->price, 0, ',', '.') }}</span>
+    {{-- @endauth --}}
+    {{-- @guest
         <span><a href="{{ route('login') }}" class="text-green-600">Login</a> untuk lihat harga</span>
-    @endguest
+    @endguest --}}
 
     {{-- TABEL HARGA GROSIR --}}
     @foreach ($product->product_variant as $variant)
