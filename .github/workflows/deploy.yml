@@ -11,12 +11,13 @@ jobs:
 
     steps:
       - name: Deploy to dscomputer.id
-        uses: appleboy/ssh-action@v0.1.10
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_SSH_USER }}
           port: 22
           key: ${{ secrets.VPS_SSH_KEY }}
+          debug: true
           script: |
             echo "[Deploy] Fetch latest code..."
             APP_DIR="/belimakan"
