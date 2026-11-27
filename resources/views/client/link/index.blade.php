@@ -43,7 +43,7 @@
 
         {{-- Footer --}}
         <footer class="relative z-10 mt-6 text-white/70 text-xs text-center">
-            <p>© {{ date('Y') }} {{ config('app.name') }} — Komputer, Aksesoris & Perlengkapan IT Terbaik</p>
+            <p>© {{ date('Y') }} {{ config('app.name') }} — Belanja Sayur Segar, Organik & Kebutuhan Dapur Terbaik</p>
         </footer>
 
     </div>

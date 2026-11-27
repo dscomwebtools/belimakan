@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Label Pengiriman - DSComputer</title>
+    <title>Label Pengiriman - BeliMakan</title>
     <style>
         * {
             margin:0;
@@ -234,20 +234,20 @@
         <div class="header">
             <table style="width:100%; border:none; vertical-align:middle;">
                 <tr>
-                    <!-- Kolom kiri: Logo + teks DSComputer -->
+                    <!-- Kolom kiri: Logo + teks BeliMakan -->
                     <td style="text-align:left; width:70%; vertical-align:middle;">
                         <table style="border:none; border-spacing:0; margin:0; padding:0;">
                             <tr>
                                 <td style="vertical-align:middle; padding:0; margin:0;">
-                                    <img src="{{ public_path('storage/logo.webp') }}" alt="Logo DSComputer"
+                                    <img src="{{ public_path('storage/logo.webp') }}" alt="Logo BeliMakan"
                                         style="width:50px; margin-right:10px; padding:0; display:inline-block;">
                                 </td>
                                 <td style="vertical-align:middle; padding:0; margin:0;">
                                     <div class="brand"
-                                        style="font-size:20px; font-weight:bold; margin:0; line-height:1;">DSComputer
+                                        style="font-size:20px; font-weight:bold; margin:0; line-height:1;">BeliMakan
                                     </div>
                                     <div class="subtext" style="font-size:14px; color:#555; margin:0; line-height:1;">
-                                        dscomputer.id</div>
+                                        belimakan.id</div>
                                 </td>
                             </tr>
                         </table>
@@ -363,8 +363,8 @@
 
         <!-- FOOTER -->
         {{-- <div class="footer">
-            Pengiriman melalui platform DSComputer<br>
-            dscomputer.id
+            Pengiriman melalui platform BeliMakan<br>
+            belimakan.id
         </div> --}}
 
     </div>

@@ -14,16 +14,16 @@ class ProductPictureSeeder extends Seeder
      */
     public function run(): void
     {
-        $product1 = Product::where('slug', 'Product-satu')->first();
-        $product2 = Product::where('slug', 'Product-dua')->first();
-        $product3 = Product::where('slug', 'Product-tiga')->first();
-        $product4 = Product::where('slug', 'Product-empat')->first();
-        $product5 = Product::where('slug', 'Product-lima')->first();
-        $product6 = Product::where('slug', 'Product-enam')->first();
-        $product7 = Product::where('slug', 'Product-tujuh')->first();
-        $product8 = Product::where('slug', 'Product-delapan')->first();
-        $product9 = Product::where('slug', 'Product-sembilan')->first();
-        $product10 = Product::where('slug', 'Product-sepuluh')->first();
+        $product1 = Product::where('slug', 'bayam-hijau-segar-ikat')->first();
+        $product2 = Product::where('slug', 'kangkung-hidroponik-segar-ikat')->first();
+        $product3 = Product::where('slug', 'wortel-manis-berastagi-super-1kg')->first();
+        $product4 = Product::where('slug', 'tomat-merah-segar-pilihan-500gr')->first();
+        $product5 = Product::where('slug', 'kentang-granola-dieng-1kg')->first();
+        $product6 = Product::where('slug', 'brokoli-hijau-segar-bebas-pestisida-500gr')->first();
+        $product7 = Product::where('slug', 'bawang-merah-brebes-pilihan-500gr')->first();
+        $product8 = Product::where('slug', 'cabai-rawit-merah-segar-pedas-250gr')->first();
+        $product9 = Product::where('slug', 'pakcoy-hidroponik-organik-250gr')->first();
+        $product10 = Product::where('slug', 'jamur-tiram-putih-segar-250gr')->first();
 
         ProductPicture::create([
             'product_id' => $product1->id,

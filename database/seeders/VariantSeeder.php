@@ -15,12 +15,12 @@ class VariantSeeder extends Seeder
     {
         Variant::create([
             'id' => 1,
-            'variant' => 'Warna'
+            'variant' => 'Ukuran / Kemasan'
         ]);
         
         Variant::create([
             'id' => 2,
-            'variant' => 'Ukuran'
+            'variant' => 'Kualitas'
         ]);
     }
 }

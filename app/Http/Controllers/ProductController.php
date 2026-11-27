@@ -967,7 +967,13 @@ class ProductController extends Controller
             return view('client.product.product-by-keyword', compact('products', 'keyword'));
         }
 
-        $product_data = Setting::where('section_name', 'product')->first();
+        $product_data = Setting::where('section_name', 'product')->first() ?? new Setting([
+            'section_name' => 'product',
+            'is_show' => true,
+            'title' => 'SAYURAN TERBARU & TERLARIS !!',
+            'description' => 'Pilihan sayuran hijau, sayur buah, umbi-umbian, dan bumbu dapur paling segar untuk menu masakan sehat keluarga Anda.',
+            'show_items' => 10,
+        ]);
         $products = Product::with([
             'product_pictures' => function ($query) {
                 $query->orderBy('position', 'asc');

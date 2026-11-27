@@ -17,21 +17,21 @@ class HomepageClientController extends Controller
     function index(): View
     {
         // SETTINGS
-        $hero = Setting::firstWhere('section_name', 'hero');
+        $hero = Setting::firstWhere('section_name', 'hero') ?? new Setting(['section_name' => 'hero', 'title' => 'Hero', 'description' => '', 'show_items' => 10, 'is_show' => true]);
 
-        $promo = Setting::firstWhere('section_name', 'promo');
+        $promo = Setting::firstWhere('section_name', 'promo') ?? new Setting(['section_name' => 'promo', 'title' => 'Promo', 'description' => '', 'show_items' => 10, 'is_show' => true]);
 
-        $auction = Setting::firstWhere('section_name', 'auction');
+        $auction = Setting::firstWhere('section_name', 'auction') ?? new Setting(['section_name' => 'auction', 'title' => 'Lelang', 'description' => '', 'show_items' => 10, 'is_show' => true]);
 
-        $product = Setting::firstWhere('section_name', 'product');
+        $product = Setting::firstWhere('section_name', 'product') ?? new Setting(['section_name' => 'product', 'title' => 'Produk', 'description' => '', 'show_items' => 10, 'is_show' => true]);
 
-        $testimonial = Setting::firstWhere('section_name', 'testimonial');
+        $testimonial = Setting::firstWhere('section_name', 'testimonial') ?? new Setting(['section_name' => 'testimonial', 'title' => 'Testimonial', 'description' => '', 'show_items' => 10, 'is_show' => true]);
 
-        $faq = Setting::firstWhere('section_name', 'faq');
+        $faq = Setting::firstWhere('section_name', 'faq') ?? new Setting(['section_name' => 'faq', 'title' => 'FAQ', 'description' => '', 'show_items' => 10, 'is_show' => true]);
 
-        $brand = Setting::firstWhere('section_name', 'brand');
+        $brand = Setting::firstWhere('section_name', 'brand') ?? new Setting(['section_name' => 'brand', 'title' => 'Brand', 'description' => '', 'show_items' => 10, 'is_show' => true]);
 
-        $link = Setting::firstWhere('section_name', 'link');
+        $link = Setting::firstWhere('section_name', 'link') ?? new Setting(['section_name' => 'link', 'title' => 'Link', 'description' => '', 'show_items' => 10, 'is_show' => true]);
 
         return view('admin.homepage-client.index', compact(
             'hero',
@@ -54,7 +54,12 @@ class HomepageClientController extends Controller
             'title.required' => 'Judul tidak boleh kosong!'
         ], []);
 
-        $data = Setting::firstWhere('section_name', $section_name);
+        $data = Setting::firstOrCreate(['section_name' => $section_name], [
+            'title' => $request->title,
+            'description' => $request->description,
+            'show_items' => $request->show_items ?? 10,
+            'is_show' => $request->is_show ?? true,
+        ]);
         $data->update($request->all());
 
         $section_name = $section_name === 'auction' ? 'lelang' : $section_name;

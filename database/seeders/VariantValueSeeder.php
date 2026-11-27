@@ -14,24 +14,24 @@ class VariantValueSeeder extends Seeder
     public function run(): void
     {
         VariantValue::create([
+            'id' => 1,
             'variant_id' => 1,
-            'value' => 'Merah'
+            'value' => '500 gram'
         ]);
         VariantValue::create([
+            'id' => 2,
             'variant_id' => 1,
-            'value' => 'Putih'
-        ]);
-        // VariantValue::create([
-        //     'variant_id' => 1,
-        //     'value' => 'Biru'
-        // ]);
-        VariantValue::create([
-            'variant_id' => 2,
-            'value' => 'M'
+            'value' => '1 kg'
         ]);
         VariantValue::create([
+            'id' => 3,
             'variant_id' => 2,
-            'value' => 'L'
+            'value' => 'Standar Segar'
+        ]);
+        VariantValue::create([
+            'id' => 4,
+            'variant_id' => 2,
+            'value' => 'Organik Super'
         ]);
     }
 }

@@ -12,7 +12,13 @@ class LinkController extends Controller
     {
         $sosmed = Sosmed::where('is_link', true)->get();
 
-        $setting = Setting::where('section_name', 'link')->first();
+        $setting = Setting::where('section_name', 'link')->first() ?? new Setting([
+            'section_name' => 'link',
+            'is_show' => true,
+            'title' => 'BeliMakan.id',
+            'description' => 'Belanja Sayur Segar Langsung dari Petani Lokal',
+            'show_items' => 10,
+        ]);
 
         return view('client.link.index', [
             'profile_name' => $setting->title,

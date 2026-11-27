@@ -40,7 +40,7 @@ class CustomVerifyEmail extends Notification
         $verifyUrl = $this->verificationUrl($notifiable);
 
         return (new MailMessage)
-        ->subject('Verifikasi Akun DSComputer Anda')
+        ->subject('Verifikasi Akun BeliMakan Anda')
                     ->greeting('Halo, ' . $notifiable->name)
                     ->line('Silakan klik tombol di bawah ini untuk memverifikasi alamat email Anda.')
                     ->action('Verifikasi Email', $verifyUrl)

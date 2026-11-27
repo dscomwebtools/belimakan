@@ -13,21 +13,20 @@ class FeatureSeeder extends Seeder
      */
     public function run(): void
     {
-        
         Feature::create([
-            'name' => 'Support CS',
+            'name' => '100% Segar dari Kebun',
         ]);
         
         Feature::create([
-            'name' => 'Free Ongkir wilayah Jakarta',
+            'name' => 'Bebas Pestisida Berbahaya',
         ]);
         
         Feature::create([
-            'name' => 'Barang Original',
+            'name' => 'Garansi Segar atau Ganti Baru',
         ]);
         
         Feature::create([
-            'name' => 'Bergaransi',
+            'name' => 'Pengiriman Cepat Same Day',
         ]);
     }
 }

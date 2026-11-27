@@ -1,9 +1,9 @@
 <x-slot name="title">
-    Login - DSCOMPUTER SOLUTION
+    Login - BeliMakan Sayur Segar
 </x-slot>
 
-<x-meta title="Login - DSCOMPUTER SOLUTION"
-    description="Masuk ke akun DSCOMPUTER SOLUTION Anda untuk melanjutkan belanja dengan mudah, aman, dan cepat." />
+<x-meta title="Login - BeliMakan Sayur Segar"
+    description="Masuk ke akun BeliMakan Anda untuk melanjutkan belanja sayur segar dengan mudah, aman, dan cepat." />
 <x-guest-layout>
     <form method="POST" action="{{ route('login') }}">
         @csrf

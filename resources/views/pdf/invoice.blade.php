@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Invoice - DSComputer</title>
+    <title>Invoice - BeliMakan</title>
     <style>
         body {
             font-family: DejaVu Sans, sans-serif;
@@ -136,7 +136,7 @@
         <table class="info-table">
             <tr>
                 <td class="info-label">Penjual</td>
-                <td>DS Computer</td>
+                <td>BeliMakan Fresh</td>
                 <td class="info-label">Nama</td>
                 <td>{{ $order->order_address->recipient }}</td>
             </tr>
@@ -258,7 +258,7 @@
         </table>
 
         <div class="footer">
-            <p>Terima kasih telah berbelanja di DS Computer.</p>
+            <p>Terima kasih telah berbelanja sayur segar di BeliMakan.</p>
         </div>
     </div>
 </body>

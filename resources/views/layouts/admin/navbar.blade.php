@@ -14,7 +14,7 @@
     </div>
     <div class="flex-1">
         <a class="btn btn-ghost text-lg" href="{{ route('client.home') }}" target="_blank">
-            <span @class(['font-serif'])>DSComputer</span>
+            <span @class(['font-serif'])>BeliMakan</span>
             <i class="fa fa-external-link text-sm"></i>
         </a>
     </div>

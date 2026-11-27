@@ -14,7 +14,7 @@ class NoticeSeeder extends Seeder
     public function run(): void
     {
         Notice::create([
-            'message' => 'Ini contoh notice yang akan ditampilkan, Cek barang promo kami sekarang !!',
+            'message' => 'Sayur Segar Panen Hari Ini Sudah Tersedia! Dapatkan Diskon & Gratis Ongkir Sekarang!',
             'link' => '/promo'
         ]);
     }

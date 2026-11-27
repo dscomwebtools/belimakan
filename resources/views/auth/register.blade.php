@@ -1,9 +1,9 @@
 <x-slot name="title">
-    Register - DSCOMPUTER SOLUTION
+    Daftar Akun - BeliMakan Sayur Segar
 </x-slot>
 
-<x-meta title="Daftar - DSCOMPUTER SOLUTION"
-    description="Buat akun baru di DSCOMPUTER SOLUTION dan nikmati pengalaman belanja yang lebih cepat, aman, dan nyaman." />
+<x-meta title="Daftar - BeliMakan Sayur Segar"
+    description="Buat akun baru di BeliMakan dan nikmati pengalaman belanja sayur segar langsung dari petani dengan mudah, aman, dan cepat." />
 <x-guest-layout>
     <form method="POST" action="{{ route('register') }}">
         @csrf

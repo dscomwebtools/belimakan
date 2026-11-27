@@ -24,8 +24,8 @@
             <img src="{{ asset('assets/images/logo.webp') }}" alt="logo" width="50px" class="hidden sm:block">
         </span>
         <div class="flex flex-col">
-            <p>Toko Online</p>
-            <strong>DSCOMPUTER SOLUTION</strong>
+            <p>Toko Sayur Segar Online</p>
+            <strong>BELIMAKAN.ID</strong>
         </div>
     </aside>
 

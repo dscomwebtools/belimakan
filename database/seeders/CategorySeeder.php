@@ -14,15 +14,27 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         Category::create([
-            'name' => 'Kabel',
+            'name' => 'Sayur Daun Segar',
         ]);
         
         Category::create([
-            'name' => 'Akses Poin',
+            'name' => 'Sayur Buah & Polong',
         ]);
         
         Category::create([
-            'name' => 'Router',
+            'name' => 'Sayur Umbi & Rimpang',
+        ]);
+
+        Category::create([
+            'name' => 'Sayur Organik & Hidroponik',
+        ]);
+
+        Category::create([
+            'name' => 'Jamur Segar',
+        ]);
+
+        Category::create([
+            'name' => 'Cabai & Rempah Dapur',
         ]);
     }
 }

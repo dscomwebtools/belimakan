@@ -77,7 +77,7 @@
     </div> --}}
 
     {{-- HERO --}}
-    @if ($hero['data']->is_show)
+    @if (!empty($hero['data']) && $hero['data']->is_show)
         <div class="hero bg-base-200 mb-14">
             <div class="hero-content flex-col sm:flex-row-reverse lg:mx-10">
                 <div class="!w-60 sm:!w-80 swiper heroSwiper">
@@ -107,7 +107,7 @@
     @endif
 
     {{-- PROMO --}}
-    @if ($promo['data']->is_show)
+    @if (!empty($promo['data']) && $promo['data']->is_show)
         <div class="promo mb-14">
             <h2 class="text-center text-xl sm:text-2xl lg:text-3xl uppercase font-bold tracking-wider">
                 {{ $promo['data']->title }} <i class="fa fa-tags text-red-500 text-2xl pb-1"></i>
@@ -159,7 +159,7 @@
     @endif
 
     {{-- LELANG --}}
-    @if ($auction['data']->is_show)
+    @if (!empty($auction['data']) && $auction['data']->is_show)
         <div class="lelang mb-14 bg-base-300 pt-10 pb-12">
             <div class="flex flex-col lg:flex-row items-center">
                 <div class="swiper lelangSwiper mb-10 lg:mb-0 !w-60 !h-60">
@@ -204,7 +204,7 @@
     @endif
 
     {{-- PRODUCTS --}}
-    @if ($products['data']->is_show)
+    @if (!empty($products['data']) && $products['data']->is_show)
         <div class="products">
             <h2 class="text-center text-xl sm:text-2xl lg:text-3xl uppercase font-bold tracking-wider">
                 {{ $products['data']->title }}</h2>
@@ -226,7 +226,7 @@
     <x-client.features />
 
     {{-- TESTIMONIAL --}}
-    @if ($testimonial['data']->is_show)
+    @if (!empty($testimonial['data']) && $testimonial['data']->is_show)
         <div class="testimonial mb-14 pt-10">
             <h2 class="text-center text-xl sm:text-2xl lg:text-3xl uppercase font-bold tracking-wider">
                 {{ $testimonial['data']->title }}</h2>
@@ -263,7 +263,7 @@
     @endif
 
     {{-- FAQ --}}
-    @if ($faq['data']->is_show)
+    @if (!empty($faq['data']) && $faq['data']->is_show)
         <div class="faq mb-10">
             <h2 class="text-center text-xl sm:text-2xl lg:text-3xl uppercase font-bold tracking-wider">
                 {{ $faq['data']->title }}</h2>
@@ -283,7 +283,7 @@
     @endif
 
     {{-- BRANDS --}}
-    @if ($brand['data']->is_show)
+    @if (!empty($brand['data']) && $brand['data']->is_show)
         <div class="brands my-20">
             <h2 class="text-center text-xl sm:text-2xl lg:text-3xl uppercase font-bold tracking-wider">
                 {{ $brand['data']->title }}</h2>

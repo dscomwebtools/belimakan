@@ -1,8 +1,8 @@
 <x-client-layout>
     <h2 class="text-center text-xl sm:text-3xl uppercase font-bold tracking-wider">
-        {{ $promo_data->title }} <i class="fa fa-tags text-red-500 text-2xl pb-1"></i>
+        {{ $promo_data->title ?? 'PROMO PANEN SEGAR' }} <i class="fa fa-tags text-red-500 text-2xl pb-1"></i>
     </h2>
-    <p class="text-center pt-2 mb-8">{{ $promo_data->description }}</p>
+    <p class="text-center pt-2 mb-8">{{ $promo_data->description ?? 'Promo sayur segar pilihan hari ini' }}</p>
 
     <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 justify-around" id="promo">
         @foreach ($promo as $product)

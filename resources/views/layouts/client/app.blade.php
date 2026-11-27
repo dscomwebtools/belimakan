@@ -28,12 +28,12 @@
 @else
     {{-- OG default --}}
     @if (!$hasOgSiteName)
-        <meta property="og:site_name" content="DSCOMPUTER SOLUTION"> @endif
+        <meta property="og:site_name" content="BeliMakan - Toko Sayur Segar Online"> @endif
     @if (!$hasOgType) <meta property="og:type" content="website"> @endif
 
     {{-- Default meta component --}}
-    <x-meta title="DSCOMPUTER SOLUTION"
-        description="Toko online DSCOMPUTER SOLUTION. Temukan beragam produk pilihan dari merk ternama, bergaransi resmi, dan pelayanan terbaik." />
+    <x-meta title="BeliMakan - Toko Sayur Segar Online"
+        description="Toko online sayur segar BeliMakan. Dapatkan aneka sayuran segar, hidroponik, organik, dan kebutuhan dapur langsung dari kebun petani lokal dengan garansi kesegaran 100% dan pengiriman cepat." />
     @endif
 
 

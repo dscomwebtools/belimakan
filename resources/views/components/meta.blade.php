@@ -10,7 +10,7 @@
 <meta property="og:image" content="{{ $image }}">
 <meta property="og:url" content="{{ $url }}">
 <meta property="og:type" content="{{ $type }}">
-<meta property="og:site_name" content="DSCOMPUTER SOLUTION">
+<meta property="og:site_name" content="{{ config('app.name', 'BeliMakan') }} - Toko Sayur Segar Online">
 
 {{-- ✅ Twitter --}}
 <meta name="twitter:card" content="summary_large_image">

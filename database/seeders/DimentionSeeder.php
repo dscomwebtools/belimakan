@@ -14,45 +14,45 @@ class DimentionSeeder extends Seeder
      */
     public function run(): void
     {
-        $product1 = Product::where('name', 'Product satu')->first();
-        $product2 = Product::where('name', 'Product dua')->first();
-        $product3 = Product::where('name', 'Product tiga')->first();
-        $product4 = Product::where('name', 'Product empat')->first();
-        $product5 = Product::where('name', 'Product lima')->first();
+        $product1 = Product::where('name', 'Bayam Hijau Segar (Ikat)')->first();
+        $product2 = Product::where('name', 'Kangkung Hidroponik Segar (Ikat)')->first();
+        $product3 = Product::where('name', 'Wortel Manis Berastagi Super (1 Kg)')->first();
+        $product4 = Product::where('name', 'Tomat Merah Segar Pilihan (500 gr)')->first();
+        $product5 = Product::where('name', 'Kentang Granola Dieng (1 Kg)')->first();
 
         Dimention::create([
             'product_id' => $product1->id,
-            'length' => 10,
-            'width' => 10,
+            'length' => 25,
+            'width' => 15,
             'height' => 10
         ]);
 
         Dimention::create([
             'product_id' => $product2->id,
-            'length' => 20,
-            'width' => 20,
-            'height' => 20
+            'length' => 25,
+            'width' => 15,
+            'height' => 10
         ]);
 
         Dimention::create([
             'product_id' => $product3->id,
-            'length' => 30,
-            'width' => 30,
-            'height' => 30
+            'length' => 20,
+            'width' => 15,
+            'height' => 12
         ]);
 
         Dimention::create([
             'product_id' => $product4->id,
-            'length' => 40,
-            'width' => 40,
-            'height' => 40
+            'length' => 15,
+            'width' => 15,
+            'height' => 10
         ]);
 
         Dimention::create([
             'product_id' => $product5->id,
-            'length' => 50,
-            'width' => 50,
-            'height' => 50
+            'length' => 20,
+            'width' => 15,
+            'height' => 15
         ]);
     }
 }

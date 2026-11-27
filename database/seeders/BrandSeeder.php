@@ -14,55 +14,55 @@ class BrandSeeder extends Seeder
     public function run(): void
     {
         Brand::create([
-            'name' => 'Apple',
+            'name' => 'Segar Farm Nusantara',
             'logo' => '/mocks/brands/apple.webp',
             'link' => '#'
         ]);
         
         Brand::create([
-            'name' => 'Asus',
+            'name' => 'Tani Makmur Organik',
             'logo' => '/mocks/brands/asus.webp',
             'link' => '#'
         ]);
         
         Brand::create([
-            'name' => 'LG',
+            'name' => 'Kebun Hidroponik Lembang',
             'logo' => '/mocks/brands/lg.webp',
             'link' => '#'
         ]);
         
         Brand::create([
-            'name' => 'DELL',
+            'name' => 'Berastagi Fresh',
             'logo' => '/mocks/brands/dell.webp',
             'link' => '#'
         ]);
         
         Brand::create([
-            'name' => 'Samsung',
+            'name' => 'Agro Lestari Malang',
             'logo' => '/mocks/brands/samsung.webp',
             'link' => '#'
         ]);
         
         Brand::create([
-            'name' => 'Toshiba',
+            'name' => 'Java Fresh Farm',
             'logo' => '/mocks/brands/toshiba.webp',
             'link' => '#'
         ]);
         
         Brand::create([
-            'name' => 'Xiaomi',
+            'name' => 'Sayur Segar Alami',
             'logo' => '/mocks/brands/xiaomi.webp',
             'link' => '#'
         ]); 
         
         Brand::create([
-            'name' => 'HP',
+            'name' => 'Bumi Organik Indonesia',
             'logo' => '/mocks/brands/hp.webp',
             'link' => '#'
         ]);
         
         Brand::create([
-            'name' => 'Sony',
+            'name' => 'Tani Bahagia',
             'logo' => '/mocks/brands/sony.webp',
             'link' => '#'
         ]);

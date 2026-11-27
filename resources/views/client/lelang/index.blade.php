@@ -1,9 +1,9 @@
 <x-client-layout>
     <h2 class="text-center text-xl sm:text-3xl uppercase font-bold tracking-wider">
-        {{ $auction_data->title }} <i class="fa fa-hammer fa-flip-horizontal text-blue-500 text-2xl pb-1"></i>
+        {{ $auction_data->title ?? 'LELANG PAKET SAYUR' }} <i class="fa fa-hammer fa-flip-horizontal text-blue-500 text-2xl pb-1"></i>
     </h2>
     <p class="mt-2 mb-8 text-center text-sm md:text-base">
-        {{ $auction_data->description }}
+        {{ $auction_data->description ?? 'Lelang paket sayur segar pilihan langsung dari petani' }}
     </p>
     <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 justify-around" id="auction">
         @foreach ($auction as $product)

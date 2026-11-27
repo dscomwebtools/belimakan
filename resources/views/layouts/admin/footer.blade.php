@@ -2,8 +2,8 @@
     <div class="flex justify-center items-center w-full gap-3">
         <img src="{{ asset('assets/images/logo.webp') }}" alt="logo" width="55px">
         <div class="flex flex-col">
-            <p>Toko Online</p>
-            <p class="font-bold text-black dark:text-white">DS Computer</p>
+            <p>Toko Sayur Online</p>
+            <p class="font-bold text-black dark:text-white">BeliMakan Fresh</p>
         </div>
     </div>
 </footer>
